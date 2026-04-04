@@ -1,0 +1,15 @@
+{
+  "name": "utg-allscore",
+  "private": true,
+  "version": "1.0.0",
+  "scripts": {
+    "dev": "npm run dev --prefix frontend",
+    "build": "npm run build --prefix frontend",
+    "start": "npm run start --prefix frontend",
+    "lint": "npm run lint --prefix frontend"
+  },
+  "dependencies": {
+    "date-fns": "^4.1.0",
+    "lucide-react": "^1.7.0"
+  }
+}

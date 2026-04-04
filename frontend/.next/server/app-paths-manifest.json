@@ -1,0 +1,10 @@
+{
+  "/_not-found/page": "app/_not-found/page.js",
+  "/manifest.webmanifest/route": "app/manifest.webmanifest/route.js",
+  "/news/page": "app/news/page.js",
+  "/live/page": "app/live/page.js",
+  "/page": "app/page.js",
+  "/login/page": "app/login/page.js",
+  "/standings/page": "app/standings/page.js",
+  "/fixtures/page": "app/fixtures/page.js"
+}
