@@ -32,7 +32,7 @@ export const MatchDetailsModal = ({
 
   return (
     <div className="fixed inset-0 z-[100] flex flex-col bg-slate-100 md:items-center md:justify-center md:bg-slate-900/60 md:p-4">
-      <div className="flex-1 w-full max-w-2xl bg-white flex flex-col md:rounded-[32px] md:overflow-hidden md:h-[85vh] animate-slideUp">
+      <div className="flex h-[100dvh] min-h-[100dvh] w-full max-w-2xl flex-col bg-white animate-slideUp md:h-[85vh] md:min-h-0 md:overflow-hidden md:rounded-[32px]">
         {/* Header Section */}
         <div className="bg-primary px-4 pt-4 pb-0 text-white relative">
           <div className="flex items-center justify-between mb-4">
