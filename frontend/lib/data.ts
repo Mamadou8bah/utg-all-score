@@ -752,7 +752,8 @@ export const teams = [
     name: "Law Students' Association (LSA)",
     colors: ["#7F1D1D", "#FCD34D"],
     tone: "Tactically mature and excellent at controlling set-piece phases.",
-    form: ["W", "D", "W", "W", "L"]
+    form: ["W", "D", "W", "W", "L"],
+    logo: "/images/lsa-logo.png"
   },
   {
     name: "Science Students' Association",
