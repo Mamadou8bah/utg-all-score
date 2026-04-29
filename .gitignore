@@ -9,4 +9,5 @@ backend/generated
 backend/uploads/*
 !backend/uploads/.gitkeep
 frontend/dist
+frontend/.next
 backend/prisma/migrations
