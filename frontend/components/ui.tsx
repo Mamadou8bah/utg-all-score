@@ -188,7 +188,7 @@ export const Navbar = () => {
   const pathname = usePathname();
 
   return (
-    <header className="sticky top-0 z-40 border-b border-slate-100 bg-background/95 backdrop-blur-xl">
+    <header className="hidden border-b border-slate-100 bg-background/95 backdrop-blur-xl md:sticky md:top-0 md:z-40 md:block">
       <div className="mx-auto flex max-w-7xl items-center justify-between px-4 py-2 sm:px-6 lg:px-8 h-16 relative">
         {/* PC Version Navigation (Left) */}
         <nav className="hidden md:flex items-center gap-1 flex-1">

@@ -23,7 +23,7 @@ export const Hero = () => (
           <div className="mt-3 flex items-center justify-between">
             <div>
               <p className="text-xl font-bold">ICT vs Business</p>
-              <p className="mt-1 text-xs text-white/70">Inter-Faculty Premier League</p>
+              <p className="mt-1 text-xs text-white/70">VC Tournament</p>
             </div>
             <Badge variant="live" className="h-6 px-2">72'</Badge>
           </div>
@@ -118,26 +118,26 @@ export const LiveMatchCard = ({ match, onClick }: { match: Match, onClick?: () =
 export const FixtureCard = ({ match, onClick }: { match: Match, onClick?: () => void }) => (
   <article 
     onClick={onClick}
-    className="rounded-2xl border border-slate-100 bg-white px-4 py-3 shadow-sm active:bg-slate-50 transition-colors cursor-pointer"
+    className="cursor-pointer rounded-2xl border border-slate-100 bg-white px-3 py-3 shadow-sm transition-colors active:bg-slate-50 sm:px-4"
   >
-    <div className="flex items-center gap-4">
-      <div className="flex flex-col items-center justify-center min-w-[50px] border-r border-slate-50 pr-4 py-1">
+    <div className="flex items-center gap-3 sm:gap-4">
+      <div className="flex min-w-[44px] flex-col items-center justify-center border-r border-slate-50 py-1 pr-3 sm:min-w-[50px] sm:pr-4">
         <span className="text-xs font-black text-slate-950">{formatTime(match.kickoff)}</span>
         <span className="text-[9px] font-black text-text-secondary uppercase mt-0.5">{match.status}</span>
       </div>
       
-      <div className="flex-1 space-y-1.5">
+      <div className="min-w-0 flex-1 space-y-1.5">
         <div className="flex items-center justify-between">
-          <div className="flex items-center gap-2">
+          <div className="min-w-0 flex items-center gap-2">
             <TeamMark teamName={match.home} className="h-4 w-4 rounded-[4px] text-[8px]" />
-            <span className="text-sm font-black text-slate-950">{match.home}</span>
+            <span className="truncate text-xs font-black text-slate-950 sm:text-sm">{match.home}</span>
           </div>
           {match.status === "FT" && <span className="text-sm font-black text-slate-950">{match.homeScore}</span>}
         </div>
         <div className="flex items-center justify-between">
-          <div className="flex items-center gap-2">
+          <div className="min-w-0 flex items-center gap-2">
             <TeamMark teamName={match.away} className="h-4 w-4 rounded-[4px] text-[8px]" />
-            <span className="text-sm font-black text-slate-950">{match.away}</span>
+            <span className="truncate text-xs font-black text-slate-950 sm:text-sm">{match.away}</span>
           </div>
           {match.status === "FT" && <span className="text-sm font-black text-slate-950">{match.awayScore}</span>}
         </div>
@@ -149,26 +149,26 @@ export const FixtureCard = ({ match, onClick }: { match: Match, onClick?: () => 
 export const ResultCard = ({ match, onClick }: { match: Match, onClick?: () => void }) => (
   <article 
     onClick={onClick}
-    className="rounded-2xl border border-slate-100 bg-white px-4 py-3 shadow-sm active:bg-slate-50 transition-colors cursor-pointer group"
+    className="group cursor-pointer rounded-2xl border border-slate-100 bg-white px-3 py-3 shadow-sm transition-colors active:bg-slate-50 sm:px-4"
   >
-    <div className="flex items-center gap-4">
-      <div className="flex flex-col items-center justify-center min-w-[50px] border-r border-slate-50 pr-4 py-1">
+    <div className="flex items-center gap-3 sm:gap-4">
+      <div className="flex min-w-[44px] flex-col items-center justify-center border-r border-slate-50 py-1 pr-3 sm:min-w-[50px] sm:pr-4">
         <span className="text-xs font-black text-secondary">FT</span>
         <span className="text-[9px] font-black text-text-secondary uppercase mt-0.5">{formatDate(match.kickoff, { month: 'short', day: 'numeric', year: undefined })}</span>
       </div>
       
-      <div className="flex-1 space-y-1.5">
+      <div className="min-w-0 flex-1 space-y-1.5">
         <div className="flex items-center justify-between">
-          <div className="flex items-center gap-2">
+          <div className="min-w-0 flex items-center gap-2">
             <TeamMark teamName={match.home} className="h-4 w-4 rounded-[4px] text-[8px] transition-colors group-hover:bg-slate-100" />
-            <span className="text-sm font-black text-slate-950">{match.home}</span>
+            <span className="truncate text-xs font-black text-slate-950 sm:text-sm">{match.home}</span>
           </div>
           <span className="text-sm font-black text-secondary">{match.homeScore}</span>
         </div>
         <div className="flex items-center justify-between">
-          <div className="flex items-center gap-2">
+          <div className="min-w-0 flex items-center gap-2">
             <TeamMark teamName={match.away} className="h-4 w-4 rounded-[4px] text-[8px] transition-colors group-hover:bg-slate-100" />
-            <span className="text-sm font-black text-slate-950">{match.away}</span>
+            <span className="truncate text-xs font-black text-slate-950 sm:text-sm">{match.away}</span>
           </div>
           <span className="text-sm font-black text-secondary">{match.awayScore}</span>
         </div>
@@ -258,18 +258,18 @@ export const EventCard = ({ event }: { event: { title: string; type: string; ven
 );
 
 export const StandingsTable = ({ rows, onTeamClick }: { rows: StandingRow[], onTeamClick?: (teamName: string) => void }) => (
-  <div className="overflow-hidden rounded-[30px] border border-slate-200 bg-white shadow-card">
+  <div className="overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-card sm:rounded-[30px]">
     <div className="overflow-x-auto">
-      <table className="min-w-full text-left text-sm whitespace-nowrap">
+      <table className="min-w-full whitespace-nowrap text-left text-xs sm:text-sm">
         <thead className="bg-slate-50 text-[10px] font-black uppercase tracking-widest text-text-secondary">
           <tr>
-            <th className="px-6 py-5 font-black"># Team</th>
-            <th className="px-3 py-5 text-center">PL</th>
-            <th className="px-3 py-5 text-center">W</th>
-            <th className="px-3 py-5 text-center">D</th>
-            <th className="px-3 py-5 text-center">L</th>
-            <th className="px-3 py-5 text-center">GD</th>
-            <th className="px-6 py-5 text-center">PTS</th>
+            <th className="px-3 py-4 font-black sm:px-6 sm:py-5"># Team</th>
+            <th className="px-2 py-4 text-center sm:px-3 sm:py-5">PL</th>
+            <th className="hidden px-3 py-5 text-center sm:table-cell">W</th>
+            <th className="hidden px-3 py-5 text-center sm:table-cell">D</th>
+            <th className="hidden px-3 py-5 text-center sm:table-cell">L</th>
+            <th className="px-2 py-4 text-center sm:px-3 sm:py-5">GD</th>
+            <th className="px-3 py-4 text-center sm:px-6 sm:py-5">PTS</th>
           </tr>
         </thead>
         <tbody>
@@ -278,34 +278,34 @@ export const StandingsTable = ({ rows, onTeamClick }: { rows: StandingRow[], onT
               key={row.team} 
               className="border-t border-slate-100 last:border-0 hover:bg-slate-50/50 transition-colors"
             >
-              <td className="px-6 py-4 font-black text-slate-950">
-                <div className="flex items-center gap-4">
+              <td className="max-w-[190px] px-3 py-3 font-black text-slate-950 sm:max-w-none sm:px-6 sm:py-4">
+                <div className="flex min-w-0 items-center gap-2 sm:gap-4">
                   <span className={cn(
-                    "flex h-6 w-6 items-center justify-center rounded-lg text-[10px] font-black",
+                    "flex h-6 w-6 shrink-0 items-center justify-center rounded-lg text-[10px] font-black",
                     index === 0 ? "bg-primary text-white" : "bg-slate-100 text-slate-400"
                   )}>
                     {index + 1}
                   </span>
                   <button 
                     onClick={() => onTeamClick?.(row.team)}
-                    className="flex items-center gap-3 text-left transition-colors hover:text-primary"
+                    className="flex min-w-0 items-center gap-2 text-left transition-colors hover:text-primary sm:gap-3"
                   >
-                    <TeamMark teamName={row.team} className="h-7 w-7 rounded-lg text-[10px]" />
-                    {row.team}
+                    <TeamMark teamName={row.team} className="h-6 w-6 shrink-0 rounded-lg text-[10px] sm:h-7 sm:w-7" />
+                    <span className="truncate">{row.team}</span>
                   </button>
                 </div>
               </td>
-              <td className="px-3 py-4 text-center font-bold text-slate-600">{row.played}</td>
-              <td className="px-3 py-4 text-center font-semibold text-slate-500">{row.win}</td>
-              <td className="px-3 py-4 text-center font-semibold text-slate-500">{row.draw}</td>
-              <td className="px-3 py-4 text-center font-semibold text-slate-500">{row.loss}</td>
+              <td className="px-2 py-3 text-center font-bold text-slate-600 sm:px-3 sm:py-4">{row.played}</td>
+              <td className="hidden px-3 py-4 text-center font-semibold text-slate-500 sm:table-cell">{row.win}</td>
+              <td className="hidden px-3 py-4 text-center font-semibold text-slate-500 sm:table-cell">{row.draw}</td>
+              <td className="hidden px-3 py-4 text-center font-semibold text-slate-500 sm:table-cell">{row.loss}</td>
               <td className={cn(
-                "px-3 py-4 text-center font-bold",
+                "px-2 py-3 text-center font-bold sm:px-3 sm:py-4",
                 row.gd > 0 ? "text-success" : row.gd < 0 ? "text-error" : "text-slate-400"
               )}>
                 {row.gd > 0 ? `+${row.gd}` : row.gd}
               </td>
-              <td className="px-6 py-4 text-center font-black text-primary text-base">
+              <td className="px-3 py-3 text-center text-sm font-black text-primary sm:px-6 sm:py-4 sm:text-base">
                 {row.pts}
               </td>
             </tr>

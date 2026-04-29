@@ -14,18 +14,18 @@ export interface Competition {
 export const competitions: Competition[] = [
   {
     id: "ifpl-2026",
-    name: "Inter-Faculty Premier League",
+    name: "VC Tournament",
     type: "GENERAL",
-    description: "The main university-wide football competition featuring all schools.",
-    format: "LEAGUE",
+    description: "The Vice Chancellor's university-wide football tournament featuring all schools.",
+    format: "TOURNAMENT",
     logo: "/images/ifpl-logo.png"
   },
   {
     id: "sitc-cup-2026",
-    name: "SITC Dean's Cup",
+    name: "ITCA League",
     type: "SCHOOL",
-    schoolName: "School of ICT",
-    description: "Internal competition for the School of ICT departments.",
+    schoolName: "Information, Technology and Communication Association (ITCA)",
+    description: "Internal ITCA league competition between Year 1, Year 2, Year 3, and Year 4.",
     format: "LEAGUE",
     logo: "/images/sitc-logo.png"
   },
@@ -147,7 +147,7 @@ export const liveMatches: Match[] = [
   {
     id: "m1",
     competitionId: "ifpl-2026",
-    competition: "Inter-Faculty Premier League",
+    competition: "VC Tournament",
     home: "School of ICT",
     away: "School of Business",
     homeScore: 2,
@@ -212,9 +212,9 @@ export const liveMatches: Match[] = [
   {
     id: "m3",
     competitionId: "sitc-cup-2026",
-    competition: "SITC Dean's Cup",
-    home: "Computer Science",
-    away: "Information Systems",
+    competition: "ITCA League",
+    home: "Year 3",
+    away: "Year 2",
     homeScore: 1,
     awayScore: 0,
     venue: "Faraba Court",
@@ -244,9 +244,113 @@ export const liveMatches: Match[] = [
 
 export const fixtures: Match[] = [
   {
+    id: "f9",
+    competitionId: "ifpl-2026",
+    competition: "VC Tournament",
+    home: "Information, Technology and Communication Association (ITCA)",
+    away: "Law Students' Association (LSA)",
+    homeScore: 0,
+    awayScore: 0,
+    venue: "Faraba Sports Ground",
+    kickoff: "2026-04-29T16:00:00+00:00",
+    status: "UPCOMING",
+    events: []
+  },
+  {
+    id: "f10",
+    competitionId: "ifpl-2026",
+    competition: "VC Tournament",
+    home: "Economics and Management Students Association (ECOMANSA)",
+    away: "Accountancy Students' Association (ASA)",
+    homeScore: 0,
+    awayScore: 0,
+    venue: "Brikama Campus Arena",
+    kickoff: "2026-04-29T18:00:00+00:00",
+    status: "UPCOMING",
+    events: []
+  },
+  {
+    id: "f11",
+    competitionId: "ifpl-2026",
+    competition: "VC Tournament",
+    home: "UTG Medical Students Association (UNIGAMSA)",
+    away: "Architecture and Engineering Students' Association (AESA)",
+    homeScore: 0,
+    awayScore: 0,
+    venue: "Faraba Sports Ground",
+    kickoff: "2026-04-30T16:00:00+00:00",
+    status: "UPCOMING",
+    events: []
+  },
+  {
+    id: "f12",
+    competitionId: "ifpl-2026",
+    competition: "VC Tournament",
+    home: "Journalism Students' Association (JSA)",
+    away: "Education Students' Association (EDUSA)",
+    homeScore: 0,
+    awayScore: 0,
+    venue: "Kanifing Annex Pitch",
+    kickoff: "2026-04-30T18:00:00+00:00",
+    status: "UPCOMING",
+    events: []
+  },
+  {
+    id: "f13",
+    competitionId: "ifpl-2026",
+    competition: "VC Tournament",
+    home: "Science Students' Association",
+    away: "Student Association for Public and Environmental Health (SAPEH)",
+    homeScore: 0,
+    awayScore: 0,
+    venue: "UTG Main Field",
+    kickoff: "2026-05-01T16:30:00+00:00",
+    status: "UPCOMING",
+    events: []
+  },
+  {
+    id: "f14",
+    competitionId: "ifpl-2026",
+    competition: "VC Tournament",
+    home: "Agriculture and Environmental Science Students' Association (AESSA)",
+    away: "UTG Nursing Students Association (UTG-NSA)",
+    homeScore: 0,
+    awayScore: 0,
+    venue: "Brikama Campus Arena",
+    kickoff: "2026-05-01T18:30:00+00:00",
+    status: "UPCOMING",
+    events: []
+  },
+  {
+    id: "f15",
+    competitionId: "ifpl-2026",
+    competition: "VC Tournament",
+    home: "Accountancy Students' Association (ASA)",
+    away: "Information, Technology and Communication Association (ITCA)",
+    homeScore: 0,
+    awayScore: 0,
+    venue: "Kanifing Annex Pitch",
+    kickoff: "2026-05-02T16:00:00+00:00",
+    status: "UPCOMING",
+    events: []
+  },
+  {
+    id: "f16",
+    competitionId: "ifpl-2026",
+    competition: "VC Tournament",
+    home: "Law Students' Association (LSA)",
+    away: "Economics and Management Students Association (ECOMANSA)",
+    homeScore: 0,
+    awayScore: 0,
+    venue: "Faraba Sports Ground",
+    kickoff: "2026-05-02T18:00:00+00:00",
+    status: "UPCOMING",
+    events: []
+  },
+  {
     id: "f1",
     competitionId: "ifpl-2026",
-    competition: "Inter-Faculty Premier League",
+    competition: "VC Tournament",
     home: "School of Arts",
     away: "School of Medicine",
     homeScore: 0,
@@ -259,9 +363,9 @@ export const fixtures: Match[] = [
   {
     id: "f4",
     competitionId: "sitc-cup-2026",
-    competition: "SITC Dean's Cup",
-    home: "Software Engineering",
-    away: "Cybersecurity",
+    competition: "ITCA League",
+    home: "Year 1",
+    away: "Year 4",
     homeScore: 0,
     awayScore: 0,
     venue: "Faraba Sports Ground",
@@ -327,7 +431,7 @@ export const results: Match[] = [
   {
     id: "r1",
     competitionId: "ifpl-2026",
-    competition: "Inter-Faculty Premier League",
+    competition: "VC Tournament",
     home: "School of Business",
     away: "School of Arts",
     homeScore: 3,
@@ -410,8 +514,10 @@ export const standings: StandingRow[] = [
   { competitionId: "ifpl-2026", team: "School of Business", played: 5, win: 3, draw: 1, loss: 1, gf: 9, ga: 7, gd: 2, pts: 10 },
   
   // SITC Cup Standings
-  { competitionId: "sitc-cup-2026", team: "Computer Science", played: 2, win: 2, draw: 0, loss: 0, gf: 4, ga: 1, gd: 3, pts: 6 },
-  { competitionId: "sitc-cup-2026", team: "Information Systems", played: 2, win: 1, draw: 0, loss: 1, gf: 2, ga: 2, gd: 0, pts: 3 },
+  { competitionId: "sitc-cup-2026", team: "Year 3", played: 2, win: 2, draw: 0, loss: 0, gf: 4, ga: 1, gd: 3, pts: 6 },
+  { competitionId: "sitc-cup-2026", team: "Year 2", played: 2, win: 1, draw: 0, loss: 1, gf: 2, ga: 2, gd: 0, pts: 3 },
+  { competitionId: "sitc-cup-2026", team: "Year 1", played: 2, win: 1, draw: 0, loss: 1, gf: 3, ga: 3, gd: 0, pts: 3 },
+  { competitionId: "sitc-cup-2026", team: "Year 4", played: 2, win: 0, draw: 0, loss: 2, gf: 1, ga: 4, gd: -3, pts: 0 },
 
   // UTGSU Unity Shield Standings
   { competitionId: "utgsu-shield-2026", team: "Economics and Management Students Association (ECOMANSA)", played: 1, win: 1, draw: 0, loss: 0, gf: 2, ga: 0, gd: 2, pts: 3 },
@@ -543,7 +649,7 @@ export const athletes = [
 ];
 
 export const events = [
-  { id: "e1", title: "Inter-Faculty Finals Night", type: "Finals", venue: "UTG Main Campus", date: "2026-05-28T18:00:00+00:00", description: "Final football and basketball fixtures followed by awards and media interviews." },
+  { id: "e1", title: "VC Tournament Finals Night", type: "Finals", venue: "UTG Main Campus", date: "2026-05-28T18:00:00+00:00", description: "Final football and basketball fixtures followed by awards and media interviews." },
   { id: "e2", title: "Athlete Media Day", type: "Media", venue: "Sports Press Lounge", date: "2026-04-09T11:00:00+00:00", description: "Portraits, interviews, and official content capture for top-performing athletes." }
 ];
 

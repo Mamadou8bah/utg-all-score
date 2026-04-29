@@ -24,9 +24,9 @@ export const NewsDetailsModal = ({
   if (!item) return null;
 
   return (
-    <div className="fixed inset-0 z-[60] flex items-end justify-center bg-slate-950/40 backdrop-blur-sm sm:items-center sm:p-4 animate-in fade-in duration-200">
+    <div className="fixed inset-0 z-[100] flex items-stretch justify-center bg-white sm:items-center sm:bg-slate-950/40 sm:p-4 sm:backdrop-blur-sm animate-in fade-in duration-200">
       <div 
-        className="relative w-full max-w-2xl overflow-hidden bg-white shadow-2xl animate-in slide-in-from-bottom-full duration-300 sm:rounded-[40px] max-h-[92vh] flex flex-col"
+        className="relative flex h-[100dvh] max-h-none w-full max-w-2xl flex-col overflow-hidden bg-white shadow-2xl animate-in slide-in-from-bottom-full duration-300 sm:h-auto sm:max-h-[92vh] sm:rounded-[40px]"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Header/Close */}
@@ -40,7 +40,7 @@ export const NewsDetailsModal = ({
         </div>
 
         {/* Scrollable Content */}
-        <div className="overflow-y-auto overflow-x-hidden pb-20 sm:pb-8">
+        <div className="flex-1 overflow-y-auto overflow-x-hidden pb-20 sm:pb-8">
           {/* Cover Image */}
           {item.image && (
             <div className="relative aspect-video w-full overflow-hidden bg-slate-900">
@@ -86,7 +86,7 @@ export const NewsDetailsModal = ({
               
               <div className="space-y-6 text-base leading-8 text-slate-600 font-medium">
                 <p>
-                  UTG Main Campus — In a stunning display of tactical discipline and raw speed, the latest round of matches in the Inter-Faculty Premier League has left fans and analysts alike breathless. The atmosphere under the campus lights was electric as students from all faculties gathered to support their respective teams.
+                  UTG Main Campus — In a stunning display of tactical discipline and raw speed, the latest round of matches in the VC Tournament has left fans and analysts alike breathless. The atmosphere under the campus lights was electric as students from all faculties gathered to support their respective teams.
                 </p>
                 <p>
                   "We've been training for this specific transition play for weeks," said the team captain during a post-match interview. "AllScore has made it easier for us to track our performance and see where we need to improve. Today, it all came together."
