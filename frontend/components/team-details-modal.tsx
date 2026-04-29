@@ -42,7 +42,11 @@ export const TeamDetailsModal = ({
           
           <div className="absolute -bottom-8 left-1/2 -translate-x-1/2 flex flex-col items-center text-center w-full px-6">
             <div className="h-20 w-20 bg-white rounded-3xl shadow-xl flex items-center justify-center text-3xl font-black text-slate-400 mb-2 border-4 border-slate-50">
-              {teamName[0]}
+              {teamData.logo ? (
+                <img src={teamData.logo} alt="" className="h-full w-full object-contain p-2" />
+              ) : (
+                teamName[0]
+              )}
             </div>
             <h2 className="text-xl font-black text-slate-950 truncate max-w-full">{teamName}</h2>
             <p className="text-[10px] font-bold text-text-secondary uppercase tracking-widest mt-1">Official University Team</p>

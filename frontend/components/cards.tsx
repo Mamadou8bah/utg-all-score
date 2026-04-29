@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { athletes, type Match, type StandingRow, type Competition } from "@/lib/data";
+import { athletes, teams, type Match, type StandingRow, type Competition } from "@/lib/data";
 import { formatDate, formatTime, cn } from "@/lib/utils";
 import { Badge, Button, MetaLine } from "@/components/ui";
 import { ChevronRight, Trophy, Info, CalendarDays, Zap, Newspaper, LayoutGrid } from "lucide-react";
@@ -49,6 +49,20 @@ export const Hero = () => (
   </section>
 );
 
+const TeamMark = ({ teamName, className }: { teamName: string; className: string }) => {
+  const team = teams.find((item) => item.name === teamName);
+
+  return (
+    <div className={cn("bg-slate-50 flex items-center justify-center text-slate-400", className)}>
+      {team?.logo ? (
+        <img src={team.logo} alt="" className="h-full w-full object-contain p-0.5" />
+      ) : (
+        <span className="font-black">{teamName[0]}</span>
+      )}
+    </div>
+  );
+};
+
 export const LiveMatchCard = ({ match, onClick }: { match: Match, onClick?: () => void }) => (
   <article 
     onClick={onClick}
@@ -73,18 +87,14 @@ export const LiveMatchCard = ({ match, onClick }: { match: Match, onClick?: () =
       <div className="flex-1 space-y-2">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <div className="h-5 w-5 bg-slate-50 rounded flex items-center justify-center text-[10px] font-black text-slate-400">
-              {match.home[0]}
-            </div>
+            <TeamMark teamName={match.home} className="h-5 w-5 rounded text-[10px]" />
             <span className="text-sm font-black text-slate-950">{match.home}</span>
           </div>
           <span className="text-lg font-black text-live">{match.homeScore}</span>
         </div>
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
-             <div className="h-5 w-5 bg-slate-50 rounded flex items-center justify-center text-[10px] font-black text-slate-400">
-              {match.away[0]}
-            </div>
+            <TeamMark teamName={match.away} className="h-5 w-5 rounded text-[10px]" />
             <span className="text-sm font-black text-slate-950">{match.away}</span>
           </div>
           <span className="text-lg font-black text-live">{match.awayScore}</span>
@@ -119,18 +129,14 @@ export const FixtureCard = ({ match, onClick }: { match: Match, onClick?: () => 
       <div className="flex-1 space-y-1.5">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <div className="h-4 w-4 bg-slate-50 rounded-[4px] flex items-center justify-center text-[8px] font-black text-slate-400">
-              {match.home[0]}
-            </div>
+            <TeamMark teamName={match.home} className="h-4 w-4 rounded-[4px] text-[8px]" />
             <span className="text-sm font-black text-slate-950">{match.home}</span>
           </div>
           {match.status === "FT" && <span className="text-sm font-black text-slate-950">{match.homeScore}</span>}
         </div>
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <div className="h-4 w-4 bg-slate-50 rounded-[4px] flex items-center justify-center text-[8px] font-black text-slate-400">
-              {match.away[0]}
-            </div>
+            <TeamMark teamName={match.away} className="h-4 w-4 rounded-[4px] text-[8px]" />
             <span className="text-sm font-black text-slate-950">{match.away}</span>
           </div>
           {match.status === "FT" && <span className="text-sm font-black text-slate-950">{match.awayScore}</span>}
@@ -154,18 +160,14 @@ export const ResultCard = ({ match, onClick }: { match: Match, onClick?: () => v
       <div className="flex-1 space-y-1.5">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <div className="h-4 w-4 bg-slate-50 group-hover:bg-slate-100 transition-colors rounded-[4px] flex items-center justify-center text-[8px] font-black text-slate-400">
-              {match.home[0]}
-            </div>
+            <TeamMark teamName={match.home} className="h-4 w-4 rounded-[4px] text-[8px] transition-colors group-hover:bg-slate-100" />
             <span className="text-sm font-black text-slate-950">{match.home}</span>
           </div>
           <span className="text-sm font-black text-secondary">{match.homeScore}</span>
         </div>
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <div className="h-4 w-4 bg-slate-50 group-hover:bg-slate-100 transition-colors rounded-[4px] flex items-center justify-center text-[8px] font-black text-slate-400">
-              {match.away[0]}
-            </div>
+            <TeamMark teamName={match.away} className="h-4 w-4 rounded-[4px] text-[8px] transition-colors group-hover:bg-slate-100" />
             <span className="text-sm font-black text-slate-950">{match.away}</span>
           </div>
           <span className="text-sm font-black text-secondary">{match.awayScore}</span>
@@ -286,8 +288,9 @@ export const StandingsTable = ({ rows, onTeamClick }: { rows: StandingRow[], onT
                   </span>
                   <button 
                     onClick={() => onTeamClick?.(row.team)}
-                    className="hover:text-primary transition-colors text-left"
+                    className="flex items-center gap-3 text-left transition-colors hover:text-primary"
                   >
+                    <TeamMark teamName={row.team} className="h-7 w-7 rounded-lg text-[10px]" />
                     {row.team}
                   </button>
                 </div>

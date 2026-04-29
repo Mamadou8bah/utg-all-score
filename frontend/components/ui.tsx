@@ -236,12 +236,6 @@ export const Navbar = () => {
             <Newspaper size={18} />
             News
           </Link>
-          <div className="h-4 w-px bg-slate-200 mx-1" />
-          <Link href="/login">
-            <Button className="rounded-2xl h-10 px-6 font-black tracking-tight" title="Login to account" aria-label="Login">
-              Sign In
-            </Button>
-          </Link>
         </div>
 
         {/* Mobile View Elements */}
@@ -250,16 +244,14 @@ export const Navbar = () => {
               <Search size={22} strokeWidth={2.5} />
            </Link>
            {/* Logo is absolute in center */}
-           <Link href="/login" className="p-2 text-slate-500 active:scale-90 transition-all">
-              <User size={22} strokeWidth={2.5} />
-           </Link>
+           <div className="h-10 w-10" />
         </div>
       </div>
     </header>
   );
 };
 
-import { User, Menu as MenuIcon } from "lucide-react";
+import { Menu as MenuIcon } from "lucide-react";
 
 export const Footer = () => (
   <footer className="border-t border-slate-200 bg-white/70">
@@ -271,7 +263,6 @@ export const Footer = () => (
       <div className="flex flex-wrap gap-3">
         <Link href="/announcements">Announcements</Link>
         <Link href="/events">Events</Link>
-        <Link href="/admin">Dashboard</Link>
         <Link href="/offline">Offline view</Link>
       </div>
     </div>

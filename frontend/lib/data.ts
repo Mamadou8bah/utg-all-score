@@ -639,7 +639,8 @@ export const teams = [
     name: "Information, Technology and Communication Association (ITCA)",
     colors: ["#2563EB", "#E0F2FE"],
     tone: "Sharp passing team with comfort in possession and aggressive recovery pressing.",
-    form: ["D", "W", "W", "D", "W"]
+    form: ["D", "W", "W", "D", "W"],
+    logo: "/images/itca-logo.png"
   },
   {
     name: "Law Students' Association (LSA)",
