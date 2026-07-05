@@ -56,8 +56,21 @@ Leave `NEXT_PUBLIC_APP_URL`, `ADMIN_APP_URL`, `AGENT_APP_URL` empty for now — 
 
 ### Seed the database (once)
 
+**Admin account** is created automatically on every API deploy (via `prisma/seed-admin.ts` during build).
+
+**Default admin:** `admin@utgsu.edu.gm` / `UTGSUAdmin2026!` — change after first login.
+
+To load demo competitions, teams, and matches:
+
 ```bash
 curl -X POST https://YOUR-API-DOMAIN.vercel.app/api/setup/seed \
+  -H "x-setup-secret: YOUR_SETUP_SECRET"
+```
+
+To recreate only the admin user (if login fails):
+
+```bash
+curl -X POST https://YOUR-API-DOMAIN.vercel.app/api/setup/admin \
   -H "x-setup-secret: YOUR_SETUP_SECRET"
 ```
 
@@ -65,10 +78,9 @@ Or from your machine:
 
 ```bash
 cd frontend
+DATABASE_URL="your-postgres-url" DIRECT_URL="your-direct-url" npm run db:seed-admin
 DATABASE_URL="your-postgres-url" DIRECT_URL="your-direct-url" npm run db:seed
 ```
-
-**Default admin:** `admin@utgsu.edu.gm` / `UTGSUAdmin2026!` — change after first login.
 
 ---
 

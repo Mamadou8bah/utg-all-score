@@ -8,4 +8,5 @@ fi
 
 npx prisma generate
 npx prisma migrate deploy
+npx tsx prisma/seed-admin.ts
 npx next build

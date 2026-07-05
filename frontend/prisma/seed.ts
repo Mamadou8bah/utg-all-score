@@ -1,15 +1,16 @@
 import { PrismaClient } from "@prisma/client";
-import bcrypt from "bcryptjs";
 import {
   recomputeCompetitionStandings,
   recomputePlayerStatsForTeams,
   updateTeamForm
 } from "../lib/services/competition-engine";
+import {
+  DEFAULT_ADMIN_EMAIL,
+  DEFAULT_ADMIN_PASSWORD,
+  ensureDefaultAdmin
+} from "../lib/bootstrap-admin";
 
 const prisma = new PrismaClient();
-
-const ADMIN_EMAIL = "admin@utgsu.edu.gm";
-const ADMIN_PASSWORD = "UTGSUAdmin2026!";
 
 const schools = [
   { name: "School of ICT", shortName: "ICT" },
@@ -75,15 +76,7 @@ export async function seedDatabase() {
     schoolMap.set(school.name, created.id);
   }
 
-  const adminHash = await bcrypt.hash(ADMIN_PASSWORD, 12);
-  await prisma.user.create({
-    data: {
-      email: ADMIN_EMAIL,
-      passwordHash: adminHash,
-      name: "UTGSU Sports Admin",
-      role: "ADMIN"
-    }
-  });
+  await ensureDefaultAdmin(prisma);
 
   const teamMap = new Map<string, string>();
 
@@ -578,8 +571,8 @@ export async function seedDatabase() {
   });
 
   console.log("\n✅ Seed complete!");
-  console.log(`   Admin login: ${ADMIN_EMAIL}`);
-  console.log(`   Admin password: ${ADMIN_PASSWORD}`);
+  console.log(`   Admin login: ${DEFAULT_ADMIN_EMAIL}`);
+  console.log(`   Admin password: ${DEFAULT_ADMIN_PASSWORD}`);
   console.log("   Admin app:  http://localhost:3001/login");
   console.log("   Agent app:  http://localhost:3002/login");
   console.log("   Public site: http://localhost:3000\n");
