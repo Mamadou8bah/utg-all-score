@@ -11,11 +11,11 @@ export function AdminMobileNav() {
   const mounted = useMounted();
 
   if (!mounted) {
-    return <nav className="fixed bottom-0 left-0 right-0 z-50 h-[4.5rem] border-t border-slate-100 bg-white/95 pb-[env(safe-area-inset-bottom)] lg:hidden" aria-hidden />;
+    return <nav className="fixed bottom-0 left-0 right-0 z-50 h-[4.5rem] border-t border-slate-100 bg-white pb-[env(safe-area-inset-bottom)] lg:hidden" aria-hidden />;
   }
 
   return (
-    <nav className="fixed bottom-0 left-0 right-0 z-50 border-t border-slate-100 bg-white/95 pb-[env(safe-area-inset-bottom)] backdrop-blur-xl lg:hidden">
+    <nav className="fixed bottom-0 left-0 right-0 z-50 border-t border-slate-100 bg-white pb-[env(safe-area-inset-bottom)] lg:hidden">
       <div className="grid grid-cols-6 gap-0.5 px-1 pt-2">
         {adminNav.map((item) => {
           const isActive = pathname === item.href;
@@ -32,7 +32,7 @@ export function AdminMobileNav() {
               <div
                 className={cn(
                   "rounded-xl p-2 transition-colors",
-                  isActive ? "bg-primary/10" : "bg-transparent"
+                  isActive ? "bg-blue-50" : ""
                 )}
               >
                 <Icon size={20} strokeWidth={isActive ? 2.5 : 2} />

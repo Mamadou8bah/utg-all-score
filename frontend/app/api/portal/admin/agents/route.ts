@@ -14,7 +14,10 @@ export async function GET(request: Request) {
 
   const agents = await prisma.user.findMany({
     where: { role: "AGENT" },
-    include: { school: true },
+    include: {
+      school: true,
+      competitionAssignments: { include: { competition: true } }
+    },
     orderBy: { createdAt: "desc" }
   });
 
@@ -26,6 +29,12 @@ export async function GET(request: Request) {
       active: agent.active,
       schoolId: agent.schoolId,
       schoolName: agent.school?.name ?? null,
+      assignedCompetitions: agent.competitionAssignments
+        .filter((entry) => entry.competition.type === "GENERAL")
+        .map((entry) => ({
+          id: entry.competitionId,
+          name: entry.competition.name
+        })),
       createdAt: agent.createdAt.toISOString()
     })),
     request

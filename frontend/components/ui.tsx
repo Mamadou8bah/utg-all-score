@@ -24,11 +24,11 @@ type ButtonProps = React.ButtonHTMLAttributes<HTMLButtonElement> & {
 export const Button = ({ className, variant = "primary", ...props }: ButtonProps) => (
   <button
     className={cn(
-      "inline-flex items-center justify-center rounded-full px-5 py-3 text-sm font-semibold transition duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40 disabled:cursor-not-allowed disabled:opacity-50",
-      variant === "primary" && "bg-primary text-white shadow-float hover:-translate-y-0.5 hover:bg-primary/90 active:translate-y-0",
-      variant === "secondary" && "bg-secondary text-slate-950 hover:bg-secondary/90 active:scale-[0.99]",
-      variant === "ghost" && "bg-white/70 text-text-primary ring-1 ring-slate-200 hover:bg-white",
-      variant === "destructive" && "bg-error text-white hover:bg-error/90",
+      "inline-flex items-center justify-center rounded-full px-5 py-3 text-sm font-semibold transition duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-200 disabled:cursor-not-allowed disabled:bg-slate-300 disabled:text-slate-500 disabled:shadow-none disabled:hover:translate-y-0",
+      variant === "primary" && "bg-primary text-white shadow-float hover:-translate-y-0.5 hover:bg-[#004688] active:translate-y-0",
+      variant === "secondary" && "bg-secondary text-slate-950 hover:bg-[#E6B000] active:scale-[0.99]",
+      variant === "ghost" && "bg-white text-text-primary ring-1 ring-slate-200 hover:bg-white",
+      variant === "destructive" && "bg-error text-white hover:bg-red-700",
       className
     )}
     {...props}
@@ -38,7 +38,7 @@ export const Button = ({ className, variant = "primary", ...props }: ButtonProps
 export const Input = ({ className, ...props }: React.InputHTMLAttributes<HTMLInputElement>) => (
   <input
     className={cn(
-      "h-12 w-full rounded-2xl border border-slate-200 bg-white px-4 text-sm text-text-primary shadow-sm outline-none transition focus:border-primary focus:ring-4 focus:ring-primary/10",
+      "h-12 w-full rounded-2xl border border-slate-200 bg-white px-4 text-sm text-text-primary shadow-sm outline-none transition focus:border-primary focus:ring-4 focus:ring-blue-100",
       className
     )}
     {...props}
@@ -58,9 +58,9 @@ export const Badge = ({
     className={cn(
       "inline-flex items-center rounded-full px-3 py-1 text-[11px] font-bold uppercase tracking-[0.18em]",
       variant === "default" && "bg-slate-100 text-text-secondary",
-      variant === "live" && "bg-live/10 text-live",
-      variant === "success" && "bg-success/10 text-success",
-      variant === "warning" && "bg-warning/10 text-warning",
+      variant === "live" && "bg-red-50 text-live",
+      variant === "success" && "bg-green-50 text-success",
+      variant === "warning" && "bg-amber-50 text-warning",
       className
     )}
   >
@@ -114,7 +114,7 @@ export const Tabs = ({
                 className={cn(
                   "whitespace-nowrap rounded-2xl px-6 py-3 text-sm font-black transition-all active:scale-95",
                   isActive 
-                    ? "bg-primary text-white shadow-lg shadow-primary/20" 
+                    ? "bg-primary text-white shadow-lg" 
                     : "bg-white text-slate-400 hover:bg-slate-50 hover:text-slate-600 ring-1 ring-slate-100"
                 )}
               >
@@ -123,7 +123,7 @@ export const Tabs = ({
             );
           })}
         </div>
-        <div className="animate-in fade-in slide-in-from-bottom-4 duration-500">
+        <div className="animate-in slide-in-from-bottom-4 duration-500">
           {selected.content}
         </div>
       </div>
@@ -167,7 +167,7 @@ export const Modal = ({
   if (!open) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-end justify-center bg-slate-950/45 p-4 md:items-center">
+    <div className="fixed inset-0 z-50 flex items-end justify-center bg-slate-900 p-4 md:items-center">
       <div className="w-full max-w-lg rounded-[32px] bg-white p-6 shadow-float animate-slideUp">
         <div className="flex items-start justify-between gap-4">
           <div>
@@ -188,7 +188,7 @@ export const Navbar = () => {
   const pathname = usePathname();
 
   return (
-    <header className="hidden border-b border-slate-100 bg-background/95 backdrop-blur-xl md:sticky md:top-0 md:z-40 md:block">
+    <header className="hidden border-b border-slate-100 bg-background md:sticky md:top-0 md:z-40 md:block">
       <div className="mx-auto flex max-w-7xl items-center justify-between px-4 py-2 sm:px-6 lg:px-8 h-16 relative">
         {/* PC Version Navigation (Left) */}
         <nav className="hidden md:flex items-center gap-1 flex-1">
@@ -204,7 +204,7 @@ export const Navbar = () => {
               className={cn(
                 "flex items-center gap-2 px-4 py-2 rounded-2xl text-sm font-black transition-all",
                 pathname === item.path 
-                  ? "bg-primary/10 text-primary shadow-sm" 
+                  ? "bg-blue-50 text-primary shadow-sm" 
                   : "text-text-secondary hover:bg-slate-50 hover:text-slate-950"
               )}
             >
@@ -231,7 +231,7 @@ export const Navbar = () => {
         <div className="hidden md:flex items-center gap-2 flex-1 justify-end">
           <Link href="/news" className={cn(
             "text-sm font-black text-text-secondary hover:text-slate-950 px-4 py-2 rounded-2xl transition-all flex items-center gap-2",
-            pathname === "/news" && "bg-primary/10 text-primary shadow-sm"
+            pathname === "/news" && "bg-blue-50 text-primary shadow-sm"
           )}>
             <Newspaper size={18} />
             News
@@ -300,7 +300,7 @@ export const OfflineStatus = () => {
     };
   }, []);
 
-  return <div className={cn("rounded-full px-4 py-2 text-sm font-medium", online ? "bg-success/10 text-success" : "bg-warning/10 text-warning")}>{online ? "Online and syncing" : "Offline mode active"}</div>;
+  return <div className={cn("rounded-full px-4 py-2 text-sm font-medium", online ? "bg-green-50 text-success" : "bg-amber-50 text-warning")}>{online ? "Online and syncing" : "Offline mode active"}</div>;
 };
 
 export const NotificationToggle = () => {

@@ -3,7 +3,7 @@ import type { PrismaClient } from "@prisma/client";
 
 export const DEFAULT_ADMIN_EMAIL = "admin@utgsu.edu.gm";
 export const DEFAULT_ADMIN_PASSWORD = "UTGSUAdmin2026!";
-export const DEFAULT_ADMIN_NAME = "UTGSU Sports Admin";
+export const DEFAULT_ADMIN_NAME = "Sports Admin";
 
 export async function ensureDefaultAdmin(prisma: PrismaClient) {
   const passwordHash = await bcrypt.hash(DEFAULT_ADMIN_PASSWORD, 12);

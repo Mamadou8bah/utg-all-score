@@ -43,12 +43,12 @@ export default function AgentLoginPage() {
           <div className="flex items-center gap-4">
             <img src={APP_LOGO} alt={APP_NAME} className="h-12 w-12 object-contain sm:h-14 sm:w-14" />
             <div>
-              <p className="text-[10px] font-bold uppercase tracking-[0.32em] text-primary/80">{APP_NAME}</p>
-              <p className="text-sm font-bold text-white/90">Agent Application</p>
+              <p className="text-[10px] font-bold uppercase tracking-[0.32em] text-primary">{APP_NAME}</p>
+              <p className="text-sm font-bold text-white">Agent Application</p>
             </div>
           </div>
           <h1 className="mt-6 text-3xl font-bold tracking-tight sm:mt-8 sm:text-5xl">School Matchday Console</h1>
-          <p className="mt-4 text-sm leading-7 text-white/72 sm:mt-5 sm:max-w-xl sm:text-base">
+          <p className="mt-4 text-sm leading-7 text-slate-300 sm:mt-5 sm:max-w-xl sm:text-base">
             Update live football scores, match events, lineups, and news for your school. Changes publish instantly to the public AllScore site.
           </p>
         </section>
@@ -79,12 +79,12 @@ export default function AgentLoginPage() {
                 </button>
               </div>
             </label>
-            {error ? <p className="rounded-2xl bg-error/10 px-4 py-3 text-sm text-error">{error}</p> : null}
+            {error ? <p className="rounded-2xl bg-red-50 px-4 py-3 text-sm text-error">{error}</p> : null}
             <Button type="submit" className="h-12 w-full text-base" disabled={loading}>
               {loading ? "Signing in..." : "Enter agent app"}
             </Button>
           </form>
-          <p className="mt-4 text-xs text-text-secondary">Use credentials provided by the UTGSU admin.</p>
+          <p className="mt-4 text-xs text-text-secondary">Use credentials provided by the admin.</p>
         </Card>
       </div>
     </div>

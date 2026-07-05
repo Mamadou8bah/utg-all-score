@@ -5,7 +5,7 @@ import type { KnockoutRound } from "@/lib/types";
 export function KnockoutBracket({ rounds }: { rounds: KnockoutRound[] }) {
   if (!rounds.length) {
     return (
-      <div className="rounded-[32px] border border-dashed border-slate-200 bg-white/50 p-12 text-center">
+      <div className="rounded-[32px] border border-dashed border-slate-200 bg-slate-50 p-12 text-center">
         <p className="text-sm font-black uppercase tracking-widest text-slate-400">Knockout bracket not scheduled yet</p>
       </div>
     );

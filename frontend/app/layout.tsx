@@ -10,7 +10,7 @@ const headingFont = Sora({ subsets: ["latin"], variable: "--font-heading" });
 
 export const metadata: Metadata = {
   title: `${appMeta.name} | ${appMeta.tagline}`,
-  description: "Official UTGSU football hub for live scores, fixtures, results, and campus sports news.",
+  description: "Official football hub for live scores, fixtures, results, and campus sports news.",
   applicationName: appMeta.name,
   appleWebApp: {
     capable: true,

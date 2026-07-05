@@ -21,10 +21,7 @@
 
   body {
     min-height: var(--app-height);
-    background:
-      radial-gradient(circle at top left, rgba(0, 85, 164, 0.12), transparent 28%),
-      radial-gradient(circle at top right, rgba(255, 199, 44, 0.18), transparent 30%),
-      linear-gradient(180deg, #f8fafc 0%, #f5f7fa 50%, #eef3f8 100%);
+    background-color: var(--background);
     color: #1f2937;
     font-family: var(--font-body), sans-serif;
     overscroll-behavior-y: contain;
@@ -78,31 +75,27 @@
   @keyframes slideUp {
     from {
       transform: translateY(20px);
-      opacity: 0;
     }
     to {
       transform: translateY(0);
-      opacity: 1;
     }
   }
 
   @keyframes dropdownFade {
     from {
       transform: translateY(-10px);
-      opacity: 0;
     }
     to {
       transform: translateY(0);
-      opacity: 1;
     }
   }
 
   @keyframes flash {
     0%, 100% {
-      opacity: 1;
+      transform: scale(1);
     }
     50% {
-      opacity: 0.3;
+      transform: scale(0.6);
     }
   }
 }

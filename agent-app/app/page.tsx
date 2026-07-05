@@ -100,22 +100,22 @@ export default function AgentDashboardPage() {
       nav={agentNav}
       onLogout={logout}
     >
-      {message ? <p className="rounded-2xl bg-primary/10 px-4 py-3 text-sm text-primary">{message}</p> : null}
+      {message ? <p className="rounded-2xl bg-blue-50 px-4 py-3 text-sm text-primary">{message}</p> : null}
 
-      <Card title="Your school's matches">
+      <Card title="Your matches">
         <div className="space-y-3">
           {matches.map((match) => (
             <button
               key={match.id}
               type="button"
               onClick={() => setSelectedId(match.id)}
-              className={`w-full rounded-[20px] p-4 text-left text-sm transition ${selectedId === match.id ? "bg-primary/10 ring-2 ring-primary/30" : "bg-slate-50 hover:bg-slate-100"}`}
+              className={`w-full rounded-[20px] p-4 text-left text-sm transition ${selectedId === match.id ? "bg-blue-50 ring-2 ring-blue-300" : "bg-slate-50 hover:bg-slate-100"}`}
             >
               <p className="font-semibold text-slate-950">{match.home} {match.homeScore} - {match.awayScore} {match.away}</p>
               <p className="text-text-secondary">{match.competition} · {match.status}{match.timer ? ` · ${match.timer}` : ""}</p>
             </button>
           ))}
-          {!matches.length ? <p className="text-sm text-text-secondary">No matches for your school yet. Contact the UTGSU admin.</p> : null}
+          {!matches.length ? <p className="text-sm text-text-secondary">No matches yet. Your admin can assign you to general competitions or schedule school fixtures.</p> : null}
         </div>
       </Card>
 

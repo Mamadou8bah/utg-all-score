@@ -23,7 +23,7 @@ export default function TeamsPage() {
     <div className="page-shell section-space space-y-8">
       <PageHeader
         eyebrow="Teams"
-        title="UTGSU football squads"
+        title="Football squads"
         description="Registered teams across UTG schools and associations, synced from the AllScore database."
       />
       <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">

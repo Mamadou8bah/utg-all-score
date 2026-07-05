@@ -18,7 +18,7 @@ export default function StandingsClient() {
   const CompetitionListItem = ({ competition }: { competition: Competition }) => (
     <button
       onClick={() => setSelectedComp(competition)}
-      className="group flex w-full items-center gap-3 rounded-2xl border border-slate-200 bg-white p-3 text-left shadow-sm transition hover:border-primary/40 hover:bg-slate-50"
+      className="group flex w-full items-center gap-3 rounded-2xl border border-slate-200 bg-white p-3 text-left shadow-sm transition hover:border-primary hover:bg-slate-50"
     >
       <div className="flex h-12 w-12 shrink-0 items-center justify-center overflow-hidden rounded-xl bg-slate-100">
         {competition.logo ? (

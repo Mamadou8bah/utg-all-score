@@ -84,7 +84,7 @@ export const CompetitionSwitcher = ({
                 onClick={() => handleSelect(comp)}
                 className={cn(
                   "flex w-full items-center justify-between rounded-xl p-3 text-left transition cursor-pointer",
-                  selected.id === comp.id ? "bg-primary/5 text-primary" : "hover:bg-slate-50 text-text-secondary"
+                  selected.id === comp.id ? "bg-blue-50 text-primary" : "hover:bg-slate-50 text-text-secondary"
                 )}
               >
                 <div className="flex items-center gap-3 min-w-0">

@@ -86,14 +86,14 @@ export default function HomeClient() {
                 ) : (
                   <div className="absolute inset-0 bg-slate-900" />
                 )}
-                <div className="absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-950/60 to-transparent" />
+                <div className="absolute inset-x-0 bottom-0 h-32 bg-slate-950" />
                 <div className="relative z-10 space-y-2">
-                  <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-primary/20 text-primary text-[10px] font-black uppercase tracking-widest border border-primary/20">
+                  <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-blue-100 text-primary text-[10px] font-black uppercase tracking-widest border border-blue-200">
                     <Newspaper size={10} /> {item.category}
                   </span>
                   <h2 className="text-lg font-black leading-tight line-clamp-2">{item.title}</h2>
                   <div className="flex items-center justify-between">
-                    <span className="text-[10px] font-bold text-white/50">
+                    <span className="text-[10px] font-bold text-slate-400">
                       {isMounted
                         ? formatDate(item.publishedAt, { month: "short", day: "numeric", year: "numeric" })
                         : ""}
@@ -113,7 +113,7 @@ export default function HomeClient() {
                   key={i}
                   className={cn(
                     "h-1 rounded-full transition-all duration-300",
-                    newsIndex === i ? "w-4 bg-primary" : "w-1 bg-white/20"
+                    newsIndex === i ? "w-4 bg-primary" : "w-1 bg-slate-700"
                   )}
                 />
               ))}
@@ -121,16 +121,15 @@ export default function HomeClient() {
           ) : null}
         </section>
       ) : (
-        <section className="relative overflow-hidden rounded-[2rem] border border-dashed border-slate-200 bg-gradient-to-br from-slate-950 via-slate-900 to-primary/30 p-6 shadow-xl">
-          <div className="absolute -right-8 -top-8 h-32 w-32 rounded-full bg-primary/20 blur-3xl" />
-          <div className="relative z-10 flex h-44 flex-col justify-between text-white">
-            <span className="inline-flex w-fit items-center gap-1.5 rounded-full bg-white/10 px-3 py-1 text-[10px] font-black uppercase tracking-widest">
-              <Sparkles size={12} /> UTGSU Newsroom
+        <section className="relative overflow-hidden rounded-[2rem] border border-dashed border-slate-700 bg-slate-950 p-6 shadow-xl">
+          <div className="flex h-44 flex-col justify-between text-white">
+            <span className="inline-flex w-fit items-center gap-1.5 rounded-full bg-slate-800 px-3 py-1 text-[10px] font-black uppercase tracking-widest">
+              <Sparkles size={12} /> Newsroom
             </span>
             <div className="space-y-2">
               <h2 className="text-xl font-black leading-tight sm:text-2xl">More news coming soon</h2>
-              <p className="max-w-md text-sm leading-6 text-white/70">
-                Match reports, campus sports stories, and official UTGSU announcements will appear here as they are published.
+              <p className="max-w-md text-sm leading-6 text-slate-300">
+                Match reports, campus sports stories, and official announcements will appear here as they are published.
               </p>
             </div>
             <Link
@@ -143,7 +142,7 @@ export default function HomeClient() {
         </section>
       )}
 
-      <div className="z-20 sticky top-0 md:top-[72px] bg-background/95 backdrop-blur py-2 space-y-4">
+      <div className="z-20 sticky top-0 md:top-[72px] bg-background py-2 space-y-4">
         <CompetitionSwitcher onSelect={setSelectedComp} />
         <DatePickerTimeline selectedDate={selectedDate} onDateChange={setSelectedDate} />
       </div>
@@ -152,7 +151,7 @@ export default function HomeClient() {
         <section className="space-y-3">
           <h2 className="px-1 text-xs font-black uppercase tracking-widest text-slate-950 flex items-center justify-between">
             <span>Upcoming Fixtures</span>
-            <span className="text-[10px] text-text-secondary opacity-60 normal-case font-bold">
+            <span className="text-[10px] text-slate-500 normal-case font-bold">
               {filteredFixtures.length} matches
             </span>
           </h2>
@@ -163,8 +162,8 @@ export default function HomeClient() {
               ))}
             </div>
           ) : (
-            <div className="rounded-3xl border border-dashed border-slate-200 p-8 text-center bg-white/40">
-              <p className="text-[10px] font-bold text-text-secondary uppercase tracking-widest opacity-60">
+            <div className="rounded-3xl border border-dashed border-slate-200 p-8 text-center bg-slate-100">
+              <p className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">
                 No fixtures for this date
               </p>
             </div>
@@ -181,7 +180,7 @@ export default function HomeClient() {
             </div>
           ) : (
             <div className="p-4 text-center">
-              <p className="text-[10px] font-bold text-text-secondary uppercase tracking-widest opacity-40 italic">
+              <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest italic">
                 Check historical archives
               </p>
             </div>

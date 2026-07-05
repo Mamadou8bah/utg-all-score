@@ -6,41 +6,40 @@ import { ChevronRight, Trophy, Info, CalendarDays, Zap, Newspaper, LayoutGrid } 
 
 export const Hero = () => (
   <section className="relative overflow-hidden rounded-[32px] bg-slate-950 px-5 py-7 text-white shadow-float sm:rounded-[36px] sm:px-8 sm:py-8 lg:px-10">
-    <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,_rgba(255,199,44,0.28),_transparent_30%),radial-gradient(circle_at_bottom_left,_rgba(0,85,164,0.4),_transparent_35%)]" />
     <div className="relative grid gap-6 lg:grid-cols-[1.15fr_0.85fr] lg:items-center">
       <div>
         <Badge variant="live">Official Campus Sports</Badge>
         <h1 className="mt-4 max-w-2xl text-3xl font-bold tracking-tight sm:text-5xl lg:text-6xl">Your Official University Sports Hub.</h1>
-        <p className="mt-4 max-w-xl text-sm leading-6 text-white/75 sm:text-base sm:leading-7">UTG AllScore brings live match control, results, official updates, and athlete storytelling into one fast sports app.</p>
+        <p className="mt-4 max-w-xl text-sm leading-6 text-slate-200 sm:text-base sm:leading-7">UTG AllScore brings live match control, results, official updates, and athlete storytelling into one fast sports app.</p>
         <div className="mt-6 flex flex-wrap gap-3">
           <Link href="/live" className="flex-1 sm:flex-none"><Button className="w-full sm:w-auto">Live Scores</Button></Link>
-          <Link href="/fixtures" className="flex-1 sm:flex-none"><Button variant="ghost" className="w-full bg-white/10 text-white ring-1 ring-white/15 hover:bg-white/15 sm:w-auto">Fixtures</Button></Link>
+          <Link href="/fixtures" className="flex-1 sm:flex-none"><Button variant="ghost" className="w-full bg-slate-800 text-white ring-1 ring-slate-600 hover:bg-slate-700 sm:w-auto">Fixtures</Button></Link>
         </div>
       </div>
       <div className="grid gap-3">
-        <div className="rounded-[28px] border border-white/10 bg-white/10 p-4 backdrop-blur sm:p-5">
-          <p className="text-[10px] uppercase tracking-[0.3em] text-white/55">Live right now</p>
+        <div className="rounded-[28px] border border-slate-700 bg-slate-800 p-4 sm:p-5">
+          <p className="text-[10px] uppercase tracking-[0.3em] text-slate-400">Live right now</p>
           <div className="mt-3 flex items-center justify-between">
             <div>
               <p className="text-xl font-bold">ICT vs Business</p>
-              <p className="mt-1 text-xs text-white/70">VC Tournament</p>
+              <p className="mt-1 text-xs text-slate-300">VC Tournament</p>
             </div>
             <Badge variant="live" className="h-6 px-2">72'</Badge>
           </div>
-          <div className="mt-3 flex items-center gap-4 text-3xl font-bold"><span>2</span><span className="text-white/40">:</span><span>1</span></div>
+          <div className="mt-3 flex items-center gap-4 text-3xl font-bold"><span>2</span><span className="text-slate-500">:</span><span>1</span></div>
         </div>
         <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
           {[
             ["Installable", "Fast PWA"],
             ["Offline", "Cached scores"]
           ].map(([title, value]) => (
-            <div key={title} className="rounded-[24px] border border-white/10 bg-white/5 p-3 backdrop-blur">
-              <p className="text-[10px] text-white/58">{title}</p>
+            <div key={title} className="rounded-[24px] border border-slate-700 bg-slate-900 p-3">
+              <p className="text-[10px] text-slate-400">{title}</p>
               <p className="mt-1 text-sm font-semibold">{value}</p>
             </div>
           ))}
-          <div className="hidden rounded-[24px] border border-white/10 bg-white/5 p-3 backdrop-blur sm:block">
-            <p className="text-[10px] text-white/58">Alerts</p>
+          <div className="hidden rounded-[24px] border border-slate-700 bg-slate-900 p-3 sm:block">
+            <p className="text-[10px] text-slate-400">Alerts</p>
             <p className="mt-1 text-sm font-semibold">Live Push</p>
           </div>
         </div>
@@ -69,7 +68,7 @@ export const LiveMatchCard = ({ match, onClick }: { match: Match, onClick?: () =
         <img 
           src="https://res.cloudinary.com/dflsnes44/image/upload/q_auto/f_auto/v1775301714/ChatGPT_Image_Apr_4_2026_11_16_34_AM_dxzi5q.png" 
           alt="League Logo"
-          className="h-3 w-3 object-contain opacity-60"
+          className="h-3 w-3 object-contain"
         />
         <p className="text-[9px] font-black text-text-secondary uppercase tracking-wider">{match.competition}</p>
       </div>
@@ -187,7 +186,7 @@ export const NewsCard = ({
           alt={item.title}
           className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-110"
         />
-        <div className="absolute inset-0 bg-gradient-to-t from-white via-transparent to-transparent opacity-60" />
+        <div className="absolute inset-x-0 bottom-0 h-16 bg-white" />
       </div>
     )}
     <div className="p-6">
@@ -224,7 +223,7 @@ export const AnnouncementCard = ({ item }: { item: { title: string; body: string
 
 export const AthleteHighlightCard = ({ athlete }: { athlete: AthleteProfile }) => (
   <article className="grid gap-5 rounded-[30px] border border-slate-200 bg-white p-5 shadow-card md:grid-cols-[160px_1fr] md:items-center">
-    <div className="relative h-40 overflow-hidden rounded-[24px] bg-[linear-gradient(180deg,_rgba(0,85,164,0.18),_rgba(255,199,44,0.28))]">
+    <div className="relative h-40 overflow-hidden rounded-[24px] bg-blue-50">
       <img src={athlete.image} alt={athlete.name} className="h-full w-full object-cover" />
     </div>
     <div>
@@ -268,7 +267,7 @@ export const StandingsTable = ({ rows, onTeamClick }: { rows: StandingRow[], onT
           {rows.sort((a,b) => b.pts - a.pts || b.gd - a.gd).map((row, index) => (
             <tr 
               key={row.team} 
-              className="border-t border-slate-100 last:border-0 hover:bg-slate-50/50 transition-colors"
+              className="border-t border-slate-100 last:border-0 hover:bg-slate-50 transition-colors"
             >
               <td className="max-w-[190px] px-3 py-3 font-black text-slate-950 sm:max-w-none sm:px-6 sm:py-4">
                 <div className="flex min-w-0 items-center gap-2 sm:gap-4">
@@ -317,12 +316,12 @@ export const CompetitionCard = ({
 }) => (
   <article 
     onClick={onClick}
-    className="group relative cursor-pointer overflow-hidden rounded-[2.5rem] border border-slate-200 bg-white p-6 shadow-sm transition-all hover:border-primary/50 hover:shadow-card active:scale-[0.98]"
+    className="group relative cursor-pointer overflow-hidden rounded-[2.5rem] border border-slate-200 bg-white p-6 shadow-sm transition-all hover:border-primary hover:shadow-card active:scale-[0.98]"
   >
     <div className="flex items-start justify-between">
       <div className="flex-1 space-y-4">
         <div className="flex items-center gap-4">
-          <div className="flex h-16 w-16 items-center justify-center rounded-[20px] bg-slate-50 transition-colors group-hover:bg-primary/10">
+          <div className="flex h-16 w-16 items-center justify-center rounded-[20px] bg-slate-50 transition-colors group-hover:bg-blue-50">
             {competition.logo ? (
               <img src={competition.logo} alt="" className="h-10 w-10 object-contain" />
             ) : (
@@ -359,4 +358,4 @@ export const CompetitionCard = ({
   </article>
 );
 
-export const SkeletonBlock = ({ className }: { className?: string }) => <div className={`animate-pulse rounded-[28px] bg-slate-200/70 ${className ?? "h-24 w-full"}`} />;
+export const SkeletonBlock = ({ className }: { className?: string }) => <div className={`animate-pulse rounded-[28px] bg-slate-200 ${className ?? "h-24 w-full"}`} />;

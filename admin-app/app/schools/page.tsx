@@ -53,7 +53,7 @@ export default function SchoolsPage() {
 
   return (
     <AdminShell title="Schools" subtitle="UTG faculties and schools for agents and teams." nav={adminNav}>
-      {message ? <p className="rounded-2xl bg-primary/10 px-4 py-3 text-sm text-primary">{message}</p> : null}
+      {message ? <p className="rounded-2xl bg-blue-50 px-4 py-3 text-sm text-primary">{message}</p> : null}
       <Card title="Add school">
         <form className="grid gap-4 md:grid-cols-2" onSubmit={handleCreate}>
           <Field label="Full name"><Input value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} required /></Field>

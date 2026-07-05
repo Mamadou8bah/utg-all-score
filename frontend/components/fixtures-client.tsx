@@ -53,7 +53,7 @@ export default function FixturesClient() {
           )}
         </div>
       ) : (
-        <div className="rounded-3xl border border-dashed border-slate-200 p-12 text-center bg-white/40">
+        <div className="rounded-3xl border border-dashed border-slate-200 p-12 text-center bg-slate-100">
           <p className="text-sm font-bold text-text-secondary">No fixtures found.</p>
         </div>
       )}

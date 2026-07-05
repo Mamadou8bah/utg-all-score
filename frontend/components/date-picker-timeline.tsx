@@ -45,7 +45,7 @@ export const DatePickerTimeline = ({
         type="button"
         onClick={openCalendar}
         aria-label="Pick a date"
-        className="flex-shrink-0 rounded-xl bg-white p-3 shadow-sm border border-slate-100 active:scale-95 transition-all text-text-secondary hover:border-primary/30 hover:text-primary"
+        className="flex-shrink-0 rounded-xl bg-white p-3 shadow-sm border border-slate-100 active:scale-95 transition-all text-text-secondary hover:border-blue-300 hover:text-primary"
       >
         <CalendarIcon size={18} />
       </button>
@@ -62,14 +62,14 @@ export const DatePickerTimeline = ({
             className={cn(
               "relative flex flex-col items-center justify-center min-w-[64px] py-2.5 rounded-2xl transition-all border",
               isSelected
-                ? "bg-primary border-primary text-white shadow-md shadow-primary/20"
+                ? "bg-primary border-primary text-white shadow-md"
                 : "bg-white border-slate-100 text-text-secondary hover:border-slate-200"
             )}
           >
             <span
               className={cn(
                 "text-[10px] uppercase font-bold tracking-tighter",
-                isSelected ? "text-white/70" : "text-text-secondary/60"
+                isSelected ? "text-slate-300" : "text-slate-500"
               )}
             >
               {format(date, "EEE")}

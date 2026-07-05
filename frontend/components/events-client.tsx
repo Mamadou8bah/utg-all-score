@@ -10,7 +10,7 @@ export default function EventsClient() {
 
   return (
     <div className="page-shell section-space space-y-8">
-      <PageHeader eyebrow="Football Calendar" title="UTGSU football events" description="Finals, knockout rounds, and official UTGSU football programming." />
+      <PageHeader eyebrow="Football Calendar" title="Football events" description="Finals, knockout rounds, and official football programming." />
       <div className="grid gap-4 md:grid-cols-2">
         {events.map((event) => <EventCard key={event.id} event={event} />)}
       </div>

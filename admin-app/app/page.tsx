@@ -35,7 +35,7 @@ export default function AdminDashboardPage() {
   }, []);
 
   return (
-    <AdminShell title="Admin Dashboard" subtitle={user ? `Signed in as ${user.name}` : "UTGSU Sports Administration"} nav={adminNav}>
+    <AdminShell title="Admin Dashboard" subtitle={user ? `Signed in as ${user.name}` : "Sports Administration"} nav={adminNav}>
       <div className="grid grid-cols-2 gap-3 sm:gap-4 xl:grid-cols-3">
         {[
           { label: "Schools", value: stats.schools },

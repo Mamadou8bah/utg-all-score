@@ -13,7 +13,10 @@ export async function GET(request: Request) {
   if (denied) return denied;
 
   const competitions = await prisma.competition.findMany({
-    include: { school: true, _count: { select: { matches: true, teamEntries: true, groups: true } } },
+    include: {
+      school: true,
+      _count: { select: { matches: true, teamEntries: true, groups: true, agents: true } }
+    },
     orderBy: { name: "asc" }
   });
 
@@ -30,7 +33,8 @@ export async function GET(request: Request) {
       schoolName: c.school?.name ?? null,
       matchCount: c._count.matches,
       teamCount: c._count.teamEntries,
-      groupCount: c._count.groups
+      groupCount: c._count.groups,
+      agentCount: c._count.agents
     })),
     request
   );

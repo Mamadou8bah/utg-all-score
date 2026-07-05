@@ -13,7 +13,7 @@ export default function AgentContentPage() {
   const [message, setMessage] = useState("");
   const [news, setNews] = useState<NewsItem[]>([]);
   const [announcements, setAnnouncements] = useState<AnnouncementItem[]>([]);
-  const [newsForm, setNewsForm] = useState({ title: "", excerpt: "", body: "", category: "UTGSU Football", image: "" });
+  const [newsForm, setNewsForm] = useState({ title: "", excerpt: "", body: "", category: "Football", image: "" });
   const [alertForm, setAlertForm] = useState({ title: "", body: "", level: "info" });
 
   async function load() {
@@ -38,7 +38,7 @@ export default function AgentContentPage() {
     });
     setMessage(res.ok ? "News published." : "Failed to publish news.");
     if (res.ok) {
-      setNewsForm({ title: "", excerpt: "", body: "", category: "UTGSU Football", image: "" });
+      setNewsForm({ title: "", excerpt: "", body: "", category: "Football", image: "" });
       load();
     }
   }
@@ -65,7 +65,7 @@ export default function AgentContentPage() {
 
   return (
     <AgentShell title="News & Announcements" subtitle="Publish football updates to the public AllScore site." nav={agentNav} onLogout={logout}>
-      {message ? <p className="rounded-2xl bg-primary/10 px-4 py-3 text-sm text-primary">{message}</p> : null}
+      {message ? <p className="rounded-2xl bg-blue-50 px-4 py-3 text-sm text-primary">{message}</p> : null}
       <Card title="Football news article">
         <form className="grid gap-4" onSubmit={publishNews}>
           <Field label="Title"><Input value={newsForm.title} onChange={(e) => setNewsForm({ ...newsForm, title: e.target.value })} required /></Field>
@@ -73,7 +73,7 @@ export default function AgentContentPage() {
           <Field label="Category">
             <Select value={newsForm.category} onChange={(e) => setNewsForm({ ...newsForm, category: e.target.value })}>
               <option>Match Report</option>
-              <option>UTGSU Football</option>
+              <option>Football</option>
               <option>Transfer News</option>
             </Select>
           </Field>

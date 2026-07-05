@@ -24,7 +24,7 @@ export const NewsDetailsModal = ({
   if (!item) return null;
 
   return (
-    <div className="fixed inset-0 z-[100] flex items-stretch justify-center bg-white sm:items-center sm:bg-slate-950/40 sm:p-4 sm:backdrop-blur-sm animate-in fade-in duration-200">
+    <div className="fixed inset-0 z-[100] flex items-stretch justify-center bg-white sm:items-center sm:bg-slate-900 sm:p-4">
       <div 
         className="relative flex h-[100dvh] max-h-none w-full max-w-2xl flex-col overflow-hidden bg-white shadow-2xl animate-in slide-in-from-bottom-full duration-300 sm:h-auto sm:max-h-[92vh] sm:rounded-[40px]"
         onClick={(e) => e.stopPropagation()}
@@ -33,7 +33,7 @@ export const NewsDetailsModal = ({
         <div className="absolute top-4 right-4 z-10">
           <button 
             onClick={onClose}
-            className="flex h-10 w-10 items-center justify-center rounded-full bg-white/20 text-white backdrop-blur-md transition hover:bg-white/30 active:scale-90 sm:bg-slate-100 sm:text-slate-600 sm:hover:bg-slate-200"
+            className="flex h-10 w-10 items-center justify-center rounded-full bg-slate-700 text-white  transition hover:bg-slate-600 active:scale-90 sm:bg-slate-100 sm:text-slate-600 sm:hover:bg-slate-200"
           >
             <X size={20} />
           </button>
@@ -49,9 +49,9 @@ export const NewsDetailsModal = ({
                 alt={item.title}
                 className="h-full w-full object-cover"
               />
-              <div className="absolute inset-0 bg-gradient-to-t from-slate-950/80 via-transparent to-transparent" />
+              <div className="absolute inset-x-0 bottom-0 h-32 bg-slate-950" />
               <div className="absolute bottom-6 left-6 right-6">
-                <Badge variant="live" className="mb-3 bg-white/20 text-white backdrop-blur-md border-none px-4 py-1.5 font-black tracking-[0.2em]">
+                <Badge variant="live" className="mb-3 bg-slate-700 text-white  border-none px-4 py-1.5 font-black tracking-[0.2em]">
                   {item.category}
                 </Badge>
                 <h1 className="text-2xl font-black text-white leading-tight sm:text-4xl">

@@ -30,6 +30,7 @@ model User {
   createdAt     DateTime       @default(now())
   newsArticles  NewsArticle[]
   announcements Announcement[]
+  competitionAssignments CompetitionAgent[]
 }
 
 model Competition {
@@ -46,6 +47,7 @@ model Competition {
   teamEntries CompetitionTeam[]
   matches     Match[]
   standings   Standing[]
+  agents      CompetitionAgent[]
 }
 
 model CompetitionGroup {
@@ -103,6 +105,16 @@ model CompetitionGroupTeam {
   team    Team             @relation(fields: [teamId], references: [id], onDelete: Cascade)
 
   @@id([groupId, teamId])
+}
+
+model CompetitionAgent {
+  competitionId String
+  userId        String
+  competition   Competition @relation(fields: [competitionId], references: [id], onDelete: Cascade)
+  user          User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  createdAt     DateTime    @default(now())
+
+  @@id([competitionId, userId])
 }
 
 model Match {

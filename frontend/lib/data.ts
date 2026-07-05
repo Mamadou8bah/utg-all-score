@@ -3,7 +3,7 @@ export * from "@/lib/types";
 export const appMeta = {
   name: "UTG AllScore",
   shortName: "AllScore",
-  tagline: "The Official Hub for UTGSU Football Updates"
+  tagline: "The Official Hub for University Sports Updates"
 };
 
 export const navLinks = [

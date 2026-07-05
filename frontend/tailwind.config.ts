@@ -24,8 +24,8 @@ const config: Config = {
         "3xl": "2.5rem"
       },
       boxShadow: {
-        card: "0 10px 30px rgba(15, 23, 42, 0.08)",
-        float: "0 22px 50px rgba(0, 85, 164, 0.16)"
+        card: "0 10px 30px #CBD5E1",
+        float: "0 22px 50px #94A3B8"
       },
       animation: {
         slideUp: "slideUp 0.5s ease forwards",
@@ -33,8 +33,8 @@ const config: Config = {
       },
       keyframes: {
         slideUp: {
-          from: { opacity: "0", transform: "translateY(16px)" },
-          to: { opacity: "1", transform: "translateY(0)" }
+          from: { transform: "translateY(16px)" },
+          to: { transform: "translateY(0)" }
         },
         marquee: {
           from: { transform: "translateX(0%)" },

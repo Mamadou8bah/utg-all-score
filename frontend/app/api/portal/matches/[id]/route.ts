@@ -21,7 +21,7 @@ export async function PATCH(request: Request, context: RouteContext) {
 
   if (session!.role === "AGENT") {
     const allowed = await agentCanAccessMatch(session!.id, id);
-    if (!allowed) return jsonError("You can only update matches involving your school's teams.", 403, request);
+    if (!allowed) return jsonError("You can only update matches for your school or assigned general competitions.", 403, request);
   }
 
   const match = await prisma.match.findUnique({ where: { id } });
@@ -56,7 +56,7 @@ export async function POST(request: Request, context: RouteContext) {
 
   if (session!.role === "AGENT") {
     const allowed = await agentCanAccessMatch(session!.id, id);
-    if (!allowed) return jsonError("You can only update matches involving your school's teams.", 403, request);
+    if (!allowed) return jsonError("You can only update matches for your school or assigned general competitions.", 403, request);
   }
 
   const action = body?.action;

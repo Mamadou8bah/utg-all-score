@@ -42,7 +42,7 @@ export const CompetitionDetailsModal = ({
         id: "standings",
         label: "Standings",
         content: (
-          <div className="space-y-6 animate-in fade-in slide-in-from-bottom-2 duration-400 sm:space-y-8">
+          <div className="space-y-6 animate-in slide-in-from-bottom-2 duration-400 sm:space-y-8">
             {competition.format === "LEAGUE" ? (
               <div className="space-y-3 sm:space-y-4">
                 <h2 className="px-1 text-[10px] font-black uppercase tracking-[0.2em] text-text-secondary">Official League Hierarchy</h2>
@@ -67,7 +67,7 @@ export const CompetitionDetailsModal = ({
         id: "matches",
         label: "Schedule",
         content: (
-          <div className="space-y-6 animate-in fade-in slide-in-from-bottom-2 duration-400 sm:space-y-8">
+          <div className="space-y-6 animate-in slide-in-from-bottom-2 duration-400 sm:space-y-8">
             {compFixtures.length > 0 && (
               <section className="space-y-4">
                 <h2 className="px-1 text-[10px] font-black uppercase tracking-[0.2em] text-text-secondary">Upcoming Fixtures</h2>
@@ -95,7 +95,7 @@ export const CompetitionDetailsModal = ({
         id: "info",
         label: "History",
         content: (
-          <div className="max-w-2xl space-y-6 px-1 animate-in fade-in slide-in-from-bottom-2 duration-400">
+          <div className="max-w-2xl space-y-6 px-1 animate-in slide-in-from-bottom-2 duration-400">
             <div className="rounded-3xl border border-slate-100 bg-white p-5 shadow-sm sm:rounded-[32px] sm:p-8">
               <h2 className="mb-4 text-xl font-black text-slate-950">About this competition</h2>
               <p className="mb-6 text-sm font-medium leading-8 text-slate-600">{competition.description}</p>
@@ -149,11 +149,11 @@ export const CompetitionDetailsModal = ({
         id: "knockout",
         label: "Knockout",
         content: (
-          <div className="animate-in fade-in slide-in-from-bottom-2 duration-400">
+          <div className="animate-in slide-in-from-bottom-2 duration-400">
             {bracket?.length ? (
               <KnockoutBracket rounds={bracket} />
             ) : (
-              <div className="rounded-[32px] border border-dashed border-slate-200 bg-white/50 p-12 text-center">
+              <div className="rounded-[32px] border border-dashed border-slate-200 bg-slate-50 p-12 text-center">
                 <LayoutGrid size={40} className="mx-auto mb-4 text-slate-200" />
                 <p className="text-sm font-black uppercase tracking-widest text-slate-400">Knockout rounds not scheduled yet</p>
               </div>
@@ -167,7 +167,7 @@ export const CompetitionDetailsModal = ({
   }, [allCompStandings, bracket, compFixtures, compResults, compStats, competition, groups, leagueStandings]);
 
   return (
-    <div className="fixed inset-0 z-[100] flex items-stretch justify-center bg-slate-50 sm:items-center sm:bg-slate-950/40 sm:p-4 sm:backdrop-blur-sm animate-in fade-in duration-200">
+    <div className="fixed inset-0 z-[100] flex items-stretch justify-center bg-slate-50 sm:items-center sm:bg-slate-900 sm:p-4">
       <div 
         className="relative flex h-[100dvh] w-full max-w-4xl flex-col overflow-hidden bg-slate-50 shadow-2xl animate-in slide-in-from-bottom-full duration-300 sm:h-[92vh] sm:rounded-[40px]"
         onClick={(e) => e.stopPropagation()}
@@ -184,7 +184,7 @@ export const CompetitionDetailsModal = ({
                 )}
               </div>
               <div className="min-w-0">
-                <Badge variant="default" className="mb-1 max-w-full truncate border-none bg-primary/10 text-[8px] font-black tracking-[0.14em] text-primary sm:text-[9px] sm:tracking-[0.2em]">
+                <Badge variant="default" className="mb-1 max-w-full truncate border-none bg-blue-50 text-[8px] font-black tracking-[0.14em] text-primary sm:text-[9px] sm:tracking-[0.2em]">
                   {competition.type === "GENERAL" ? "Official University Athletics" : competition.schoolName}
                 </Badge>
                 <h1 className="break-words text-xl font-black leading-tight text-slate-950 sm:text-3xl">

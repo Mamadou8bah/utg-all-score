@@ -17,7 +17,7 @@ export const MobileNav = () => {
   ];
 
   return (
-    <nav className="fixed bottom-0 left-0 right-0 z-50 border-t border-slate-100 bg-white/95 pb-[env(safe-area-inset-bottom)] backdrop-blur-xl md:hidden">
+    <nav className="fixed bottom-0 left-0 right-0 z-50 border-t border-slate-100 bg-white pb-[env(safe-area-inset-bottom)] md:hidden">
       <div className="flex items-center justify-around px-2 py-3">
         {bottomLinks.map((link) => {
           const isActive = pathname === link.href;
@@ -32,7 +32,7 @@ export const MobileNav = () => {
             >
               <div className={cn(
                 "p-2 rounded-xl transition-colors",
-                isActive ? "bg-primary/10" : "bg-transparent"
+                isActive ? "bg-blue-50" : ""
               )}>
                 {link.icon}
               </div>

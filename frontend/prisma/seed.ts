@@ -110,7 +110,7 @@ export async function seedDatabase() {
       team.school,
       team.colors,
       team.form,
-      `UTGSU sub-association side competing in university football competitions.`
+      `University sub-association side competing in university football competitions.`
     );
   }
 
@@ -152,7 +152,7 @@ export async function seedDatabase() {
       name: "VC Tournament",
       type: "GENERAL",
       format: "TOURNAMENT",
-      description: "The Vice Chancellor's university-wide football tournament featuring UTGSU sub-associations and faculty sides."
+      description: "The Vice Chancellor's university-wide football tournament featuring sub-associations and faculty sides."
     }
   });
 
@@ -180,11 +180,11 @@ export async function seedDatabase() {
 
   const unityShield = await prisma.competition.create({
     data: {
-      slug: "utgsu-unity-shield-2026",
-      name: "UTGSU Unity Shield",
+      slug: "unity-shield-2026",
+      name: "Unity Shield",
       type: "GENERAL",
       format: "TOURNAMENT",
-      description: "UTGSU flagship football competition for recognized sub-associations across The University of The Gambia."
+      description: "Flagship football competition for recognized sub-associations across The University of The Gambia."
     }
   });
 
@@ -514,10 +514,10 @@ export async function seedDatabase() {
         publishedAt: new Date("2026-04-02T20:30:00+00:00")
       },
       {
-        title: "UTGSU confirms football-only matchday operations for 2026",
+        title: "Football-only matchday operations confirmed for 2026",
         excerpt: "AllScore now focuses exclusively on UTG football — VC Tournament, Unity Shield, and school leagues.",
-        body: "The UTGSU sports office has standardised digital scoring workflows for football fixtures across all campuses.",
-        category: "UTGSU Football",
+        body: "The sports office has standardised digital scoring workflows for football fixtures across all campuses.",
+        category: "Football",
         image: "https://images.unsplash.com/photo-1522778119026-d647f0596c20?q=80&w=800&auto=format&fit=crop",
         publishedAt: new Date("2026-04-01T12:00:00+00:00")
       },
@@ -554,18 +554,18 @@ export async function seedDatabase() {
   await prisma.footballEvent.createMany({
     data: [
       {
-        title: "UTGSU Unity Shield Semi-Finals",
+        title: "Unity Shield Semi-Finals",
         type: "Knockout",
         venue: "UTG Main Field, Kanifing",
         date: new Date("2026-05-15T16:00:00+00:00"),
-        description: "Semi-final football fixtures across Unity Shield groups with UTGSU match officials."
+        description: "Semi-final football fixtures across Unity Shield groups with official match officials."
       },
       {
         title: "VC Tournament Final",
         type: "Final",
         venue: "Faraba Sports Ground",
         date: new Date("2026-05-28T18:00:00+00:00"),
-        description: "VC Tournament football final followed by UTGSU awards ceremony."
+        description: "VC Tournament football final followed by awards ceremony."
       }
     ]
   });

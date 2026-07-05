@@ -6,7 +6,15 @@ import { adminNav } from "@/lib/nav";
 import { apiFetch, apiJson } from "@/lib/api";
 
 type School = { id: string; name: string };
-type Agent = { id: string; email: string; name: string; schoolName: string | null; active: boolean; schoolId?: string | null };
+type Agent = {
+  id: string;
+  email: string;
+  name: string;
+  schoolName: string | null;
+  active: boolean;
+  schoolId?: string | null;
+  assignedCompetitions?: Array<{ id: string; name: string }>;
+};
 
 export default function AgentsPage() {
   const [schools, setSchools] = useState<School[]>([]);
@@ -57,8 +65,8 @@ export default function AgentsPage() {
   }
 
   return (
-    <AdminShell title="School Agents" subtitle="Add agents tied to UTG schools." nav={adminNav}>
-      {message ? <p className="rounded-2xl bg-primary/10 px-4 py-3 text-sm text-primary">{message}</p> : null}
+    <AdminShell title="School Agents" subtitle="Agents belong to a school and can be assigned to general university-wide competitions." nav={adminNav}>
+      {message ? <p className="rounded-2xl bg-blue-50 px-4 py-3 text-sm text-primary">{message}</p> : null}
       <Card title="Create agent">
         <form className="grid gap-4 md:grid-cols-2" onSubmit={handleCreate}>
           <Field label="Full name"><Input value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} required /></Field>
@@ -99,6 +107,11 @@ export default function AgentsPage() {
                     <p className="font-semibold text-slate-950">{agent.name} {!agent.active ? <span className="text-error">(inactive)</span> : null}</p>
                     <p className="text-text-secondary">{agent.email}</p>
                     <p className="mt-1 text-primary">{agent.schoolName ?? "No school"}</p>
+                    {agent.assignedCompetitions?.length ? (
+                      <p className="mt-1 text-xs text-text-secondary">
+                        General competitions: {agent.assignedCompetitions.map((c) => c.name).join(", ")}
+                      </p>
+                    ) : null}
                   </div>
                   <div className="flex gap-2">
                     <Button variant="ghost" onClick={() => { setEditingId(agent.id); setEditForm({ name: agent.name, schoolId: agent.schoolId ?? "", active: agent.active, password: "" }); }}>Edit</Button>

@@ -6,7 +6,7 @@ export default function manifest(): MetadataRoute.Manifest {
     id: "/",
     name: "UTG AllScore Admin",
     short_name: "AllScore Admin",
-    description: "UTGSU football administration — teams, competitions, and school agents.",
+    description: "Football administration — teams, competitions, and school agents.",
     start_url: "/",
     scope: "/",
     display: "standalone",

@@ -25,9 +25,9 @@ export function AdminShell({
 
   return (
     <div className="flex min-h-[var(--app-height)] flex-col">
-      <header className="sticky top-0 z-40 border-b border-slate-100/80 bg-white/90 backdrop-blur-xl">
-        <div className="flex h-14 items-center justify-between px-4 sm:px-6">
-          <Link href="/" className="flex min-w-0 items-center gap-2.5">
+      <header className="sticky top-0 z-40 border-b border-slate-100 bg-white">
+        <div className="relative z-10 flex h-14 items-center justify-between px-4 sm:px-6">
+          <Link href="/" className="flex min-w-0 items-center gap-2.5 rounded-xl py-1 pr-2 transition active:scale-[0.98]">
             <img src={APP_LOGO} alt={APP_NAME} className="h-9 w-9 shrink-0 object-contain" />
             <div className="min-w-0 lg:hidden">
               <p className="truncate text-[9px] font-black uppercase tracking-[0.2em] text-primary">{APP_NAME}</p>
@@ -38,8 +38,8 @@ export function AdminShell({
               <p className="text-sm font-bold text-slate-950">Admin</p>
             </div>
           </Link>
-          <div className="flex shrink-0 items-center gap-2">
-            <span className="hidden rounded-full bg-primary/10 px-3 py-1 text-[10px] font-bold uppercase tracking-[0.14em] text-primary sm:inline">
+          <div className="relative z-[50] flex shrink-0 items-center gap-2">
+            <span className="hidden rounded-full bg-blue-50 px-3 py-1 text-[10px] font-bold uppercase tracking-[0.14em] text-primary sm:inline">
               Admin
             </span>
             <ProfileMenu />
@@ -49,7 +49,7 @@ export function AdminShell({
 
       <div className="mx-auto flex w-full max-w-7xl flex-1 gap-6 px-4 py-4 sm:px-6 lg:py-8 xl:px-8">
         <aside className="sticky top-20 hidden h-fit w-60 shrink-0 rounded-[32px] bg-slate-950 p-4 text-white shadow-float lg:block">
-          <p className="px-3 py-2 text-xs font-bold uppercase tracking-[0.28em] text-white/55">Administration</p>
+          <p className="px-3 py-2 text-xs font-bold uppercase tracking-[0.28em] text-slate-400">Administration</p>
           <nav className="mt-2 flex flex-col gap-1">
             {nav.map((item) => {
               const Icon = item.icon;
@@ -58,7 +58,7 @@ export function AdminShell({
                   key={item.href}
                   href={item.href}
                   className={cn(
-                    "flex items-center gap-3 rounded-2xl px-4 py-3 text-sm font-medium transition hover:bg-white/10",
+                    "flex items-center gap-3 rounded-2xl px-4 py-3 text-sm font-medium transition hover:bg-slate-800",
                     pathname === item.href && "bg-white text-slate-950"
                   )}
                 >
@@ -68,8 +68,8 @@ export function AdminShell({
               );
             })}
           </nav>
-          <div className="mt-6 border-t border-white/10 px-3 pt-4">
-            <a href={PUBLIC_SITE_URL} className="text-sm text-white/70 transition hover:text-white">
+          <div className="mt-6 border-t border-slate-700 px-3 pt-4">
+            <a href={PUBLIC_SITE_URL} className="text-sm text-slate-300 transition hover:text-white">
               ← Public AllScore site
             </a>
           </div>
@@ -77,7 +77,7 @@ export function AdminShell({
 
         <main className="mobile-safe-bottom min-w-0 flex-1 space-y-4 animate-slideUp lg:space-y-6">
           <div className="hidden lg:block">
-            <p className="text-[10px] font-bold uppercase tracking-[0.32em] text-primary">UTGSU Football</p>
+            <p className="text-[10px] font-bold uppercase tracking-[0.32em] text-primary">Football Admin</p>
             <h1 className="mt-2 text-4xl font-bold tracking-tight text-slate-950">{title}</h1>
             <p className="mt-2 text-base text-text-secondary">{subtitle}</p>
           </div>
@@ -114,7 +114,7 @@ export function Input(props: React.InputHTMLAttributes<HTMLInputElement>) {
     <input
       {...props}
       className={cn(
-        "h-12 w-full rounded-2xl border border-slate-200 bg-white px-4 text-sm text-text-primary shadow-sm outline-none transition focus:border-primary focus:ring-4 focus:ring-primary/10",
+        "h-12 w-full rounded-2xl border border-slate-200 bg-white px-4 text-sm text-text-primary shadow-sm outline-none transition focus:border-primary focus:ring-4 focus:ring-blue-100",
         props.className
       )}
     />
@@ -126,7 +126,7 @@ export function Select(props: React.SelectHTMLAttributes<HTMLSelectElement>) {
     <select
       {...props}
       className={cn(
-        "h-12 w-full rounded-2xl border border-slate-200 bg-white px-4 text-sm text-text-primary shadow-sm outline-none transition focus:border-primary focus:ring-4 focus:ring-primary/10",
+        "h-12 w-full rounded-2xl border border-slate-200 bg-white px-4 text-sm text-text-primary shadow-sm outline-none transition focus:border-primary focus:ring-4 focus:ring-blue-100",
         props.className
       )}
     />
@@ -138,7 +138,7 @@ export function Textarea(props: React.TextareaHTMLAttributes<HTMLTextAreaElement
     <textarea
       {...props}
       className={cn(
-        "min-h-[100px] w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm text-text-primary shadow-sm outline-none transition focus:border-primary focus:ring-4 focus:ring-primary/10",
+        "min-h-[100px] w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm text-text-primary shadow-sm outline-none transition focus:border-primary focus:ring-4 focus:ring-blue-100",
         props.className
       )}
     />
@@ -155,9 +155,9 @@ export function Button({
     <button
       {...props}
       className={cn(
-        "inline-flex items-center justify-center rounded-full px-5 py-3 text-sm font-semibold transition duration-200 disabled:opacity-50",
-        variant === "primary" && "bg-primary text-white shadow-float hover:-translate-y-0.5 hover:bg-primary/90",
-        variant === "secondary" && "bg-secondary text-slate-950 hover:bg-secondary/90",
+        "inline-flex items-center justify-center rounded-full px-5 py-3 text-sm font-semibold transition duration-200 disabled:cursor-not-allowed disabled:bg-slate-300 disabled:text-slate-500 disabled:shadow-none",
+        variant === "primary" && "bg-primary text-white shadow-float hover:-translate-y-0.5 hover:bg-[#004688]",
+        variant === "secondary" && "bg-secondary text-slate-950 hover:bg-[#E6B000]",
         variant === "ghost" && "border border-slate-200 bg-white text-slate-950 hover:bg-slate-50",
         className
       )}

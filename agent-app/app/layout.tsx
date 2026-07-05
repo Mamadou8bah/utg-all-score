@@ -10,7 +10,7 @@ const headingFont = Sora({ subsets: ["latin"], variable: "--font-heading" });
 
 export const metadata: Metadata = {
   title: "UTG AllScore Agent",
-  description: "School agent app for updating UTGSU football scores, lineups, and news.",
+  description: "School agent app for updating football scores, lineups, and news.",
   applicationName: "UTG AllScore Agent",
   icons: {
     icon: APP_ICON,

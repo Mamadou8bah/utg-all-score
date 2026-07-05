@@ -29,7 +29,7 @@ export function CompetitionLogo({
       className={cn(
         "flex shrink-0 items-center justify-center",
         box,
-        competition.type === "GENERAL" ? "bg-primary/10 text-primary" : "bg-secondary/20 text-slate-800",
+        competition.type === "GENERAL" ? "bg-blue-50 text-primary" : "bg-amber-100 text-slate-800",
         className
       )}
     >

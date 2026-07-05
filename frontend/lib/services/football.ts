@@ -333,7 +333,7 @@ export async function fetchAthletes(): Promise<AthleteProfile[]> {
     sport: "Football",
     role: player.position ?? player.role,
     statLine: `${player.goals} goals, ${player.assists} assists`,
-    story: `Key contributor for ${player.team.name} in UTGSU football competitions.`,
+    story: `Key contributor for ${player.team.name} in university football competitions.`,
     image: index % 2 === 0 ? "/images/athlete-lamin.svg" : "/images/athlete-maimuna.svg"
   }));
 }
@@ -350,17 +350,34 @@ export async function fetchFootballEvents(): Promise<FootballEventItem[]> {
   }));
 }
 
+export async function getAgentAssignedCompetitionIds(userId: string) {
+  const rows = await prisma.competitionAgent.findMany({
+    where: { userId },
+    select: { competitionId: true }
+  });
+  return rows.map((row) => row.competitionId);
+}
+
 export async function agentCanAccessMatch(userId: string, matchId: string) {
   const user = await prisma.user.findUnique({
     where: { id: userId },
-    include: { school: { include: { teams: true } } }
+    include: {
+      school: { include: { teams: true } },
+      competitionAssignments: { select: { competitionId: true } }
+    }
   });
-  if (!user?.schoolId || !user.school) return false;
+  if (!user) return false;
 
-  const teamIds = user.school.teams.map((t) => t.id);
   const match = await prisma.match.findUnique({ where: { id: matchId } });
   if (!match) return false;
 
+  if (user.competitionAssignments.some((entry) => entry.competitionId === match.competitionId)) {
+    return true;
+  }
+
+  if (!user.schoolId || !user.school) return false;
+
+  const teamIds = user.school.teams.map((t) => t.id);
   return teamIds.includes(match.homeTeamId) || teamIds.includes(match.awayTeamId);
 }
 

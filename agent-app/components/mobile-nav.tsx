@@ -13,14 +13,14 @@ export function AgentMobileNav() {
   if (!mounted) {
     return (
       <nav
-        className="fixed bottom-0 left-0 right-0 z-50 h-[4.5rem] border-t border-slate-100 bg-white/95 pb-[env(safe-area-inset-bottom)] lg:hidden"
+        className="fixed bottom-0 left-0 right-0 z-50 h-[4.5rem] border-t border-slate-100 bg-white pb-[env(safe-area-inset-bottom)] lg:hidden"
         aria-hidden
       />
     );
   }
 
   return (
-    <nav className="fixed bottom-0 left-0 right-0 z-50 border-t border-slate-100 bg-white/95 pb-[env(safe-area-inset-bottom)] backdrop-blur-xl lg:hidden">
+    <nav className="fixed bottom-0 left-0 right-0 z-50 border-t border-slate-100 bg-white pb-[env(safe-area-inset-bottom)] lg:hidden">
       <div className="grid grid-cols-2 px-2 pt-2">
         {agentNav.map((item) => {
           const isActive = pathname === item.href;
@@ -34,7 +34,7 @@ export function AgentMobileNav() {
                 isActive ? "text-primary" : "text-slate-400"
               )}
             >
-              <div className={cn("rounded-xl p-2.5 transition-colors", isActive ? "bg-primary/10" : "bg-transparent")}>
+              <div className={cn("rounded-xl p-2.5 transition-colors", isActive ? "bg-blue-50" : "")}>
                 <Icon size={22} strokeWidth={isActive ? 2.5 : 2} />
               </div>
               <span className="text-[10px] font-black uppercase tracking-wide">{item.shortLabel ?? item.label}</span>

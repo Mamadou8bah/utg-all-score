@@ -6,7 +6,7 @@ export default function manifest(): MetadataRoute.Manifest {
     id: "/",
     name: "UTG AllScore Agent",
     short_name: "AllScore Agent",
-    description: "School agent app for updating UTGSU football scores, lineups, and news.",
+    description: "School agent app for updating football scores, lineups, and news.",
     start_url: "/",
     scope: "/",
     display: "standalone",

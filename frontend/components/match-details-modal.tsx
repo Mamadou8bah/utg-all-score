@@ -33,7 +33,7 @@ export const MatchDetailsModal = ({
   }, [match]);
 
   return (
-    <div className="fixed inset-0 z-[100] flex flex-col bg-slate-100 md:items-center md:justify-center md:bg-slate-900/60 md:p-4">
+    <div className="fixed inset-0 z-[100] flex flex-col bg-slate-100 md:items-center md:justify-center md:bg-slate-900 md:p-4">
       <div className="flex h-[100dvh] min-h-[100dvh] w-full max-w-2xl flex-col bg-white animate-slideUp md:h-[85vh] md:min-h-0 md:overflow-hidden md:rounded-[32px]">
         {/* Header Section */}
         <div className="bg-primary px-4 pt-4 pb-0 text-white relative">
@@ -46,9 +46,9 @@ export const MatchDetailsModal = ({
                   className="h-full w-full object-contain"
                 />
               </div>
-              <span className="text-[10px] font-black uppercase tracking-[0.15em] text-white/90">{match.competition}</span>
+              <span className="text-[10px] font-black uppercase tracking-[0.15em] text-white">{match.competition}</span>
             </div>
-            <button onClick={onClose} className="p-2 rounded-full bg-white/10 hover:bg-white/20 transition-colors">
+            <button onClick={onClose} className="p-2 rounded-full bg-slate-800 hover:bg-slate-700 transition-colors">
               <X size={20} />
             </button>
           </div>
@@ -58,7 +58,7 @@ export const MatchDetailsModal = ({
               onClick={() => setSelectedTeam(match.home)}
               className="flex flex-col items-center gap-2 flex-1 group active:scale-95 transition-transform"
             >
-              <div className="h-16 w-16 bg-white/20 group-hover:bg-white/30 rounded-full flex items-center justify-center text-2xl font-black">
+              <div className="h-16 w-16 bg-slate-700 group-hover:bg-slate-600 rounded-full flex items-center justify-center text-2xl font-black">
                 {match.home.charAt(0)}
               </div>
               <span className="text-sm font-black text-center">{match.home}</span>
@@ -69,7 +69,7 @@ export const MatchDetailsModal = ({
                 {match.status !== "UPCOMING" ? (
                   <>
                     <span>{match.homeScore}</span>
-                    <span className="text-white/40">-</span>
+                    <span className="text-slate-500">-</span>
                     <span>{match.awayScore}</span>
                   </>
                 ) : (
@@ -77,13 +77,13 @@ export const MatchDetailsModal = ({
                 )}
               </div>
               {match.status === "LIVE" && (
-                <div className="px-2 py-0.5 rounded bg-white/20 text-[10px] font-black uppercase flex items-center gap-1">
+                <div className="px-2 py-0.5 rounded bg-slate-700 text-[10px] font-black uppercase flex items-center gap-1">
                   <span className="w-1 h-1 rounded-full bg-white animate-flash" />
                   {match.timer}
                 </div>
               )}
               {match.status === "FT" && (
-                <span className="text-[10px] font-black uppercase opacity-60">Full Time</span>
+                <span className="text-[10px] font-black uppercase text-slate-300">Full Time</span>
               )}
             </div>
 
@@ -91,7 +91,7 @@ export const MatchDetailsModal = ({
               onClick={() => setSelectedTeam(match.away)}
               className="flex flex-col items-center gap-2 flex-1 group active:scale-95 transition-transform"
             >
-              <div className="h-16 w-16 bg-white/20 group-hover:bg-white/30 rounded-full flex items-center justify-center text-2xl font-black">
+              <div className="h-16 w-16 bg-slate-700 group-hover:bg-slate-600 rounded-full flex items-center justify-center text-2xl font-black">
                 {match.away.charAt(0)}
               </div>
               <span className="text-sm font-black text-center">{match.away}</span>
@@ -108,7 +108,7 @@ export const MatchDetailsModal = ({
                   "px-4 py-3 text-sm font-black transition-colors whitespace-nowrap border-b-2",
                   activeTab === tab 
                     ? "border-secondary text-white" 
-                    : "border-transparent text-white/50 hover:text-white/80"
+                    : "border-slate-200 text-slate-400 hover:text-white"
                 )}
               >
                 {tab}
@@ -260,7 +260,7 @@ export const MatchDetailsModal = ({
                       onClick={() => setSelectedTeam(team.team)}
                       className={cn(
                         "w-full px-4 py-3 flex items-center justify-between text-sm transition-colors hover:bg-slate-50",
-                        (team.team === match.home || team.team === match.away) ? "bg-primary/5 font-black" : "font-bold text-slate-700"
+                        (team.team === match.home || team.team === match.away) ? "bg-blue-50 font-black" : "font-bold text-slate-700"
                       )}
                     >
                       <div className="flex items-center gap-4">
@@ -268,8 +268,8 @@ export const MatchDetailsModal = ({
                         <span className="truncate max-w-[120px]">{team.team}</span>
                       </div>
                       <div className="flex items-center gap-4 text-xs">
-                        <span className="w-4 text-center opacity-60">{team.played}</span>
-                        <span className="w-4 text-center opacity-60">{team.gd}</span>
+                        <span className="w-4 text-center text-slate-500">{team.played}</span>
+                        <span className="w-4 text-center text-slate-500">{team.gd}</span>
                         <span className="w-4 text-center text-primary">{team.pts}</span>
                       </div>
                     </button>
@@ -307,7 +307,7 @@ export const MatchDetailsModal = ({
                       <div className="space-y-2 pt-2">
                         <p className="text-[10px] font-black text-text-secondary uppercase tracking-widest border-b border-slate-50 pb-1">Substitutes</p>
                         {match.lineups.home.subs.map(p => (
-                          <div key={p.number} className="flex items-center gap-3 text-xs opacity-70">
+                          <div key={p.number} className="flex items-center gap-3 text-xs text-slate-500">
                             <span className="w-4 font-black text-slate-400">{p.number}</span>
                             <span className="font-bold text-slate-600 truncate">{p.name}</span>
                           </div>
@@ -340,7 +340,7 @@ export const MatchDetailsModal = ({
                       <div className="space-y-2 pt-2">
                         <p className="text-[10px] font-black text-text-secondary uppercase tracking-widest border-b border-slate-50 pb-1 text-right">Substitutes</p>
                         {match.lineups.away.subs.map(p => (
-                          <div key={p.number} className="flex items-center gap-3 text-xs opacity-70 flex-row-reverse">
+                          <div key={p.number} className="flex items-center gap-3 text-xs text-slate-500 flex-row-reverse">
                             <span className="w-4 font-black text-slate-400 text-right">{p.number}</span>
                             <span className="font-bold text-slate-600 truncate text-right">{p.name}</span>
                           </div>

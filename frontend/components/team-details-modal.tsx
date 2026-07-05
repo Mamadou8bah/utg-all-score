@@ -26,7 +26,7 @@ export const TeamDetailsModal = ({
 
   if (!teamData) {
     return (
-      <div className="fixed inset-0 z-[110] flex items-end justify-center bg-slate-950/45 p-4 md:items-center">
+      <div className="fixed inset-0 z-[110] flex items-end justify-center bg-slate-900 p-4 md:items-center">
         <div className="w-full max-w-lg rounded-[32px] bg-white p-6 shadow-float">
           <p className="font-semibold text-slate-950">{teamName}</p>
           <p className="mt-2 text-sm text-text-secondary">Team profile loading or not yet registered.</p>
@@ -37,17 +37,16 @@ export const TeamDetailsModal = ({
   }
 
   return (
-    <div className="fixed inset-0 z-[100] flex items-end justify-center bg-slate-950/60 backdrop-blur-sm sm:items-center sm:p-4 animate-in fade-in duration-200">
+    <div className="fixed inset-0 z-[100] flex items-end justify-center bg-slate-900 sm:items-center sm:p-4">
       <div className="w-full max-w-xl bg-slate-50 rounded-t-[2.5rem] sm:rounded-[2.5rem] shadow-2xl flex flex-col max-h-[92vh] overflow-hidden animate-in slide-in-from-bottom duration-300">
         
         {/* Header / Cover */}
         <div className="relative h-40 bg-slate-900 overflow-hidden shrink-0">
-          <div className="absolute inset-0 opacity-20 bg-[radial-gradient(circle_at_center,_var(--tw-gradient-stops))] from-primary via-transparent to-transparent" />
           <div className="absolute top-6 left-6 right-6 flex items-start justify-between z-10">
-            <button onClick={onClose} className="p-2 rounded-full bg-white/10 text-white backdrop-blur hover:bg-white/20 transition-colors">
+            <button onClick={onClose} className="p-2 rounded-full bg-slate-800 text-white hover:bg-slate-700 transition-colors">
               <X size={20} />
             </button>
-            <button className="p-2 rounded-full bg-white/10 text-white backdrop-blur hover:bg-white/20 transition-colors">
+            <button className="p-2 rounded-full bg-slate-800 text-white hover:bg-slate-700 transition-colors">
               <Star size={20} />
             </button>
           </div>

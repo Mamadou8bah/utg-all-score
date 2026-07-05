@@ -75,8 +75,8 @@ export default function MatchesPage() {
   }
 
   return (
-    <AdminShell title="Match Fixtures" subtitle="Schedule football matches for UTGSU competitions." nav={adminNav}>
-      {message ? <p className="rounded-2xl bg-primary/10 px-4 py-3 text-sm text-primary">{message}</p> : null}
+    <AdminShell title="Match Fixtures" subtitle="Schedule football matches for university competitions." nav={adminNav}>
+      {message ? <p className="rounded-2xl bg-blue-50 px-4 py-3 text-sm text-primary">{message}</p> : null}
       <Card title="Schedule match">
         <form className="grid gap-4 md:grid-cols-2" onSubmit={handleCreate}>
           <Field label="Competition">

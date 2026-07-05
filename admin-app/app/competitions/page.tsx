@@ -18,9 +18,19 @@ type School = { id: string; name: string };
 
 type Team = { id: string; name: string };
 
-type Competition = { id: string; name: string; slug: string; type: string; format: string; teamCount: number; matchCount: number; groupCount: number; logo?: string | null; description?: string; schoolId?: string | null };
+type Agent = { id: string; name: string; schoolName: string | null; active: boolean };
+
+type Competition = { id: string; name: string; slug: string; type: string; format: string; teamCount: number; matchCount: number; groupCount: number; agentCount?: number; logo?: string | null; description?: string; schoolId?: string | null };
 
 type Entry = { competitionId: string; teamId: string; teamName: string; competitionName: string };
+
+type AgentAssignment = {
+  competitionId: string;
+  userId: string;
+  competitionName: string;
+  agentName: string;
+  schoolName: string | null;
+};
 
 
 
@@ -30,13 +40,19 @@ export default function CompetitionsPage() {
 
   const [teams, setTeams] = useState<Team[]>([]);
 
+  const [agents, setAgents] = useState<Agent[]>([]);
+
   const [competitions, setCompetitions] = useState<Competition[]>([]);
 
   const [entries, setEntries] = useState<Entry[]>([]);
 
+  const [agentAssignments, setAgentAssignments] = useState<AgentAssignment[]>([]);
+
   const [form, setForm] = useState({ name: "", slug: "", type: "GENERAL", format: "LEAGUE", description: "", schoolId: "", logo: "" });
 
   const [linkForm, setLinkForm] = useState({ competitionId: "", teamId: "" });
+
+  const [agentForm, setAgentForm] = useState({ competitionId: "", userId: "" });
 
   const [editingId, setEditingId] = useState<string | null>(null);
 
@@ -52,9 +68,13 @@ export default function CompetitionsPage() {
 
     setTeams(await apiJson<Team[]>("/api/portal/admin/teams"));
 
+    setAgents(await apiJson<Agent[]>("/api/portal/admin/agents"));
+
     setCompetitions(await apiJson<Competition[]>("/api/portal/admin/competitions"));
 
     setEntries(await apiJson<Entry[]>("/api/portal/admin/competition-teams"));
+
+    setAgentAssignments(await apiJson<AgentAssignment[]>("/api/portal/admin/competition-agents"));
 
   }
 
@@ -174,6 +194,54 @@ export default function CompetitionsPage() {
 
 
 
+  async function handleAssignAgent(event: React.FormEvent) {
+
+    event.preventDefault();
+
+    const res = await apiFetch("/api/portal/admin/competition-agents", {
+
+      method: "POST",
+
+      body: JSON.stringify(agentForm)
+
+    });
+
+    const json = await res.json();
+
+    setMessage(res.ok ? "Agent assigned to general competition." : json.error || "Failed.");
+
+    if (res.ok) {
+
+      setAgentForm({ competitionId: "", userId: "" });
+
+      load();
+
+    }
+
+  }
+
+
+
+  async function unassignAgent(competitionId: string, userId: string) {
+
+    const res = await apiFetch("/api/portal/admin/competition-agents", {
+
+      method: "DELETE",
+
+      body: JSON.stringify({ competitionId, userId })
+
+    });
+
+    const json = await res.json();
+
+    setMessage(res.ok ? "Agent unassigned." : json.error || "Failed.");
+
+    if (res.ok) load();
+
+  }
+
+
+
   async function generateFixtures(competitionId: string, name: string) {
 
     const startDate = prompt(`Start date for ${name} fixtures (YYYY-MM-DD)`, new Date().toISOString().slice(0, 10));
@@ -238,9 +306,9 @@ export default function CompetitionsPage() {
 
   return (
 
-    <AdminShell title="Competitions" subtitle="VC Tournament, Unity Shield, ITCA League, and school cups." nav={adminNav}>
+    <AdminShell title="Competitions" subtitle="Create general university-wide or school-internal competitions." nav={adminNav}>
 
-      {message ? <p className="rounded-2xl bg-primary/10 px-4 py-3 text-sm text-primary">{message}</p> : null}
+      {message ? <p className="rounded-2xl bg-blue-50 px-4 py-3 text-sm text-primary">{message}</p> : null}
 
       <Card title="Create competition">
 
@@ -254,7 +322,7 @@ export default function CompetitionsPage() {
 
             <Select value={form.type} onChange={(e) => setForm({ ...form, type: e.target.value })}>
 
-              <option value="GENERAL">General (UTGSU-wide)</option>
+              <option value="GENERAL">General (University-wide)</option>
 
               <option value="SCHOOL">School internal</option>
 
@@ -334,6 +402,80 @@ export default function CompetitionsPage() {
 
       </Card>
 
+      <Card title="Assign agents to general competition">
+
+        <p className="mb-4 text-sm text-text-secondary">
+          General competitions are university-wide. Assign agents from any school to update all fixtures in that competition.
+        </p>
+
+        <form className="grid gap-4 sm:grid-cols-2" onSubmit={handleAssignAgent}>
+
+          <Field label="General competition">
+
+            <Select value={agentForm.competitionId} onChange={(e) => setAgentForm({ ...agentForm, competitionId: e.target.value })} required>
+
+              <option value="">Select competition</option>
+
+              {competitions.filter((c) => c.type === "GENERAL").map((c) => (
+
+                <option key={c.id} value={c.id}>{c.name}</option>
+
+              ))}
+
+            </Select>
+
+          </Field>
+
+          <Field label="Agent (any school)">
+
+            <Select value={agentForm.userId} onChange={(e) => setAgentForm({ ...agentForm, userId: e.target.value })} required>
+
+              <option value="">Select agent</option>
+
+              {agents.filter((a) => a.active).map((a) => (
+
+                <option key={a.id} value={a.id}>{a.name} · {a.schoolName ?? "No school"}</option>
+
+              ))}
+
+            </Select>
+
+          </Field>
+
+          <div className="sm:col-span-2"><Button type="submit" variant="secondary" className="w-full sm:w-auto">Assign agent</Button></div>
+
+        </form>
+
+      </Card>
+
+      <Card title="General competition agents">
+
+        <div className="space-y-2">
+
+          {agentAssignments.map((entry) => (
+
+            <div key={`${entry.competitionId}-${entry.userId}`} className="flex flex-col gap-3 rounded-xl bg-slate-50 px-4 py-3 text-sm sm:flex-row sm:items-center sm:justify-between">
+
+              <span className="min-w-0">
+
+                <strong>{entry.agentName}</strong>
+
+                {entry.schoolName ? ` (${entry.schoolName})` : ""} → {entry.competitionName}
+
+              </span>
+
+              <Button variant="ghost" className="w-full sm:w-auto" onClick={() => unassignAgent(entry.competitionId, entry.userId)}>Unassign</Button>
+
+            </div>
+
+          ))}
+
+          {!agentAssignments.length ? <p className="text-sm text-text-secondary">No agents assigned to general competitions yet.</p> : null}
+
+        </div>
+
+      </Card>
+
       <Card title="Linked teams">
 
         <div className="space-y-2">
@@ -398,7 +540,7 @@ export default function CompetitionsPage() {
 
                     <p className="text-sm text-text-secondary">{c.type} · {c.format} · {c.slug}</p>
 
-                    <p className="mt-1 text-xs font-semibold text-primary">{c.teamCount} teams · {c.matchCount} matches{c.groupCount ? ` · ${c.groupCount} groups` : ""}</p>
+                    <p className="mt-1 text-xs font-semibold text-primary">{c.teamCount} teams · {c.matchCount} matches{c.groupCount ? ` · ${c.groupCount} groups` : ""}{c.type === "GENERAL" && c.agentCount ? ` · ${c.agentCount} agents` : ""}</p>
 
                   </div>
 

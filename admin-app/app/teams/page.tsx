@@ -92,7 +92,7 @@ export default function TeamsPage() {
 
   return (
     <AdminShell title="Football Teams" subtitle="Register teams, upload logos, and manage squads." nav={adminNav}>
-      {message ? <p className="rounded-2xl bg-primary/10 px-4 py-3 text-sm text-primary">{message}</p> : null}
+      {message ? <p className="rounded-2xl bg-blue-50 px-4 py-3 text-sm text-primary">{message}</p> : null}
       <Card title="Add team">
         <form className="grid gap-4 md:grid-cols-2" onSubmit={handleCreate}>
           <Field label="Team name"><Input value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} required /></Field>
