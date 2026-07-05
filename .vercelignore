@@ -1,0 +1,8 @@
+# Prevent local build artifacts from being uploaded to Vercel
+.next
+**/.next
+node_modules
+**/.env
+**/.env.local
+frontend/prisma/dev.db
+frontend/prisma/prod.db

@@ -5,8 +5,10 @@ dist
 .env.local
 coverage
 *.log
-frontend/.next
-admin-app/.next
-agent-app/.next
+
+# Next.js build output (never commit)
+.next/
+**/.next/
+
 frontend/prisma/dev.db
 frontend/prisma/prod.db
