@@ -1,7 +1,9 @@
 import { apiUrl, resolveApiUrl, resolvePublicSiteUrl } from "@/lib/api-url";
 
 export const API_URL = resolveApiUrl();
-export const PUBLIC_SITE_URL = resolvePublicSiteUrl();const TOKEN_KEY = "utg_admin_token";
+export const PUBLIC_SITE_URL = resolvePublicSiteUrl();
+
+const TOKEN_KEY = "utg_admin_token";
 
 export function saveToken(token: string) {
   localStorage.setItem(TOKEN_KEY, token);
@@ -29,7 +31,8 @@ export async function apiFetch(path: string, init: RequestInit = {}) {
   }
   if (token) headers.set("Authorization", `Bearer ${token}`);
 
-  return fetch(apiUrl(path, API_URL), { ...init, headers });}
+  return fetch(apiUrl(path, API_URL), { ...init, headers });
+}
 
 export async function apiJson<T>(path: string, init?: RequestInit) {
   const res = await apiFetch(path, init);

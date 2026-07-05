@@ -5,11 +5,7 @@ import Link from "next/link";
 import type { LineupPlayer, Match } from "@/lib/types";
 import { AgentShell, Button, Card, Field, Input, Select } from "@/components/ui";
 import { apiFetch, apiJson, logout } from "@/lib/api";
-
-const nav = [
-  { href: "/", label: "Matchday Console" },
-  { href: "/content", label: "News & Alerts" }
-];
+import { agentNav } from "@/lib/nav";
 
 const emptyPlayer = (): LineupPlayer => ({ number: 1, name: "", role: "GK" });
 
@@ -101,7 +97,7 @@ export default function AgentDashboardPage() {
     <AgentShell
       title="Matchday Console"
       subtitle={user ? `${user.name} · ${user.schoolName ?? "School agent"}` : "School football agent"}
-      nav={nav}
+      nav={agentNav}
       onLogout={logout}
     >
       {message ? <p className="rounded-2xl bg-primary/10 px-4 py-3 text-sm text-primary">{message}</p> : null}
@@ -176,7 +172,7 @@ export default function AgentDashboardPage() {
                   <div key={side} className="space-y-3">
                     <p className="text-sm font-bold text-slate-950">{label}</p>
                     {rows.map((player, index) => (
-                      <div key={`${side}-${index}`} className="grid grid-cols-[60px_1fr_80px] gap-2">
+                      <div key={`${side}-${index}`} className="grid grid-cols-[3rem_1fr_4.5rem] gap-2 sm:grid-cols-[60px_1fr_80px]">
                         <Input type="number" min={1} value={player.number} onChange={(e) => updateLineup(side, index, "number", Number(e.target.value))} />
                         <Input value={player.name} placeholder="Player name" onChange={(e) => updateLineup(side, index, "name", e.target.value)} />
                         <Select value={player.role} onChange={(e) => updateLineup(side, index, "role", e.target.value)}>

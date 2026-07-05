@@ -3,9 +3,12 @@
 import type { ReactNode } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { LogOut } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { PUBLIC_SITE_URL } from "@/lib/api";
 import { APP_LOGO, APP_NAME } from "@/lib/branding";
+import { AgentMobileNav } from "@/components/mobile-nav";
+import type { AgentNavItem } from "@/lib/nav";
 
 export function AgentShell({
   title,
@@ -16,55 +19,65 @@ export function AgentShell({
 }: {
   title: string;
   subtitle: string;
-  nav: Array<{ href: string; label: string }>;
+  nav: AgentNavItem[];
   children: ReactNode;
   onLogout?: () => void;
 }) {
   const pathname = usePathname();
 
   return (
-    <div className="min-h-screen">
-      <header className="sticky top-0 z-40 border-b border-slate-100 bg-background/95 backdrop-blur-xl">
-        <div className="page-shell flex h-16 items-center justify-between">
-          <Link href="/" className="flex items-center gap-3">
-            <img src={APP_LOGO} alt={APP_NAME} className="h-10 w-10 object-contain" />
-            <div className="hidden sm:block">
+    <div className="flex min-h-[var(--app-height)] flex-col">
+      <header className="sticky top-0 z-40 border-b border-slate-100/80 bg-white/90 backdrop-blur-xl">
+        <div className="flex h-14 items-center justify-between px-4 sm:px-6">
+          <Link href="/" className="flex min-w-0 items-center gap-2.5">
+            <img src={APP_LOGO} alt={APP_NAME} className="h-9 w-9 shrink-0 object-contain" />
+            <div className="min-w-0 lg:hidden">
+              <p className="truncate text-[9px] font-black uppercase tracking-[0.2em] text-primary">{APP_NAME}</p>
+              <p className="truncate text-sm font-bold text-slate-950">{title}</p>
+            </div>
+            <div className="hidden min-w-0 lg:block">
               <p className="text-[10px] font-bold uppercase tracking-[0.32em] text-primary">{APP_NAME}</p>
               <p className="text-sm font-bold text-slate-950">Agent</p>
             </div>
           </Link>
-          <div className="flex items-center gap-3">
-            <span className="rounded-full bg-primary/10 px-3 py-1 text-[11px] font-bold uppercase tracking-[0.18em] text-primary">
+          <div className="flex shrink-0 items-center gap-2">
+            <span className="hidden rounded-full bg-primary/10 px-3 py-1 text-[10px] font-bold uppercase tracking-[0.14em] text-primary sm:inline">
               Agent
             </span>
             {onLogout ? (
               <button
                 onClick={onLogout}
-                className="rounded-full border border-slate-200 bg-white/70 px-4 py-2 text-sm font-semibold text-slate-700 shadow-sm transition hover:bg-white"
+                aria-label="Sign out"
+                className="flex h-10 w-10 items-center justify-center rounded-full border border-slate-200 bg-white text-slate-600 shadow-sm transition active:scale-95 lg:w-auto lg:gap-2 lg:px-4 lg:py-2"
               >
-                Sign out
+                <LogOut size={18} className="lg:hidden" />
+                <span className="hidden text-sm font-semibold lg:inline">Sign out</span>
               </button>
             ) : null}
           </div>
         </div>
       </header>
 
-      <div className="page-shell section-space grid gap-6 lg:grid-cols-[240px_1fr]">
-        <aside className="h-fit rounded-[32px] bg-slate-950 p-4 text-white shadow-float">
+      <div className="mx-auto flex w-full max-w-7xl flex-1 gap-6 px-4 py-4 sm:px-6 lg:py-8 xl:px-8">
+        <aside className="sticky top-20 hidden h-fit w-60 shrink-0 rounded-[32px] bg-slate-950 p-4 text-white shadow-float lg:block">
           <p className="px-3 py-2 text-xs font-bold uppercase tracking-[0.28em] text-white/55">Matchday</p>
           <nav className="mt-2 flex flex-col gap-1">
-            {nav.map((item) => (
-              <Link
-                key={item.href}
-                href={item.href}
-                className={cn(
-                  "rounded-2xl px-4 py-3 text-sm font-medium transition hover:bg-white/10",
-                  pathname === item.href && "bg-white text-slate-950"
-                )}
-              >
-                {item.label}
-              </Link>
-            ))}
+            {nav.map((item) => {
+              const Icon = item.icon;
+              return (
+                <Link
+                  key={item.href}
+                  href={item.href}
+                  className={cn(
+                    "flex items-center gap-3 rounded-2xl px-4 py-3 text-sm font-medium transition hover:bg-white/10",
+                    pathname === item.href && "bg-white text-slate-950"
+                  )}
+                >
+                  <Icon size={18} />
+                  {item.label}
+                </Link>
+              );
+            })}
           </nav>
           <div className="mt-6 border-t border-white/10 px-3 pt-4">
             <a href={PUBLIC_SITE_URL} className="text-sm text-white/70 transition hover:text-white">
@@ -73,23 +86,26 @@ export function AgentShell({
           </div>
         </aside>
 
-        <main className="space-y-6 animate-slideUp">
-          <div>
+        <main className="mobile-safe-bottom min-w-0 flex-1 space-y-4 animate-slideUp lg:space-y-6">
+          <div className="hidden lg:block">
             <p className="text-[10px] font-bold uppercase tracking-[0.32em] text-primary">UTGSU Football</p>
-            <h1 className="mt-2 text-3xl font-bold tracking-tight text-slate-950 md:text-4xl">{title}</h1>
-            <p className="mt-2 text-sm text-text-secondary md:text-base">{subtitle}</p>
+            <h1 className="mt-2 text-4xl font-bold tracking-tight text-slate-950">{title}</h1>
+            <p className="mt-2 text-base text-text-secondary">{subtitle}</p>
           </div>
+          <p className="text-sm text-text-secondary lg:hidden">{subtitle}</p>
           {children}
         </main>
       </div>
+
+      <AgentMobileNav />
     </div>
   );
 }
 
 export function Card({ title, children }: { title?: string; children: ReactNode }) {
   return (
-    <section className="rounded-[28px] border border-slate-100 bg-white p-5 shadow-card">
-      {title ? <h2 className="mb-4 text-lg font-semibold text-slate-950">{title}</h2> : null}
+    <section className="rounded-[24px] border border-slate-100 bg-white p-4 shadow-card sm:rounded-[28px] sm:p-5">
+      {title ? <h2 className="mb-3 text-base font-semibold text-slate-950 sm:mb-4 sm:text-lg">{title}</h2> : null}
       {children}
     </section>
   );
@@ -97,10 +113,10 @@ export function Card({ title, children }: { title?: string; children: ReactNode 
 
 export function Field({ label, children }: { label: string; children: ReactNode }) {
   return (
-    <label className="block space-y-2">
+    <div className="block space-y-2">
       <span className="text-sm font-semibold text-slate-950">{label}</span>
       {children}
-    </label>
+    </div>
   );
 }
 

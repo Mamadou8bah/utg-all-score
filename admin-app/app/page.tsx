@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import { AdminShell, Card } from "@/components/ui";
 import { adminNav } from "@/lib/nav";
-import { apiJson, logout, PUBLIC_SITE_URL, API_URL } from "@/lib/api";
+import { apiJson, PUBLIC_SITE_URL, API_URL } from "@/lib/api";
 import { apiUrl } from "@/lib/api-url";
 import type { Match } from "@/lib/types";
 
@@ -35,7 +35,7 @@ export default function AdminDashboardPage() {
   }, []);
 
   return (
-    <AdminShell title="Admin Dashboard" subtitle={user ? `Signed in as ${user.name}` : "UTGSU Sports Administration"} nav={adminNav} onLogout={logout}>
+    <AdminShell title="Admin Dashboard" subtitle={user ? `Signed in as ${user.name}` : "UTGSU Sports Administration"} nav={adminNav}>
       <div className="grid grid-cols-2 gap-3 sm:gap-4 xl:grid-cols-3">
         {[
           { label: "Schools", value: stats.schools },

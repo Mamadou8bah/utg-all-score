@@ -4,11 +4,7 @@ import { useEffect, useState } from "react";
 import { AgentShell, Button, Card, Field, Input, Select, Textarea } from "@/components/ui";
 import { ImageUpload } from "@/components/image-upload";
 import { apiFetch, apiJson, logout } from "@/lib/api";
-
-const nav = [
-  { href: "/", label: "Matchday Console" },
-  { href: "/content", label: "News & Alerts" }
-];
+import { agentNav } from "@/lib/nav";
 
 type NewsItem = { id: string; title: string; excerpt: string; category: string; publishedAt: string };
 type AnnouncementItem = { id: string; title: string; body: string; level: string; createdAt: string };
@@ -68,7 +64,7 @@ export default function AgentContentPage() {
   }
 
   return (
-    <AgentShell title="News & Announcements" subtitle="Publish football updates to the public AllScore site." nav={nav} onLogout={logout}>
+    <AgentShell title="News & Announcements" subtitle="Publish football updates to the public AllScore site." nav={agentNav} onLogout={logout}>
       {message ? <p className="rounded-2xl bg-primary/10 px-4 py-3 text-sm text-primary">{message}</p> : null}
       <Card title="Football news article">
         <form className="grid gap-4" onSubmit={publishNews}>

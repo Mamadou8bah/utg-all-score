@@ -3,25 +3,23 @@
 import type { ReactNode } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { LogOut } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { PUBLIC_SITE_URL } from "@/lib/api";
 import { APP_LOGO, APP_NAME } from "@/lib/branding";
 import { AdminMobileNav } from "@/components/mobile-nav";
+import { ProfileMenu } from "@/components/profile-menu";
 import type { AdminNavItem } from "@/lib/nav";
 
 export function AdminShell({
   title,
   subtitle,
   nav,
-  children,
-  onLogout
+  children
 }: {
   title: string;
   subtitle: string;
   nav: AdminNavItem[];
   children: ReactNode;
-  onLogout?: () => void;
 }) {
   const pathname = usePathname();
 
@@ -44,16 +42,7 @@ export function AdminShell({
             <span className="hidden rounded-full bg-primary/10 px-3 py-1 text-[10px] font-bold uppercase tracking-[0.14em] text-primary sm:inline">
               Admin
             </span>
-            {onLogout ? (
-              <button
-                onClick={onLogout}
-                aria-label="Sign out"
-                className="flex h-10 w-10 items-center justify-center rounded-full border border-slate-200 bg-white text-slate-600 shadow-sm transition active:scale-95 lg:w-auto lg:gap-2 lg:px-4 lg:py-2"
-              >
-                <LogOut size={18} className="lg:hidden" />
-                <span className="hidden text-sm font-semibold lg:inline">Sign out</span>
-              </button>
-            ) : null}
+            <ProfileMenu />
           </div>
         </div>
       </header>

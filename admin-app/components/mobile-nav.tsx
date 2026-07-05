@@ -16,7 +16,7 @@ export function AdminMobileNav() {
 
   return (
     <nav className="fixed bottom-0 left-0 right-0 z-50 border-t border-slate-100 bg-white/95 pb-[env(safe-area-inset-bottom)] backdrop-blur-xl lg:hidden">
-      <div className="grid grid-cols-6 px-1 pt-2">
+      <div className="grid grid-cols-6 gap-0.5 px-1 pt-2">
         {adminNav.map((item) => {
           const isActive = pathname === item.href;
           const Icon = item.icon;
@@ -37,7 +37,7 @@ export function AdminMobileNav() {
               >
                 <Icon size={20} strokeWidth={isActive ? 2.5 : 2} />
               </div>
-              <span className="max-w-full truncate text-[8px] font-black uppercase tracking-tight">
+              <span className="max-w-full truncate text-[9px] font-black uppercase tracking-tight">
                 {item.shortLabel ?? item.label}
               </span>
             </Link>

@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { AdminShell, Button, Card, Field, Input, Select } from "@/components/ui";
 import { adminNav } from "@/lib/nav";
-import { apiFetch, apiJson, logout } from "@/lib/api";
+import { apiFetch, apiJson } from "@/lib/api";
 
 type Competition = { id: string; name: string };
 type Team = { id: string; name: string };
@@ -75,7 +75,7 @@ export default function MatchesPage() {
   }
 
   return (
-    <AdminShell title="Match Fixtures" subtitle="Schedule football matches for UTGSU competitions." nav={adminNav} onLogout={logout}>
+    <AdminShell title="Match Fixtures" subtitle="Schedule football matches for UTGSU competitions." nav={adminNav}>
       {message ? <p className="rounded-2xl bg-primary/10 px-4 py-3 text-sm text-primary">{message}</p> : null}
       <Card title="Schedule match">
         <form className="grid gap-4 md:grid-cols-2" onSubmit={handleCreate}>

@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 
-export const PwaBoot = () => {
+export function PwaBoot() {
   const [message, setMessage] = useState<string | null>(null);
 
   useEffect(() => {
@@ -10,15 +10,13 @@ export const PwaBoot = () => {
       navigator.serviceWorker.register("/sw.js").catch(() => null);
     }
 
-    const handleOnline = () => {
-      setMessage("Back online. Refreshing score and news caches.");
+    const show = (text: string) => {
+      setMessage(text);
       window.setTimeout(() => setMessage(null), 3200);
     };
 
-    const handleOffline = () => {
-      setMessage("You are offline. Showing cached scores, fixtures, and announcements.");
-      window.setTimeout(() => setMessage(null), 3200);
-    };
+    const handleOnline = () => show("Back online. Syncing admin data.");
+    const handleOffline = () => show("You are offline. Reconnect to save changes.");
 
     window.addEventListener("online", handleOnline);
     window.addEventListener("offline", handleOffline);
@@ -30,5 +28,9 @@ export const PwaBoot = () => {
 
   if (!message) return null;
 
-  return <div className="fixed inset-x-4 bottom-[calc(72px+env(safe-area-inset-bottom))] z-50 rounded-2xl bg-slate-950 px-4 py-3 text-sm text-white shadow-float md:bottom-4 md:left-auto md:right-4 md:w-[360px]">{message}</div>;
-};
+  return (
+    <div className="fixed inset-x-4 bottom-[calc(4.75rem+env(safe-area-inset-bottom))] z-[60] rounded-2xl bg-slate-950 px-4 py-3 text-sm text-white shadow-float lg:bottom-4 lg:left-auto lg:right-4 lg:w-[360px]">
+      {message}
+    </div>
+  );
+}

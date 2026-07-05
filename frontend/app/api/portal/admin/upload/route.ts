@@ -17,7 +17,7 @@ export async function POST(request: Request) {
 
   if (!isCloudinaryConfigured()) {
     return jsonError(
-      "Cloudinary is not configured. Set CLOUDINARY_CLOUD_NAME, CLOUDINARY_API_KEY, and CLOUDINARY_API_SECRET.",
+      "Cloudinary is not configured. Set CLOUDINARY_CLOUD_NAME plus either CLOUDINARY_UPLOAD_PRESET (unsigned preset) or CLOUDINARY_API_KEY and CLOUDINARY_API_SECRET.",
       503,
       request
     );

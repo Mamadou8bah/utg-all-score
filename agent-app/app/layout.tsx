@@ -1,7 +1,9 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Manrope, Sora } from "next/font/google";
 import "./globals.css";
 import { AuthGuard } from "@/components/auth-guard";
+import { PwaBoot } from "@/components/pwa-boot";
+import { APP_ICON, PWA_THEME_COLOR } from "@/lib/branding";
 
 const bodyFont = Manrope({ subsets: ["latin"], variable: "--font-body" });
 const headingFont = Sora({ subsets: ["latin"], variable: "--font-heading" });
@@ -9,16 +11,31 @@ const headingFont = Sora({ subsets: ["latin"], variable: "--font-heading" });
 export const metadata: Metadata = {
   title: "UTG AllScore Agent",
   description: "School agent app for updating UTGSU football scores, lineups, and news.",
+  applicationName: "UTG AllScore Agent",
   icons: {
-    icon: "https://res.cloudinary.com/dflsnes44/image/upload/q_auto/f_auto/v1775301714/ChatGPT_Image_Apr_4_2026_11_16_34_AM_dxzi5q.png"
+    icon: APP_ICON,
+    apple: APP_ICON
+  },
+  appleWebApp: {
+    capable: true,
+    statusBarStyle: "default",
+    title: "AllScore Agent"
   }
+};
+
+export const viewport: Viewport = {
+  width: "device-width",
+  initialScale: 1,
+  viewportFit: "cover",
+  themeColor: PWA_THEME_COLOR
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en">
-      <body className={`${bodyFont.variable} ${headingFont.variable}`}>
+    <html lang="en" suppressHydrationWarning>
+      <body className={`${bodyFont.variable} ${headingFont.variable}`} suppressHydrationWarning>
         <AuthGuard>{children}</AuthGuard>
+        <PwaBoot />
       </body>
     </html>
   );

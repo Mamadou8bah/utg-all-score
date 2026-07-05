@@ -43,10 +43,19 @@ In **Project Settings → Environment Variables**, add:
 | `DATABASE_URL` | `@POSTGRES_PRISMA_URL` (reference the storage variable) |
 | `DIRECT_URL` | `@POSTGRES_URL_NON_POOLING` |
 | `AUTH_SECRET` | long random string (32+ chars) |
-| `CLOUDINARY_CLOUD_NAME` | your Cloudinary cloud |
-| `CLOUDINARY_API_KEY` | your key |
-| `CLOUDINARY_API_SECRET` | your secret |
+| `CLOUDINARY_CLOUD_NAME` | your Cloudinary cloud (e.g. `dflsnes44`) |
+| `CLOUDINARY_UPLOAD_PRESET` | unsigned preset name (recommended — see below) |
+| `CLOUDINARY_API_KEY` | your key (only if not using upload preset) |
+| `CLOUDINARY_API_SECRET` | your secret (only if not using upload preset) |
 | `SETUP_SECRET` | random secret for one-time seeding |
+
+**Cloudinary logo uploads:** New Cloudinary API keys have **no upload permission** by default. Easiest fix:
+
+1. Cloudinary Console → **Settings → Upload → Upload presets → Add**
+2. Name: `utg-allscore-unsigned`, Signing: **Unsigned**, Folder: `utg-allscore/logos`
+3. On Vercel API project set `CLOUDINARY_UPLOAD_PRESET=utg-allscore-unsigned` and redeploy
+
+Alternatively, Cloudinary Console → **Settings → API Keys** → assign your key a role with **Upload assets** permission.
 
 Leave `NEXT_PUBLIC_APP_URL`, `ADMIN_APP_URL`, `AGENT_APP_URL` empty for now — set them after all three projects are deployed.
 
@@ -187,6 +196,7 @@ npm run dev
 | CORS error | `ADMIN_APP_URL` / `AGENT_APP_URL` must match exact portal URL (no trailing slash) |
 | Empty database | Run seed endpoint or `npm run db:seed` |
 | Prisma connection errors | Use `POSTGRES_PRISMA_URL` for `DATABASE_URL`, not raw `POSTGRES_URL` |
+| Logo upload `missing permissions (actions=["create"])` | Cloudinary API key lacks upload role — use unsigned `CLOUDINARY_UPLOAD_PRESET` or assign Upload role to the key |
 
 ---
 

@@ -7,7 +7,7 @@
     --primary: #0055A4;
     --secondary: #FFC72C;
     --background: #F8FAFC;
-    --app-height: 100vh;
+    --app-height: 100dvh;
   }
 
   * {
@@ -49,6 +49,16 @@
 
   .section-space {
     @apply py-6 md:py-10;
+  }
+
+  .mobile-safe-bottom {
+    padding-bottom: calc(5.5rem + env(safe-area-inset-bottom));
+  }
+
+  @media (min-width: 1024px) {
+    .mobile-safe-bottom {
+      padding-bottom: 0;
+    }
   }
 }
 

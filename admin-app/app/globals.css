@@ -7,7 +7,7 @@
     --primary: #0055A4;
     --secondary: #FFC72C;
     --background: #F8FAFC;
-    --app-height: 100vh;
+    --app-height: 100dvh;
   }
 
   * {

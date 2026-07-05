@@ -10,7 +10,7 @@ import { LogoUpload } from "@/components/logo-upload";
 
 import { adminNav } from "@/lib/nav";
 
-import { apiFetch, apiJson, logout } from "@/lib/api";
+import { apiFetch, apiJson } from "@/lib/api";
 
 
 
@@ -238,13 +238,13 @@ export default function CompetitionsPage() {
 
   return (
 
-    <AdminShell title="Competitions" subtitle="VC Tournament, Unity Shield, ITCA League, and school cups." nav={adminNav} onLogout={logout}>
+    <AdminShell title="Competitions" subtitle="VC Tournament, Unity Shield, ITCA League, and school cups." nav={adminNav}>
 
       {message ? <p className="rounded-2xl bg-primary/10 px-4 py-3 text-sm text-primary">{message}</p> : null}
 
       <Card title="Create competition">
 
-        <form className="grid gap-4 md:grid-cols-2" onSubmit={handleCreate}>
+        <form className="grid gap-4 sm:grid-cols-2" onSubmit={handleCreate}>
 
           <Field label="Name"><Input value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} required /></Field>
 
@@ -290,11 +290,11 @@ export default function CompetitionsPage() {
 
           ) : null}
 
-          <Field label="Description"><Textarea value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })} className="md:col-span-2" required /></Field>
+          <Field label="Description"><Textarea value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })} className="sm:col-span-2" required /></Field>
 
-          <div className="md:col-span-2"><LogoUpload value={form.logo} onChange={(logo) => setForm({ ...form, logo })} label="Competition logo" /></div>
+          <div className="sm:col-span-2"><LogoUpload value={form.logo} onChange={(logo) => setForm({ ...form, logo })} label="Competition logo" /></div>
 
-          <div className="md:col-span-2"><Button type="submit">Create competition</Button></div>
+          <div className="sm:col-span-2"><Button type="submit" className="w-full sm:w-auto">Create competition</Button></div>
 
         </form>
 
@@ -302,7 +302,7 @@ export default function CompetitionsPage() {
 
       <Card title="Add team to competition">
 
-        <form className="grid gap-4 md:grid-cols-2" onSubmit={handleLink}>
+        <form className="grid gap-4 sm:grid-cols-2" onSubmit={handleLink}>
 
           <Field label="Competition">
 
@@ -328,7 +328,7 @@ export default function CompetitionsPage() {
 
           </Field>
 
-          <div className="md:col-span-2"><Button type="submit" variant="secondary">Link team</Button></div>
+          <div className="sm:col-span-2"><Button type="submit" variant="secondary" className="w-full sm:w-auto">Link team</Button></div>
 
         </form>
 
@@ -340,11 +340,11 @@ export default function CompetitionsPage() {
 
           {entries.map((e) => (
 
-            <div key={`${e.competitionId}-${e.teamId}`} className="flex items-center justify-between rounded-xl bg-slate-50 px-4 py-2 text-sm">
+            <div key={`${e.competitionId}-${e.teamId}`} className="flex flex-col gap-3 rounded-xl bg-slate-50 px-4 py-3 text-sm sm:flex-row sm:items-center sm:justify-between">
 
-              <span><strong>{e.teamName}</strong> in {e.competitionName}</span>
+              <span className="min-w-0"><strong>{e.teamName}</strong> in {e.competitionName}</span>
 
-              <Button variant="ghost" onClick={() => unlink(e.competitionId, e.teamId)}>Unlink</Button>
+              <Button variant="ghost" className="w-full sm:w-auto" onClick={() => unlink(e.competitionId, e.teamId)}>Unlink</Button>
 
             </div>
 
@@ -366,17 +366,17 @@ export default function CompetitionsPage() {
 
               {editingId === c.id ? (
 
-                <div className="grid gap-3 md:grid-cols-2">
+                <div className="grid gap-3 sm:grid-cols-2">
 
                   <Input value={editForm.name} onChange={(e) => setEditForm({ ...editForm, name: e.target.value })} />
 
                   <Input value={editForm.slug} onChange={(e) => setEditForm({ ...editForm, slug: e.target.value })} />
 
-                  <Textarea value={editForm.description} onChange={(e) => setEditForm({ ...editForm, description: e.target.value })} className="md:col-span-2" />
+                  <Textarea value={editForm.description} onChange={(e) => setEditForm({ ...editForm, description: e.target.value })} className="sm:col-span-2" />
 
-                  <LogoUpload value={editForm.logo} onChange={(logo) => setEditForm({ ...editForm, logo })} />
+                  <div className="sm:col-span-2"><LogoUpload value={editForm.logo} onChange={(logo) => setEditForm({ ...editForm, logo })} /></div>
 
-                  <div className="flex gap-2 md:col-span-2">
+                  <div className="flex flex-col gap-2 sm:col-span-2 sm:flex-row">
 
                     <Button onClick={() => saveEdit(c.id)}>Save</Button>
 
@@ -388,11 +388,11 @@ export default function CompetitionsPage() {
 
               ) : (
 
-                <div className="flex items-center gap-4">
+                <div className="flex flex-col gap-4 sm:flex-row sm:items-start">
 
                   <LogoMark name={c.name} logo={c.logo} />
 
-                  <div className="flex-1">
+                  <div className="min-w-0 flex-1">
 
                     <p className="font-semibold text-slate-950">{c.name}</p>
 
@@ -402,19 +402,21 @@ export default function CompetitionsPage() {
 
                   </div>
 
-                  <div className="flex flex-wrap gap-2">
+                  <div className="flex w-full flex-col gap-2 sm:w-auto sm:min-w-[220px]">
 
                     {c.format === "LEAGUE" ? (
-                      <Button variant="secondary" onClick={() => generateFixtures(c.id, c.name)}>Generate fixtures</Button>
+                      <Button variant="secondary" className="w-full sm:w-auto" onClick={() => generateFixtures(c.id, c.name)}>Generate fixtures</Button>
                     ) : null}
 
                     {c.format === "TOURNAMENT" && c.groupCount > 0 ? (
-                      <Button variant="secondary" onClick={() => qualifyGroups(c.id, c.name)}>Qualify to knockout</Button>
+                      <Button variant="secondary" className="w-full sm:w-auto" onClick={() => qualifyGroups(c.id, c.name)}>Qualify to knockout</Button>
                     ) : null}
 
+                    <div className="grid grid-cols-2 gap-2">
                     <Button variant="ghost" onClick={() => { setEditingId(c.id); setEditForm({ name: c.name, slug: c.slug, type: c.type, format: c.format, description: c.description ?? "", schoolId: c.schoolId ?? "", logo: c.logo ?? "" }); }}>Edit</Button>
 
                     <Button variant="ghost" onClick={() => remove(c.id, c.name)}>Delete</Button>
+                    </div>
 
                   </div>
 

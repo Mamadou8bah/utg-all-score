@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { AdminShell, Button, Card, Field, Input } from "@/components/ui";
 import { adminNav } from "@/lib/nav";
-import { apiFetch, apiJson, logout } from "@/lib/api";
+import { apiFetch, apiJson } from "@/lib/api";
 
 type School = { id: string; name: string; shortName: string };
 
@@ -52,7 +52,7 @@ export default function SchoolsPage() {
   }
 
   return (
-    <AdminShell title="Schools" subtitle="UTG faculties and schools for agents and teams." nav={adminNav} onLogout={logout}>
+    <AdminShell title="Schools" subtitle="UTG faculties and schools for agents and teams." nav={adminNav}>
       {message ? <p className="rounded-2xl bg-primary/10 px-4 py-3 text-sm text-primary">{message}</p> : null}
       <Card title="Add school">
         <form className="grid gap-4 md:grid-cols-2" onSubmit={handleCreate}>

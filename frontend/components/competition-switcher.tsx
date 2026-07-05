@@ -3,13 +3,14 @@
 import { useState, useMemo, useEffect } from "react";
 import { type Competition } from "@/lib/types";
 import { useCompetitionsBundle } from "@/lib/use-api-data";
+import { CompetitionLogo } from "@/components/competition-logo";
 import { cn } from "@/lib/utils";
-import { ChevronDown, Globe, Landmark, Star } from "lucide-react";
+import { ChevronDown, Star } from "lucide-react";
 
-export const CompetitionSwitcher = ({ 
-  onSelect 
-}: { 
-  onSelect: (comp: Competition) => void 
+export const CompetitionSwitcher = ({
+  onSelect
+}: {
+  onSelect: (comp: Competition) => void;
 }) => {
   const { competitions } = useCompetitionsBundle();
   const [isOpen, setIsOpen] = useState(false);
@@ -23,7 +24,6 @@ export const CompetitionSwitcher = ({
     }
   }, [competitions, selected, onSelect]);
 
-  // Load favorites from local storage
   useEffect(() => {
     const saved = localStorage.getItem("favorite-competitions");
     if (saved) setFavorites(JSON.parse(saved));
@@ -31,8 +31,8 @@ export const CompetitionSwitcher = ({
 
   const toggleFavorite = (e: React.MouseEvent, id: string) => {
     e.stopPropagation();
-    const newFavs = favorites.includes(id) 
-      ? favorites.filter(favId => favId !== id)
+    const newFavs = favorites.includes(id)
+      ? favorites.filter((favId) => favId !== id)
       : [...favorites, id];
     setFavorites(newFavs);
     localStorage.setItem("favorite-competitions", JSON.stringify(newFavs));
@@ -59,27 +59,23 @@ export const CompetitionSwitcher = ({
   return (
     <div className="relative w-full px-1 mb-6">
       <button
+        type="button"
         onClick={() => setIsOpen(!isOpen)}
         className="flex w-full items-center justify-between rounded-2xl border border-slate-200 bg-white p-4 shadow-sm active:scale-[0.98] transition-all"
       >
-        <div className="flex items-center gap-3">
-          <div className={cn(
-            "flex h-10 w-10 items-center justify-center rounded-xl",
-            selected.type === "GENERAL" ? "bg-primary/10 text-primary" : "bg-secondary/20 text-slate-800"
-          )}>
-            {selected.type === "GENERAL" ? <Globe size={20} /> : <Landmark size={20} />}
-          </div>
-          <div className="text-left">
-            <p className="text-[10px] font-bold uppercase tracking-wider text-text-secondary">
+        <div className="flex items-center gap-3 min-w-0">
+          <CompetitionLogo competition={selected} />
+          <div className="text-left min-w-0">
+            <p className="text-[10px] font-bold uppercase tracking-wider text-text-secondary truncate">
               {selected.type === "GENERAL" ? "University Wide" : selected.schoolName}
             </p>
-            <p className="text-sm font-bold text-slate-950">{selected.name}</p>
+            <p className="text-sm font-bold text-slate-950 truncate">{selected.name}</p>
           </div>
         </div>
-        <ChevronDown size={20} className={cn("text-text-secondary transition-transform", isOpen && "rotate-180")} />
+        <ChevronDown size={20} className={cn("shrink-0 text-text-secondary transition-transform", isOpen && "rotate-180")} />
       </button>
 
-      {isOpen && (
+      {isOpen ? (
         <div className="absolute left-1 right-1 z-30 mt-2 overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-xl animate-dropdownFade">
           <div className="p-2 space-y-1 max-h-80 overflow-y-auto">
             {sortedCompetitions.map((comp) => (
@@ -91,37 +87,32 @@ export const CompetitionSwitcher = ({
                   selected.id === comp.id ? "bg-primary/5 text-primary" : "hover:bg-slate-50 text-text-secondary"
                 )}
               >
-                <div className="flex items-center gap-3">
-                  <div className={cn(
-                    "flex h-8 w-8 items-center justify-center rounded-lg",
-                    comp.type === "GENERAL" ? "bg-primary/10" : "bg-slate-100"
-                  )}>
-                    {comp.type === "GENERAL" ? <Globe size={16} /> : <Landmark size={16} />}
-                  </div>
-                  <div>
-                    <p className="text-sm font-bold">{comp.name}</p>
-                    <p className="text-[10px]">{comp.type === "GENERAL" ? "General" : comp.schoolName}</p>
+                <div className="flex items-center gap-3 min-w-0">
+                  <CompetitionLogo competition={comp} size="sm" />
+                  <div className="min-w-0">
+                    <p className="text-sm font-bold truncate">{comp.name}</p>
+                    <p className="text-[10px] truncate">{comp.type === "GENERAL" ? "General" : comp.schoolName}</p>
                   </div>
                 </div>
                 <button
+                  type="button"
                   onClick={(e) => toggleFavorite(e, comp.id)}
-                  className="p-1.5 hover:bg-slate-200 rounded-lg transition-colors"
+                  className="shrink-0 p-1.5 hover:bg-slate-200 rounded-lg transition-colors"
+                  aria-label={favorites.includes(comp.id) ? "Remove favorite" : "Add favorite"}
                 >
-                  <Star 
-                    size={16} 
+                  <Star
+                    size={16}
                     className={cn(
                       "transition-all",
-                      favorites.includes(comp.id) 
-                        ? "fill-yellow-400 text-yellow-400" 
-                        : "text-slate-300"
-                    )} 
+                      favorites.includes(comp.id) ? "fill-yellow-400 text-yellow-400" : "text-slate-300"
+                    )}
                   />
                 </button>
               </div>
             ))}
           </div>
         </div>
-      )}
+      ) : null}
     </div>
   );
 };
