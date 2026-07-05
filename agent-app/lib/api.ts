@@ -1,5 +1,7 @@
-export const API_URL = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:3000";
-export const PUBLIC_SITE_URL = process.env.NEXT_PUBLIC_PUBLIC_SITE_URL ?? "http://localhost:3000";
+import { apiUrl, resolveApiUrl, resolvePublicSiteUrl } from "@/lib/api-url";
+
+export const API_URL = resolveApiUrl();
+export const PUBLIC_SITE_URL = resolvePublicSiteUrl();
 const TOKEN_KEY = "utg_agent_token";
 
 export function saveToken(token: string) {
@@ -28,7 +30,7 @@ export async function apiFetch(path: string, init: RequestInit = {}) {
   }
   if (token) headers.set("Authorization", `Bearer ${token}`);
 
-  return fetch(`${API_URL}${path}`, { ...init, headers });
+  return fetch(apiUrl(path, API_URL), { ...init, headers });
 }
 
 export async function apiJson<T>(path: string, init?: RequestInit) {

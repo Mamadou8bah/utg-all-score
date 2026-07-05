@@ -50,6 +50,16 @@
   .section-space {
     @apply py-6 md:py-10;
   }
+
+  .mobile-safe-bottom {
+    padding-bottom: calc(5.5rem + env(safe-area-inset-bottom));
+  }
+
+  @media (min-width: 1024px) {
+    .mobile-safe-bottom {
+      padding-bottom: 0;
+    }
+  }
 }
 
 @layer utilities {

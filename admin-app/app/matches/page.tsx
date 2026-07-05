@@ -126,7 +126,9 @@ export default function MatchesPage() {
               <div>
                 <p className="font-semibold text-slate-950">{match.home} vs {match.away}</p>
                 <p className="text-sm text-text-secondary">{match.competition} · {match.status}{match.round ? ` · ${match.round}` : ""} · {match.venue}</p>
-                <p className="text-xs text-primary">{new Date(match.kickoff).toLocaleString()}</p>
+                <time className="text-xs text-primary" dateTime={match.kickoff} suppressHydrationWarning>
+                  {new Date(match.kickoff).toLocaleString(undefined, { dateStyle: "medium", timeStyle: "short" })}
+                </time>
               </div>
               <Button variant="ghost" onClick={() => remove(match.id)}>Delete</Button>
             </div>

@@ -170,7 +170,8 @@ npm run dev
 | Issue | Fix |
 |-------|-----|
 | Build fails on `migrate deploy` | Check `DIRECT_URL` is set to non-pooling URL |
-| Admin can't reach API | Rebuild admin with correct `NEXT_PUBLIC_API_URL` |
+| Admin can't reach API | Set `NEXT_PUBLIC_API_URL=https://YOUR-API-DOMAIN.vercel.app` (no trailing slash, `https://` not `hhttps://`), then **redeploy** admin |
+| `URL scheme "hhttps" is not supported` | Typo in Vercel env: change `hhttps://...` to `https://...` and redeploy |
 | CORS error | `ADMIN_APP_URL` / `AGENT_APP_URL` must match exact portal URL (no trailing slash) |
 | Empty database | Run seed endpoint or `npm run db:seed` |
 | Prisma connection errors | Use `POSTGRES_PRISMA_URL` for `DATABASE_URL`, not raw `POSTGRES_URL` |
