@@ -197,6 +197,46 @@ npm run dev
 | Empty database | Run seed endpoint or `npm run db:seed` |
 | Prisma connection errors | Use `POSTGRES_PRISMA_URL` for `DATABASE_URL`, not raw `POSTGRES_URL` |
 | Logo upload `missing permissions (actions=["create"])` | Cloudinary API key lacks upload role — use unsigned `CLOUDINARY_UPLOAD_PRESET` or assign Upload role to the key |
+| **`404 DEPLOYMENT_NOT_FOUND`** on `*.vercel.app` | No successful production deployment exists (build failed or project misconfigured). Fix the build, then redeploy each project (see below) |
+
+### Fix `DEPLOYMENT_NOT_FOUND` (all apps show 404)
+
+This Vercel error means the domain exists but **no live deployment** is attached — usually because every build failed.
+
+1. **Use three separate Vercel projects** (not one project at repo root):
+
+   | Project | Root Directory | Build command |
+   |---------|----------------|---------------|
+   | API / public site | `frontend` | `npm run vercel-build` (auto via `vercel.json`) |
+   | Admin portal | `admin-app` | `npm run build` |
+   | Agent app | `agent-app` | `npm run build` |
+
+   In each project: **Settings → General → Root Directory** must match the table above.
+
+2. **Redeploy the API (`frontend`) first** — it must succeed before admin/agent are useful:
+   - **Deployments → Redeploy** (latest commit on `main`)
+   - Build logs should show `Applying database migrations...` then `Building Next.js app...`
+   - If migration fails with `CompetitionAgent already exists`, the build script auto-recovers; redeploy again
+
+3. **If migration is still blocked**, run once against production Postgres (Neon SQL or local with prod `DATABASE_URL`):
+
+   ```bash
+   cd frontend
+   npx prisma migrate resolve --rolled-back "20260705160000_competition_agents"
+   npx prisma migrate deploy
+   ```
+
+4. **Redeploy admin and agent** after the API build is green.
+
+5. **Verify** (replace with your domains):
+
+   ```bash
+   curl -s https://YOUR-API.vercel.app/api/health
+   ```
+
+   Should return `{"data":{"status":"ok"}}`, not `DEPLOYMENT_NOT_FOUND`.
+
+6. **Do not use old preview URLs** — always use the project's **Production** domain from Vercel → Settings → Domains.
 
 ---
 

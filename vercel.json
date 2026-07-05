@@ -1,0 +1,4 @@
+{
+  "$comment": "Monorepo guard — do not deploy from repository root. Create separate Vercel projects with Root Directory: frontend, admin-app, or agent-app.",
+  "buildCommand": "echo \"ERROR: Set Root Directory to frontend, admin-app, or agent-app in Vercel → Project Settings → General.\" && exit 1"
+}

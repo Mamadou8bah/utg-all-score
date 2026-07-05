@@ -8,9 +8,19 @@ fi
 
 npx prisma generate
 
-# Recover from duplicate CompetitionAgent migration if a prior deploy failed mid-way.
-npx prisma migrate resolve --rolled-back "20260705160000_competition_agents" 2>/dev/null || true
+# Clear a failed duplicate migration from an earlier deploy (safe no-op if absent).
+echo "Checking for failed migration recovery..."
+npx prisma migrate resolve --rolled-back "20260705160000_competition_agents" || true
 
-npx prisma migrate deploy
+echo "Applying database migrations..."
+if ! npx prisma migrate deploy; then
+  echo "Migration deploy failed — retrying after recovery..."
+  npx prisma migrate resolve --rolled-back "20260705160000_competition_agents" || true
+  npx prisma migrate deploy
+fi
+
+echo "Ensuring default admin account..."
 npx tsx prisma/seed-admin.ts
+
+echo "Building Next.js app..."
 npx next build
