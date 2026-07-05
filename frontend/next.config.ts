@@ -1,7 +1,9 @@
 import type { NextConfig } from "next";
+import path from "path";
 
 const nextConfig: NextConfig = {
   output: "standalone",
+  outputFileTracingRoot: path.join(__dirname, ".."),
   experimental: {
     optimizePackageImports: ["clsx"]
   },
@@ -12,9 +14,9 @@ const nextConfig: NextConfig = {
         protocol: "https",
         hostname: "res.cloudinary.com",
         port: "",
-        pathname: "/**",
-      },
-    ],
+        pathname: "/**"
+      }
+    ]
   }
 };
 

@@ -1,4 +1,4 @@
-// File: C:\Users\mbah1\Desktop\300LVL(Second Semester)\utg-all-score\frontend\app\standings\page.tsx
+// File: C:\Users\Mamadou\Downloads\utg-all-score\frontend\app\standings\page.tsx
 import * as entry from '../../../../app/standings/page.js'
 import type { ResolvingMetadata, ResolvingViewport } from 'next/dist/lib/metadata/types/metadata-interface.js'
 

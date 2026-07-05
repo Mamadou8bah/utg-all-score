@@ -1,6 +1,7 @@
-import { NextResponse } from "next/server";
-import { liveMatches } from "@/lib/data";
+import { fetchMatchesByStatus } from "@/lib/services/football";
+import { jsonData } from "@/lib/api-utils";
 
-export function GET() {
-  return NextResponse.json({ data: liveMatches });
+export async function GET() {
+  const data = await fetchMatchesByStatus("LIVE");
+  return jsonData(data);
 }

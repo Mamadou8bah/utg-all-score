@@ -1,14 +1,14 @@
-import { type NextRequest, NextResponse } from "next/server";
-import { results } from "@/lib/data";
+import { fetchMatchesByStatus } from "@/lib/services/football";
+import { jsonData } from "@/lib/api-utils";
 
-export function GET(request: NextRequest) {
+export async function GET(request: Request) {
   const { searchParams } = new URL(request.url);
   const competitionId = searchParams.get("competitionId");
+  let data = await fetchMatchesByStatus("FT");
 
   if (competitionId) {
-    const filteredResults = results.filter(r => r.competitionId === competitionId);
-    return NextResponse.json({ data: filteredResults });
+    data = data.filter((match) => match.competitionId === competitionId);
   }
 
-  return NextResponse.json({ data: results });
+  return jsonData(data);
 }

@@ -1,11 +1,68 @@
 version: "3.9"
 
+# Local all-in-one stack (requires Postgres). For Vercel see deploy/VERCEL.md
+
 services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: utg_allscore_db
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: utg
+      POSTGRES_PASSWORD: utg
+      POSTGRES_DB: allscore
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U utg -d allscore"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
   frontend:
     build:
       context: ./frontend
       dockerfile: Dockerfile
-    container_name: utg_allscore_frontend
+    container_name: utg_allscore_api
     restart: unless-stopped
     ports:
       - "3000:3000"
+    env_file:
+      - ./frontend/.env
+    environment:
+      DATABASE_URL: "postgresql://utg:utg@postgres:5432/allscore?schema=public"
+      DIRECT_URL: "postgresql://utg:utg@postgres:5432/allscore?schema=public"
+      ADMIN_APP_URL: ${ADMIN_APP_URL:-http://localhost:3001}
+      AGENT_APP_URL: ${AGENT_APP_URL:-http://localhost:3002}
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+  admin-app:
+    build:
+      context: ./admin-app
+      dockerfile: Dockerfile
+      args:
+        NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL:-http://localhost:3000}
+        NEXT_PUBLIC_PUBLIC_SITE_URL: ${NEXT_PUBLIC_PUBLIC_SITE_URL:-http://localhost:3000}
+    container_name: utg_allscore_admin
+    restart: unless-stopped
+    ports:
+      - "3001:3001"
+
+  agent-app:
+    build:
+      context: ./agent-app
+      dockerfile: Dockerfile
+      args:
+        NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL:-http://localhost:3000}
+        NEXT_PUBLIC_PUBLIC_SITE_URL: ${NEXT_PUBLIC_PUBLIC_SITE_URL:-http://localhost:3000}
+    container_name: utg_allscore_agent
+    restart: unless-stopped
+    ports:
+      - "3002:3002"
+
+volumes:
+  postgres_data:

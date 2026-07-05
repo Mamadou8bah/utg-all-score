@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { athletes, teams, type Match, type StandingRow, type Competition } from "@/lib/data";
+import { type Match, type StandingRow, type Competition, type AthleteProfile } from "@/lib/types";
 import { formatDate, formatTime, cn } from "@/lib/utils";
 import { Badge, Button, MetaLine } from "@/components/ui";
 import { ChevronRight, Trophy, Info, CalendarDays, Zap, Newspaper, LayoutGrid } from "lucide-react";
@@ -49,19 +49,11 @@ export const Hero = () => (
   </section>
 );
 
-const TeamMark = ({ teamName, className }: { teamName: string; className: string }) => {
-  const team = teams.find((item) => item.name === teamName);
-
-  return (
-    <div className={cn("bg-slate-50 flex items-center justify-center text-slate-400", className)}>
-      {team?.logo ? (
-        <img src={team.logo} alt="" className="h-full w-full object-contain p-0.5" />
-      ) : (
-        <span className="font-black">{teamName[0]}</span>
-      )}
-    </div>
-  );
-};
+const TeamMark = ({ teamName, className }: { teamName: string; className: string }) => (
+  <div className={cn("bg-slate-50 flex items-center justify-center text-slate-400", className)}>
+    <span className="font-black">{teamName[0]}</span>
+  </div>
+);
 
 export const LiveMatchCard = ({ match, onClick }: { match: Match, onClick?: () => void }) => (
   <article 
@@ -230,7 +222,7 @@ export const AnnouncementCard = ({ item }: { item: { title: string; body: string
   </div>
 );
 
-export const AthleteHighlightCard = ({ athlete }: { athlete: (typeof athletes)[number] }) => (
+export const AthleteHighlightCard = ({ athlete }: { athlete: AthleteProfile }) => (
   <article className="grid gap-5 rounded-[30px] border border-slate-200 bg-white p-5 shadow-card md:grid-cols-[160px_1fr] md:items-center">
     <div className="relative h-40 overflow-hidden rounded-[24px] bg-[linear-gradient(180deg,_rgba(0,85,164,0.18),_rgba(255,199,44,0.28))]">
       <img src={athlete.image} alt={athlete.name} className="h-full w-full object-cover" />

@@ -1,6 +1,7 @@
-import { NextResponse } from "next/server";
-import { fixtures } from "@/lib/data";
+import { fetchMatchesByStatus } from "@/lib/services/football";
+import { jsonData } from "@/lib/api-utils";
 
-export function GET() {
-  return NextResponse.json({ data: fixtures });
+export async function GET() {
+  const data = await fetchMatchesByStatus("UPCOMING");
+  return jsonData(data);
 }

@@ -3,11 +3,13 @@
 import { useState } from "react";
 import { ResultCard } from "@/components/cards";
 import { PageHeader } from "@/components/ui";
-import { results, type Match } from "@/lib/data";
+import { type Match } from "@/lib/types";
+import { useApiData } from "@/lib/use-api-data";
 import { MatchDetailsModal } from "@/components/match-details-modal";
 
 export default function ResultsClient() {
   const [selectedMatch, setSelectedMatch] = useState<Match | null>(null);
+  const { data: results } = useApiData<Match[]>("/api/results", []);
 
   return (
     <div className="page-shell section-space space-y-8 pb-32">

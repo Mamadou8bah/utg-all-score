@@ -1,16 +1,18 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import { competitions, type Competition } from "@/lib/data";
+import { type Competition } from "@/lib/types";
+import { useCompetitionsBundle } from "@/lib/use-api-data";
 import { CompetitionDetailsModal } from "@/components/competition-details-modal";
 import { ChevronRight, LayoutGrid, Trophy } from "lucide-react";
 
 export default function StandingsClient() {
   const [selectedComp, setSelectedComp] = useState<Competition | null>(null);
+  const { competitions } = useCompetitionsBundle();
 
   const filteredCompetitions = useMemo(
     () => competitions.slice().sort((a, b) => a.name.localeCompare(b.name)),
-    []
+    [competitions]
   );
 
   const CompetitionListItem = ({ competition }: { competition: Competition }) => (

@@ -1,6 +1,7 @@
-import { NextResponse } from "next/server";
-import { newsItems } from "@/lib/data";
+import { fetchNews } from "@/lib/services/football";
+import { jsonData } from "@/lib/api-utils";
 
-export function GET() {
-  return NextResponse.json({ data: newsItems });
+export async function GET() {
+  const data = await fetchNews();
+  return jsonData(data);
 }

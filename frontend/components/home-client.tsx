@@ -3,7 +3,8 @@
 import { useState, useMemo, useEffect } from "react";
 import { LiveMatchCard, FixtureCard } from "@/components/cards";
 import { InstallPrompt, NotificationToggle, OfflineStatus } from "@/components/ui";
-import { liveMatches, fixtures, results, competitions, newsItems, type Competition, type Match } from "@/lib/data";
+import { type Competition, type Match } from "@/lib/types";
+import { useApiData, useCompetitionsBundle } from "@/lib/use-api-data";
 import { CompetitionSwitcher } from "@/components/competition-switcher";
 import { DatePickerTimeline } from "@/components/date-picker-timeline";
 import { MatchDetailsModal } from "@/components/match-details-modal";
@@ -13,7 +14,12 @@ import { cn, formatDate } from "@/lib/utils";
 import { ChevronRight, Newspaper } from "lucide-react";
 
 export default function HomeClient() {
-  const [selectedComp, setSelectedComp] = useState<Competition>(competitions[0]);
+  const { data: liveMatches } = useApiData<Match[]>("/api/live", []);
+  const { data: fixtures } = useApiData<Match[]>("/api/fixtures", []);
+  const { data: results } = useApiData<Match[]>("/api/results", []);
+  const { data: newsItems } = useApiData<any[]>("/api/news", []);
+  const { competitions } = useCompetitionsBundle();
+  const [selectedComp, setSelectedComp] = useState<Competition | null>(null);
   const [selectedDate, setSelectedDate] = useState<Date>(new Date());
   const [selectedMatch, setSelectedMatch] = useState<Match | null>(null);
   const [selectedNews, setSelectedNews] = useState<any>(null);
@@ -33,14 +39,20 @@ export default function HomeClient() {
     return () => clearInterval(timer);
   }, []);
 
+  useEffect(() => {
+    if (!selectedComp && competitions.length) {
+      setSelectedComp(competitions[0]);
+    }
+  }, [competitions, selectedComp]);
+
   const filteredFixtures = useMemo(() => 
-    fixtures.filter(m => m.competitionId === selectedComp.id && isSameDay(new Date(m.kickoff), selectedDate)),
-    [selectedComp, selectedDate]
+    selectedComp ? fixtures.filter(m => m.competitionId === selectedComp.id && isSameDay(new Date(m.kickoff), selectedDate)) : [],
+    [selectedComp, selectedDate, fixtures]
   );
 
   const filteredResults = useMemo(() => 
-    results.filter(m => m.competitionId === selectedComp.id && isSameDay(new Date(m.kickoff), selectedDate)),
-    [selectedComp, selectedDate]
+    selectedComp ? results.filter(m => m.competitionId === selectedComp.id && isSameDay(new Date(m.kickoff), selectedDate)) : [],
+    [selectedComp, selectedDate, results]
   );
 
   return (

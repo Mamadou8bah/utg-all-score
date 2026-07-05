@@ -1,0 +1,65 @@
+# Render blueprint — three separate web services from one repo.
+# Dashboard: New > Blueprint > connect repo and use this file.
+#
+# After deploy, set custom domains:
+#   utg-allscore-api      → allscore.utgsu.edu.gm
+#   utg-allscore-admin    → admin.allscore.utgsu.edu.gm
+#   utg-allscore-agent    → agent.allscore.utgsu.edu.gm
+#
+# Then update env vars on each service with the final URLs and redeploy admin + agent.
+
+services:
+  - type: web
+    name: utg-allscore-api
+    runtime: docker
+    rootDir: frontend
+    dockerfilePath: ./Dockerfile
+    plan: starter
+    healthCheckPath: /api/health
+    disk:
+      name: sqlite
+      mountPath: /app/prisma
+      sizeGB: 1
+    envVars:
+      - key: DATABASE_URL
+        value: file:/app/prisma/prod.db
+      - key: AUTH_SECRET
+        generateValue: true
+      - key: NEXT_PUBLIC_APP_URL
+        sync: false
+      - key: ADMIN_APP_URL
+        sync: false
+      - key: AGENT_APP_URL
+        sync: false
+      - key: CLOUDINARY_CLOUD_NAME
+        sync: false
+      - key: CLOUDINARY_API_KEY
+        sync: false
+      - key: CLOUDINARY_API_SECRET
+        sync: false
+      - key: RUN_SEED
+        value: "true"
+
+  - type: web
+    name: utg-allscore-admin
+    runtime: docker
+    rootDir: admin-app
+    dockerfilePath: ./Dockerfile
+    plan: starter
+    envVars:
+      - key: NEXT_PUBLIC_API_URL
+        sync: false
+      - key: NEXT_PUBLIC_PUBLIC_SITE_URL
+        sync: false
+
+  - type: web
+    name: utg-allscore-agent
+    runtime: docker
+    rootDir: agent-app
+    dockerfilePath: ./Dockerfile
+    plan: starter
+    envVars:
+      - key: NEXT_PUBLIC_API_URL
+        sync: false
+      - key: NEXT_PUBLIC_PUBLIC_SITE_URL
+        sync: false

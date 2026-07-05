@@ -1,7 +1,8 @@
 "use client";
 
 import { useState, useMemo, useEffect } from "react";
-import { competitions, type Competition } from "@/lib/data";
+import { type Competition } from "@/lib/types";
+import { useCompetitionsBundle } from "@/lib/use-api-data";
 import { cn } from "@/lib/utils";
 import { ChevronDown, Globe, Landmark, Star } from "lucide-react";
 
@@ -10,9 +11,17 @@ export const CompetitionSwitcher = ({
 }: { 
   onSelect: (comp: Competition) => void 
 }) => {
+  const { competitions } = useCompetitionsBundle();
   const [isOpen, setIsOpen] = useState(false);
-  const [selected, setSelected] = useState(competitions[0]);
+  const [selected, setSelected] = useState<Competition | null>(null);
   const [favorites, setFavorites] = useState<string[]>([]);
+
+  useEffect(() => {
+    if (!selected && competitions.length) {
+      setSelected(competitions[0]);
+      onSelect(competitions[0]);
+    }
+  }, [competitions, selected, onSelect]);
 
   // Load favorites from local storage
   useEffect(() => {
@@ -37,13 +46,15 @@ export const CompetitionSwitcher = ({
       if (!aFav && bFav) return 1;
       return 0;
     });
-  }, [favorites]);
+  }, [favorites, competitions]);
 
   const handleSelect = (comp: Competition) => {
     setSelected(comp);
     onSelect(comp);
     setIsOpen(false);
   };
+
+  if (!selected) return null;
 
   return (
     <div className="relative w-full px-1 mb-6">

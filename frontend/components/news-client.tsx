@@ -3,11 +3,12 @@
 import { useState } from "react";
 import { NewsCard } from "@/components/cards";
 import { PageHeader } from "@/components/ui";
-import { newsItems } from "@/lib/data";
+import { useApiData } from "@/lib/use-api-data";
 import { NewsDetailsModal } from "@/components/news-details-modal";
 
 export default function NewsClient() {
   const [selectedNews, setSelectedNews] = useState<any>(null);
+  const { data: newsItems } = useApiData<any[]>("/api/news", []);
 
   return (
     <div className="page-shell section-space space-y-8">

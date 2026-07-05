@@ -1,0 +1,207 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+model School {
+  id           String        @id @default(cuid())
+  name         String        @unique
+  shortName    String
+  createdAt    DateTime      @default(now())
+  users        User[]
+  teams        Team[]
+  competitions Competition[]
+}
+
+model User {
+  id            String         @id @default(cuid())
+  email         String         @unique
+  passwordHash  String
+  name          String
+  role          String // ADMIN | AGENT
+  schoolId      String?
+  school        School?        @relation(fields: [schoolId], references: [id])
+  active        Boolean        @default(true)
+  createdAt     DateTime       @default(now())
+  newsArticles  NewsArticle[]
+  announcements Announcement[]
+}
+
+model Competition {
+  id          String            @id @default(cuid())
+  slug        String            @unique
+  name        String
+  type        String // GENERAL | SCHOOL
+  format      String // LEAGUE | TOURNAMENT
+  description String
+  logo        String?
+  schoolId    String?
+  school      School?           @relation(fields: [schoolId], references: [id])
+  groups      CompetitionGroup[]
+  teamEntries CompetitionTeam[]
+  matches     Match[]
+  standings   Standing[]
+}
+
+model CompetitionGroup {
+  id            String                 @id @default(cuid())
+  competitionId String
+  competition   Competition            @relation(fields: [competitionId], references: [id], onDelete: Cascade)
+  name          String
+  teamEntries   CompetitionGroupTeam[]
+  matches       Match[]
+}
+
+model Team {
+  id             String                 @id @default(cuid())
+  name           String                 @unique
+  schoolId       String?
+  school         School?                @relation(fields: [schoolId], references: [id])
+  colors         String
+  tone           String?
+  form           String
+  logo           String?
+  players        Player[]
+  homeMatches    Match[]                @relation("HomeTeam")
+  awayMatches    Match[]                @relation("AwayTeam")
+  competitionEntries CompetitionTeam[]
+  groupEntries   CompetitionGroupTeam[]
+  lineupEntries  LineupPlayer[]
+  standings      Standing[]
+}
+
+model Player {
+  id       String  @id @default(cuid())
+  teamId   String
+  team     Team    @relation(fields: [teamId], references: [id], onDelete: Cascade)
+  number   Int
+  name     String
+  role     String
+  position String?
+  goals    Int     @default(0)
+  assists  Int     @default(0)
+}
+
+model CompetitionTeam {
+  competitionId String
+  teamId        String
+  competition   Competition @relation(fields: [competitionId], references: [id], onDelete: Cascade)
+  team          Team        @relation(fields: [teamId], references: [id], onDelete: Cascade)
+
+  @@id([competitionId, teamId])
+}
+
+model CompetitionGroupTeam {
+  groupId String
+  teamId  String
+  group   CompetitionGroup @relation(fields: [groupId], references: [id], onDelete: Cascade)
+  team    Team             @relation(fields: [teamId], references: [id], onDelete: Cascade)
+
+  @@id([groupId, teamId])
+}
+
+model Match {
+  id            String       @id @default(cuid())
+  competitionId String
+  competition   Competition  @relation(fields: [competitionId], references: [id], onDelete: Cascade)
+  homeTeamId    String
+  awayTeamId    String
+  homeTeam      Team         @relation("HomeTeam", fields: [homeTeamId], references: [id])
+  awayTeam      Team         @relation("AwayTeam", fields: [awayTeamId], references: [id])
+  homeScore     Int          @default(0)
+  awayScore     Int          @default(0)
+  venue         String
+  kickoff       DateTime
+  status        String // LIVE | FT | UPCOMING
+  timer         String?
+  stage         String       @default("LEAGUE") // LEAGUE | GROUP | KNOCKOUT
+  round         String?
+  groupId       String?
+  group         CompetitionGroup? @relation(fields: [groupId], references: [id])
+  nextMatchId   String?
+  nextMatchSlot String? // home | away
+  nextMatch     Match?       @relation("KnockoutAdvance", fields: [nextMatchId], references: [id])
+  feederMatches Match[]      @relation("KnockoutAdvance")
+  events        MatchEvent[]
+  lineups       LineupPlayer[]
+}
+
+model MatchEvent {
+  id      String @id @default(cuid())
+  matchId String
+  match   Match  @relation(fields: [matchId], references: [id], onDelete: Cascade)
+  minute  Int
+  type    String
+  player  String
+  team    String
+  detail  String
+}
+
+model LineupPlayer {
+  id      String  @id @default(cuid())
+  matchId String
+  match   Match   @relation(fields: [matchId], references: [id], onDelete: Cascade)
+  teamId  String
+  team    Team    @relation(fields: [teamId], references: [id])
+  number  Int
+  name    String
+  role    String
+  isSub   Boolean @default(false)
+}
+
+model Standing {
+  id            String      @id @default(cuid())
+  competitionId String
+  teamId        String
+  groupKey      String      @default("") // "" = league/overall, otherwise competitionGroup.id
+  competition   Competition @relation(fields: [competitionId], references: [id], onDelete: Cascade)
+  team          Team        @relation(fields: [teamId], references: [id])
+  played        Int         @default(0)
+  win           Int         @default(0)
+  draw          Int         @default(0)
+  loss          Int         @default(0)
+  gf            Int         @default(0)
+  ga            Int         @default(0)
+  gd            Int         @default(0)
+  pts           Int         @default(0)
+
+  @@unique([competitionId, teamId, groupKey])
+}
+
+model NewsArticle {
+  id          String   @id @default(cuid())
+  title       String
+  excerpt     String
+  body        String?
+  category    String
+  image       String?
+  publishedAt DateTime @default(now())
+  published   Boolean  @default(true)
+  authorId    String?
+  author      User?    @relation(fields: [authorId], references: [id])
+}
+
+model Announcement {
+  id        String            @id @default(cuid())
+  title     String
+  body      String
+  level     String // info | warning
+  active    Boolean           @default(true)
+  createdAt DateTime          @default(now())
+  authorId  String?
+  author    User?             @relation(fields: [authorId], references: [id])
+}
+
+model FootballEvent {
+  id          String   @id @default(cuid())
+  title       String
+  type        String
+  venue       String
+  date        DateTime
+  description String
+}

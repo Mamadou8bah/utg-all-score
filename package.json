@@ -3,13 +3,24 @@
   "private": true,
   "version": "1.0.0",
   "scripts": {
-    "dev": "npm run dev --prefix frontend",
-    "build": "npm run build --prefix frontend",
-    "start": "npm run start --prefix frontend",
-    "lint": "npm run lint --prefix frontend"
-  },
-  "dependencies": {
-    "date-fns": "^4.1.0",
-    "lucide-react": "^1.7.0"
+    "dev": "npm run dev:public",
+    "dev:public": "npm run dev --prefix frontend",
+    "dev:admin": "npm run dev --prefix admin-app",
+    "dev:agent": "npm run dev --prefix agent-app",
+    "dev:all": "npx concurrently -n public,admin,agent -c blue,magenta,green \"npm run dev:public\" \"npm run dev:admin\" \"npm run dev:agent\"",
+    "build": "npm run build --prefix frontend && npm run build --prefix admin-app && npm run build --prefix agent-app",
+    "build:public": "npm run build --prefix frontend",
+    "build:admin": "npm run build --prefix admin-app",
+    "build:agent": "npm run build --prefix agent-app",
+    "start:public": "npm run start --prefix frontend",
+    "start:admin": "npm run start --prefix admin-app",
+    "start:agent": "npm run start --prefix agent-app",
+    "lint": "npm run lint --prefix frontend",
+    "db:migrate": "npm run db:migrate --prefix frontend",
+    "db:seed": "npm run db:seed --prefix frontend",
+    "db:reset": "npm run db:reset --prefix frontend",
+    "deploy:frontend": "docker compose -f deploy/frontend/docker-compose.yml up -d --build",
+    "deploy:admin": "docker compose -f deploy/admin-app/docker-compose.yml up -d --build",
+    "deploy:agent": "docker compose -f deploy/agent-app/docker-compose.yml up -d --build"
   }
 }

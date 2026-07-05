@@ -1,7 +1,8 @@
 "use client";
 
 import { useMemo } from "react";
-import { type Match, type StandingRow, results, fixtures, teams, athletes } from "@/lib/data";
+import { type Match } from "@/lib/types";
+import { useFootballBundle } from "@/lib/use-api-data";
 import { cn, formatDate } from "@/lib/utils";
 import { X, Trophy, Users, History, LayoutDashboard, Star } from "lucide-react";
 
@@ -12,7 +13,8 @@ export const TeamDetailsModal = ({
   teamName: string, 
   onClose: () => void 
 }) => {
-  const teamData = useMemo(() => teams.find(t => t.name === teamName), [teamName]);
+  const { results, fixtures, teams, athletes } = useFootballBundle();
+  const teamData = useMemo(() => teams.find(t => t.name === teamName), [teamName, teams]);
   
   const teamMatches = useMemo(() => {
     const all = [...results, ...fixtures];
@@ -22,7 +24,17 @@ export const TeamDetailsModal = ({
 
   const squad = useMemo(() => athletes.filter(a => a.team === teamName), [teamName]);
 
-  if (!teamData) return null;
+  if (!teamData) {
+    return (
+      <div className="fixed inset-0 z-[110] flex items-end justify-center bg-slate-950/45 p-4 md:items-center">
+        <div className="w-full max-w-lg rounded-[32px] bg-white p-6 shadow-float">
+          <p className="font-semibold text-slate-950">{teamName}</p>
+          <p className="mt-2 text-sm text-text-secondary">Team profile loading or not yet registered.</p>
+          <button onClick={onClose} className="mt-4 rounded-full bg-slate-100 px-4 py-2 text-sm">Close</button>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="fixed inset-0 z-[100] flex items-end justify-center bg-slate-950/60 backdrop-blur-sm sm:items-center sm:p-4 animate-in fade-in duration-200">

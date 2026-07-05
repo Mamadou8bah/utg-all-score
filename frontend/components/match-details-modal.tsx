@@ -1,7 +1,8 @@
 "use client";
 
 import { useState, useMemo } from "react";
-import { type Match, standings, results, fixtures } from "@/lib/data";
+import { type Match } from "@/lib/types";
+import { useFootballBundle } from "@/lib/use-api-data";
 import { cn, formatTime, formatDate } from "@/lib/utils";
 import { X, Calendar, MapPin, TrendingUp, Info, ListOrdered, History } from "lucide-react";
 import { TeamDetailsModal } from "@/components/team-details-modal";
@@ -13,6 +14,7 @@ export const MatchDetailsModal = ({
   match: Match, 
   onClose: () => void 
 }) => {
+  const { standings, results, fixtures } = useFootballBundle();
   const [activeTab, setActiveTab] = useState("Details");
   const [selectedTeam, setSelectedTeam] = useState<string | null>(null);
   const tabs = ["Details", "Stats", "Lineups", "H2H", "Standings"];

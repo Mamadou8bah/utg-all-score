@@ -4,16 +4,13 @@ import { useState, useMemo } from "react";
 import { Badge, Button, Tabs } from "@/components/ui";
 import { X, Trophy, CalendarDays, LayoutGrid, Info, ChevronRight, Share2 } from "lucide-react";
 import { 
-  standings, 
-  competitions, 
-  fixtures, 
-  results, 
-  competitionGroups,
   type Competition, 
   type Match, 
   type StandingRow 
-} from "@/lib/data";
+} from "@/lib/types";
+import { useCompetitionsBundle, useFootballBundle } from "@/lib/use-api-data";
 import { StandingsTable, FixtureCard, ResultCard } from "@/components/cards";
+import { KnockoutBracket } from "@/components/knockout-bracket";
 import { TeamDetailsModal } from "@/components/team-details-modal";
 import { MatchDetailsModal } from "@/components/match-details-modal";
 
@@ -24,15 +21,150 @@ export const CompetitionDetailsModal = ({
   competition: Competition; 
   onClose: () => void 
 }) => {
+  const { standings, fixtures, results } = useFootballBundle();
+  const { groups: competitionGroups, brackets, stats: competitionStats } = useCompetitionsBundle();
   const [selectedTeam, setSelectedTeam] = useState<string | null>(null);
   const [selectedMatch, setSelectedMatch] = useState<Match | null>(null);
 
   if (!competition) return null;
 
-  const compStandings = standings.filter(s => s.competitionId === competition.id);
+  const allCompStandings = standings.filter((s) => s.competitionId === competition.id);
+  const leagueStandings = allCompStandings.filter((s) => !s.groupKey || s.groupKey === "");
   const compFixtures = fixtures.filter(f => f.competitionId === competition.id);
   const compResults = results.filter(r => r.competitionId === competition.id);
   const groups = competitionGroups[competition.id];
+  const bracket = brackets[competition.id];
+  const compStats = competitionStats[competition.id];
+
+  const tabs = useMemo(() => {
+    const base = [
+      {
+        id: "standings",
+        label: "Standings",
+        content: (
+          <div className="space-y-6 animate-in fade-in slide-in-from-bottom-2 duration-400 sm:space-y-8">
+            {competition.format === "LEAGUE" ? (
+              <div className="space-y-3 sm:space-y-4">
+                <h2 className="px-1 text-[10px] font-black uppercase tracking-[0.2em] text-text-secondary">Official League Hierarchy</h2>
+                <StandingsTable rows={leagueStandings} onTeamClick={(name) => setSelectedTeam(name)} />
+              </div>
+            ) : groups ? (
+              <div className="grid gap-5 sm:grid-cols-2 sm:gap-8">
+                {groups.map((group) => (
+                  <div key={group.id} className="space-y-3 sm:space-y-4">
+                    <h2 className="px-1 text-[10px] font-black uppercase tracking-[0.2em] text-primary">{group.name}</h2>
+                    <StandingsTable rows={allCompStandings.filter((s) => s.groupKey === group.id)} onTeamClick={(name) => setSelectedTeam(name)} />
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <StandingsTable rows={leagueStandings} onTeamClick={(name) => setSelectedTeam(name)} />
+            )}
+          </div>
+        )
+      },
+      {
+        id: "matches",
+        label: "Schedule",
+        content: (
+          <div className="space-y-6 animate-in fade-in slide-in-from-bottom-2 duration-400 sm:space-y-8">
+            {compFixtures.length > 0 && (
+              <section className="space-y-4">
+                <h2 className="px-1 text-[10px] font-black uppercase tracking-[0.2em] text-text-secondary">Upcoming Fixtures</h2>
+                <div className="grid gap-3">
+                  {compFixtures.map((match) => (
+                    <FixtureCard key={match.id} match={match} onClick={() => setSelectedMatch(match)} />
+                  ))}
+                </div>
+              </section>
+            )}
+            {compResults.length > 0 && (
+              <section className="space-y-4">
+                <h2 className="px-1 text-[10px] font-black uppercase tracking-[0.2em] text-primary">Concluded Results</h2>
+                <div className="grid gap-3">
+                  {compResults.map((match) => (
+                    <ResultCard key={match.id} match={match} onClick={() => setSelectedMatch(match)} />
+                  ))}
+                </div>
+              </section>
+            )}
+          </div>
+        )
+      },
+      {
+        id: "info",
+        label: "History",
+        content: (
+          <div className="max-w-2xl space-y-6 px-1 animate-in fade-in slide-in-from-bottom-2 duration-400">
+            <div className="rounded-3xl border border-slate-100 bg-white p-5 shadow-sm sm:rounded-[32px] sm:p-8">
+              <h2 className="mb-4 text-xl font-black text-slate-950">About this competition</h2>
+              <p className="mb-6 text-sm font-medium leading-8 text-slate-600">{competition.description}</p>
+              <div className="grid gap-3 sm:grid-cols-2 sm:gap-4">
+                <div className="rounded-2xl bg-slate-50 p-4">
+                  <p className="mb-1 text-[10px] font-black uppercase tracking-widest text-slate-400">
+                    {compStats?.leaderLabel ?? "Current Leader"}
+                  </p>
+                  <p className="font-black text-slate-950">{compStats?.reigningChampion ?? "TBD"}</p>
+                </div>
+                <div className="rounded-2xl bg-slate-50 p-4">
+                  <p className="mb-1 text-[10px] font-black uppercase tracking-widest text-slate-400">Top Scorer</p>
+                  <p className="font-black text-slate-950">
+                    {compStats?.topScorer
+                      ? `${compStats.topScorer.name} (${compStats.topScorer.goals})`
+                      : "TBD"}
+                  </p>
+                  {compStats?.topScorer ? (
+                    <p className="mt-1 text-xs font-medium text-text-secondary">{compStats.topScorer.team}</p>
+                  ) : null}
+                </div>
+                <div className="rounded-2xl bg-slate-50 p-4">
+                  <p className="mb-1 text-[10px] font-black uppercase tracking-widest text-slate-400">Highest Scoring Match</p>
+                  <p className="font-black text-slate-950">
+                    {compStats?.highestScoringMatch
+                      ? `${compStats.highestScoringMatch.totalGoals} goals`
+                      : "TBD"}
+                  </p>
+                  {compStats?.highestScoringMatch ? (
+                    <p className="mt-1 text-xs font-medium text-text-secondary">
+                      {compStats.highestScoringMatch.home} vs {compStats.highestScoringMatch.away}
+                    </p>
+                  ) : null}
+                </div>
+                <div className="rounded-2xl bg-slate-50 p-4">
+                  <p className="mb-1 text-[10px] font-black uppercase tracking-widest text-slate-400">Season Totals</p>
+                  <p className="font-black text-slate-950">{compStats?.totalGoals ?? 0} goals</p>
+                  <p className="mt-1 text-xs font-medium text-text-secondary">
+                    {compStats?.matchesPlayed ?? 0} matches · {compStats?.teamCount ?? 0} teams
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+        )
+      }
+    ];
+
+    if (competition.format === "TOURNAMENT") {
+      base.splice(1, 0, {
+        id: "knockout",
+        label: "Knockout",
+        content: (
+          <div className="animate-in fade-in slide-in-from-bottom-2 duration-400">
+            {bracket?.length ? (
+              <KnockoutBracket rounds={bracket} />
+            ) : (
+              <div className="rounded-[32px] border border-dashed border-slate-200 bg-white/50 p-12 text-center">
+                <LayoutGrid size={40} className="mx-auto mb-4 text-slate-200" />
+                <p className="text-sm font-black uppercase tracking-widest text-slate-400">Knockout rounds not scheduled yet</p>
+              </div>
+            )}
+          </div>
+        )
+      });
+    }
+
+    return base;
+  }, [allCompStandings, bracket, compFixtures, compResults, compStats, competition, groups, leagueStandings]);
 
   return (
     <div className="fixed inset-0 z-[100] flex items-stretch justify-center bg-slate-50 sm:items-center sm:bg-slate-950/40 sm:p-4 sm:backdrop-blur-sm animate-in fade-in duration-200">
@@ -86,118 +218,7 @@ export const CompetitionDetailsModal = ({
 
         {/* Scrollable Area */}
         <div className="flex-1 overflow-y-auto overflow-x-hidden bg-slate-50 px-3 py-4 sm:px-10 sm:py-6">
-          <Tabs 
-            variant="pwa"
-            tabs={[
-              {
-                id: "standings",
-                label: "Standings",
-                content: (
-                  <div className="space-y-6 animate-in fade-in slide-in-from-bottom-2 duration-400 sm:space-y-8">
-                    {competition.format === "LEAGUE" ? (
-                      <div className="space-y-3 sm:space-y-4">
-                        <h2 className="px-1 text-[10px] font-black uppercase tracking-[0.2em] text-text-secondary">Official League Hierarchy</h2>
-                        <StandingsTable 
-                          rows={compStandings} 
-                          onTeamClick={(name) => setSelectedTeam(name)}
-                        />
-                      </div>
-                    ) : groups ? (
-                      <div className="grid gap-5 sm:grid-cols-2 sm:gap-8">
-                        {groups.map((group) => (
-                           <div key={group.name} className="space-y-3 sm:space-y-4">
-                              <h2 className="px-1 text-[10px] font-black uppercase tracking-[0.2em] text-primary">{group.name}</h2>
-                              <StandingsTable 
-                                rows={compStandings.filter(s => group.teams.includes(s.team))}
-                                onTeamClick={(name) => setSelectedTeam(name)}
-                              />
-                           </div>
-                        ))}
-                      </div>
-                    ) : (
-                      <div className="rounded-[32px] border border-dashed border-slate-200 p-12 text-center bg-white/50">
-                        <LayoutGrid size={40} className="mx-auto text-slate-200 mb-4" />
-                        <p className="text-sm font-black text-slate-400 uppercase tracking-widest">Bracket generation in progress</p>
-                      </div>
-                    )}
-
-                    {/* Promotion/Relegation Legend */}
-                    <div className="grid gap-3 px-1 sm:flex sm:items-center sm:gap-6">
-                       <div className="flex items-center gap-2">
-                          <div className="h-2 w-2 rounded-full bg-primary" />
-                          <span className="text-[10px] font-bold text-text-secondary opacity-70 uppercase tracking-widest">Champions League</span>
-                       </div>
-                       <div className="flex items-center gap-2">
-                          <div className="h-2 w-2 rounded-full bg-slate-400" />
-                          <span className="text-[10px] font-bold text-text-secondary opacity-70 uppercase tracking-widest">Qualification Playoff</span>
-                       </div>
-                    </div>
-                  </div>
-                )
-              },
-              {
-                id: "matches",
-                label: "Schedule",
-                content: (
-                  <div className="space-y-6 animate-in fade-in slide-in-from-bottom-2 duration-400 sm:space-y-8">
-                    {compFixtures.length > 0 && (
-                      <section className="space-y-4">
-                         <h2 className="px-1 text-[10px] font-black uppercase tracking-[0.2em] text-text-secondary">Upcoming Fixtures</h2>
-                         <div className="grid gap-3">
-                           {compFixtures.map(match => (
-                             <FixtureCard 
-                                key={match.id} 
-                                match={match} 
-                                onClick={() => setSelectedMatch(match)}
-                             />
-                           ))}
-                         </div>
-                      </section>
-                    )}
-
-                    {compResults.length > 0 && (
-                      <section className="space-y-4">
-                         <h2 className="px-1 text-[10px] font-black uppercase tracking-[0.2em] text-primary">Concluded Results</h2>
-                         <div className="grid gap-3">
-                           {compResults.map(match => (
-                             <ResultCard 
-                                key={match.id} 
-                                match={match} 
-                                onClick={() => setSelectedMatch(match)}
-                             />
-                           ))}
-                         </div>
-                      </section>
-                    )}
-                  </div>
-                )
-              },
-              {
-                id: "info",
-                label: "History",
-                content: (
-                   <div className="max-w-2xl space-y-6 px-1 animate-in fade-in slide-in-from-bottom-2 duration-400">
-                      <div className="rounded-3xl border border-slate-100 bg-white p-5 shadow-sm sm:rounded-[32px] sm:p-8">
-                         <h2 className="text-xl font-black text-slate-950 mb-4">About this competition</h2>
-                         <p className="text-sm leading-8 font-medium text-slate-600 mb-6">
-                           {competition.description} This annual event remains the most prestigious athletic gathering at the University of The Gambia. Managed by AllScore, the 2026 season introduces digital match oversight and live data verification for the first time.
-                         </p>
-                         <div className="grid gap-3 sm:grid-cols-2 sm:gap-4">
-                            <div className="rounded-2xl bg-slate-50 p-4">
-                               <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Reigning Champ</p>
-                               <p className="font-black text-slate-950">School of ICT</p>
-                            </div>
-                            <div className="rounded-2xl bg-slate-50 p-4">
-                               <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Record Goals</p>
-                               <p className="font-black text-slate-950">42 (2024 Season)</p>
-                            </div>
-                         </div>
-                      </div>
-                   </div>
-                )
-              }
-            ]}
-          />
+          <Tabs variant="pwa" tabs={tabs} />
         </div>
 
         {/* Nested Team Modal */}

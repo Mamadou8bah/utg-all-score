@@ -4,7 +4,7 @@ import type React from "react";
 import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { announcements, appMeta, navLinks } from "@/lib/data";
+import { appMeta } from "@/lib/data";
 import { cn, formatDate, formatTime } from "@/lib/utils";
 import { 
   Home, 
@@ -251,51 +251,6 @@ export const Navbar = () => {
   );
 };
 
-import { Menu as MenuIcon } from "lucide-react";
-
-export const Footer = () => (
-  <footer className="border-t border-slate-200 bg-white/70">
-    <div className="mx-auto flex max-w-7xl flex-col gap-4 px-4 py-8 text-sm text-text-secondary sm:px-6 lg:flex-row lg:items-center lg:justify-between lg:px-8">
-      <div>
-        <p className="font-semibold text-slate-950">{appMeta.name}</p>
-        <p>{appMeta.tagline}</p>
-      </div>
-      <div className="flex flex-wrap gap-3">
-        <Link href="/announcements">Announcements</Link>
-        <Link href="/events">Events</Link>
-        <Link href="/offline">Offline view</Link>
-      </div>
-    </div>
-  </footer>
-);
-
-export const Sidebar = () => {
-  const pathname = usePathname();
-  const items = [
-    { href: "/admin", label: "Overview" },
-    { href: "/admin?tab=matches", label: "Matches" },
-    { href: "/admin?tab=content", label: "Content" },
-    { href: "/admin?tab=users", label: "Users" }
-  ];
-
-  return (
-    <aside className="rounded-[32px] bg-slate-950 p-5 text-white shadow-float">
-      <p className="text-xs uppercase tracking-[0.28em] text-white/55">Admin Dashboard</p>
-      <div className="mt-6 flex flex-col gap-2">
-        {items.map((item) => (
-          <Link
-            key={item.href}
-            href={item.href}
-            className={cn("rounded-2xl px-4 py-3 text-sm transition", pathname === "/admin" && item.href === "/admin" ? "bg-white text-slate-950" : "bg-white/5 text-white/74 hover:bg-white/10")}
-          >
-            {item.label}
-          </Link>
-        ))}
-      </div>
-    </aside>
-  );
-};
-
 export const InstallPrompt = () => {
   const [eventState, setEventState] = useState<any>(null);
   const [installed, setInstalled] = useState(false);
@@ -401,21 +356,6 @@ export const NotificationToggle = () => {
     </>
   );
 };
-
-export const AnnouncementTicker = () => (
-  <div className="overflow-hidden rounded-[28px] border border-secondary/30 bg-secondary/15 px-4 py-3">
-    <div className="flex min-w-max gap-8 animate-marquee">
-      {[...announcements, ...announcements].map((item, index) => (
-        <div key={`${item.id}-${index}`} className="flex items-center gap-3">
-          <Badge variant={item.level === "warning" ? "warning" : "default"}>{item.level === "warning" ? "Alert" : "Update"}</Badge>
-          <p className="text-sm font-medium text-slate-950">
-            {item.title}: <span className="font-normal text-text-secondary">{item.body}</span>
-          </p>
-        </div>
-      ))}
-    </div>
-  </div>
-);
 
 export const MetaLine = ({ date, venue }: { date: string; venue?: string }) => (
   <div className="flex flex-wrap gap-3 text-sm text-text-secondary">

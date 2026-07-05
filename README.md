@@ -1,69 +1,108 @@
 # UTG AllScore
-**The Official Hub for University Sports Updates**
 
-UTG AllScore is now a single Next.js Progressive Web App. The project no longer uses a separate backend service; page routes, API routes, manifest generation, offline support, and browser-side notification flows all live in the Next.js app.
+Official UTGSU football hub — live scores, fixtures, results, and campus sports news.
 
-## Stack
+## Architecture
 
-- Next.js App Router
-- TypeScript
-- Tailwind CSS
-- Progressive Web App setup
-- Route Handlers for app-owned APIs
+Three Next.js apps share one SQLite database via the public API:
 
-## Project Structure
+| App | Port | Role |
+|-----|------|------|
+| `frontend/` | 3000 | Public PWA + API + Prisma database |
+| `admin-app/` | 3001 | Admin — schools, agents, teams, competitions, fixtures |
+| `agent-app/` | 3002 | School agents — scores, events, lineups, news |
 
-```txt
-utg-all-score/
-  frontend/
-    app/
-    components/
-    lib/
-    public/
-    Dockerfile
-  docs/
-  .env.example
-  docker-compose.yml
-  package.json
-```
-
-## Local Development
-
-1. Install frontend dependencies
+## Quick start
 
 ```bash
-cd frontend
-npm install
+# Install dependencies
+cd frontend && npm install
+cd ../admin-app && npm install
+cd ../agent-app && npm install
+
+# Configure environment
+cp frontend/.env.example frontend/.env
+# Add Cloudinary credentials for logo/image uploads
+
+# Database
+cd ../frontend
+npm run db:migrate
+npm run db:seed
+
+# Run all apps (from repo root)
+cd ..
+npm run dev:all
 ```
 
-2. Run the app
+**URLs**
+- Public site: http://localhost:3000
+- Admin: http://localhost:3001/login
+- Agent: http://localhost:3002/login
 
-```bash
-cd frontend
-npm run dev
-```
+**Seeded admin:** `admin@utgsu.edu.gm` / `UTGSUAdmin2026!`
 
-Or from the repository root:
+## Scripts (repo root)
 
-```bash
-npm run dev
-```
-
-3. Open:
-
-- App: `http://localhost:3000`
+| Script | Description |
+|--------|-------------|
+| `npm run dev:all` | Run public + admin + agent |
+| `npm run dev:public` | Public site only |
+| `npm run dev:admin` | Admin app only |
+| `npm run dev:agent` | Agent app only |
+| `npm run build` | Production build all apps |
+| `npm run db:seed` | Seed UTGSU football data |
+| `npm run db:reset` | Reset and re-seed database |
 
 ## Docker
 
+Local all-in-one stack:
+
 ```bash
+cp frontend/.env.example frontend/.env
 docker compose up --build
 ```
 
-The app will be available at `http://localhost:3000`.
+Services: public API `:3000`, admin `:3001`, agent `:3002`. SQLite persisted in Docker volume.
 
-## Notes
+## Production deployment
 
-- PWA manifest lives in `frontend/app/manifest.ts`
-- Service worker lives in `frontend/public/sw.js`
-- Route handlers for cached content live under `frontend/app/api`
-- Push subscription endpoint is currently a placeholder route and should be connected to a real push provider when you are ready
+### Vercel (recommended)
+
+All three apps deploy as **separate Vercel projects** with **Vercel Postgres** for the database.
+
+See **[deploy/VERCEL.md](deploy/VERCEL.md)** for the full step-by-step guide.
+
+Quick summary:
+1. Create 3 Vercel projects (root dirs: `frontend`, `admin-app`, `agent-app`)
+2. Add **Vercel Postgres** to the `frontend` project
+3. Set env vars and redeploy
+4. Seed once via `POST /api/setup/seed`
+
+### Docker / VPS
+
+See **[deploy/DEPLOYMENT.md](deploy/DEPLOYMENT.md)** for Docker, Render, and Railway.
+
+## Environment variables
+
+See `frontend/.env.example` for the full list. Key vars:
+
+- `DATABASE_URL` — Postgres pooled URL (`POSTGRES_PRISMA_URL` on Vercel)
+- `DIRECT_URL` — Postgres direct URL for migrations (`POSTGRES_URL_NON_POOLING` on Vercel)
+- `AUTH_SECRET` — JWT signing secret
+- `ADMIN_APP_URL` / `AGENT_APP_URL` — CORS origins for portal apps
+- `CLOUDINARY_*` — Logo and image uploads
+
+Admin and agent apps need `NEXT_PUBLIC_API_URL` pointing to the frontend API.
+
+## Admin capabilities
+
+- Schools, agents, teams (with logos + squads), competitions (with logos)
+- Link/unlink teams to competitions
+- Schedule and delete fixtures
+- Full edit/delete on all resources
+
+## Agent capabilities
+
+- Update live scores, events, venue, lineups
+- Publish and delete news articles and announcements
+- Upload cover images via Cloudinary
