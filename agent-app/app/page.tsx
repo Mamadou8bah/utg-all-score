@@ -129,6 +129,7 @@ export default function AgentDashboardPage() {
                 <Select value={scores.status} onChange={(e) => setScores({ ...scores, status: e.target.value })}>
                   <option value="UPCOMING">Upcoming</option>
                   <option value="LIVE">Live</option>
+                  <option value="HT">Half Time</option>
                   <option value="FT">Full Time</option>
                 </Select>
               </Field>

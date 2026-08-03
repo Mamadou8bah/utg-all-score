@@ -17,6 +17,6 @@ export type Match = {
   awayScore: number;
   venue: string;
   kickoff: string;
-  status: "LIVE" | "FT" | "UPCOMING";
+  status: "LIVE" | "HT" | "FT" | "UPCOMING";
   timer?: string;
 };

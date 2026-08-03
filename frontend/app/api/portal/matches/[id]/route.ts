@@ -4,8 +4,13 @@ import { handleCorsPreflight } from "@/lib/cors";
 import { agentCanAccessMatch, fetchMatchById, serializeMatch } from "@/lib/services/football";
 import { processMatchResult, syncPlayerStatsForMatchEvent } from "@/lib/services/competition-engine";
 import { jsonData, jsonError, requireUser } from "@/lib/api-utils";
+import { schedulePushToAll } from "@/lib/push";
 
 type RouteContext = { params: Promise<{ id: string }> };
+
+function scoreline(home: string, away: string, homeScore: number, awayScore: number) {
+  return `${home} ${homeScore}–${awayScore} ${away}`;
+}
 
 export async function OPTIONS(request: Request) {
   return handleCorsPreflight(request) ?? new Response(null, { status: 204 });
@@ -24,7 +29,10 @@ export async function PATCH(request: Request, context: RouteContext) {
     if (!allowed) return jsonError("You can only update matches for your school or assigned general competitions.", 403, request);
   }
 
-  const match = await prisma.match.findUnique({ where: { id } });
+  const match = await prisma.match.findUnique({
+    where: { id },
+    include: { homeTeam: true, awayTeam: true }
+  });
   if (!match) return jsonError("Match not found.", 404, request);
 
   const previousStatus = match.status;
@@ -37,10 +45,45 @@ export async function PATCH(request: Request, context: RouteContext) {
       status: body?.status ?? match.status,
       timer: body?.timer ?? match.timer,
       venue: body?.venue ?? match.venue
-    }
+    },
+    include: { homeTeam: true, awayTeam: true }
   });
 
   await processMatchResult(id, previousStatus);
+
+  if (updated.status !== previousStatus) {
+    const line = scoreline(updated.homeTeam.name, updated.awayTeam.name, updated.homeScore, updated.awayScore);
+
+    if (updated.status === "LIVE" && previousStatus === "HT") {
+      schedulePushToAll({
+        title: "Second half underway",
+        body: line,
+        url: "/live",
+        tag: `match-2h-${updated.id}`
+      });
+    } else if (updated.status === "LIVE") {
+      schedulePushToAll({
+        title: "Kickoff",
+        body: `${updated.homeTeam.name} vs ${updated.awayTeam.name}`,
+        url: "/live",
+        tag: `match-ko-${updated.id}`
+      });
+    } else if (updated.status === "HT") {
+      schedulePushToAll({
+        title: "Half time",
+        body: line,
+        url: "/live",
+        tag: `match-ht-${updated.id}`
+      });
+    } else if (updated.status === "FT") {
+      schedulePushToAll({
+        title: "Full time",
+        body: line,
+        url: "/results",
+        tag: `match-ft-${updated.id}`
+      });
+    }
+  }
 
   const full = await fetchMatchById(id);
   return jsonData(serializeMatch(full)!, request);
@@ -73,6 +116,20 @@ export async function POST(request: Request, context: RouteContext) {
       }
     });
     await syncPlayerStatsForMatchEvent(id, event.team);
+
+    if (String(event.type).toLowerCase() === "goal") {
+      const full = await fetchMatchById(id);
+      const serialized = serializeMatch(full);
+      if (serialized) {
+        schedulePushToAll({
+          title: `GOAL! ${event.player}`,
+          body: `${event.team} · ${serialized.home} ${serialized.homeScore}–${serialized.awayScore} ${serialized.away}`,
+          url: "/live",
+          tag: `goal-${event.id}`
+        });
+      }
+    }
+
     return jsonData(event, request, 201);
   }
 

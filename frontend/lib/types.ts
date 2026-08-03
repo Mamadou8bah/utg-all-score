@@ -1,6 +1,6 @@
 export type CompetitionType = "GENERAL" | "SCHOOL";
 export type CompetitionFormat = "LEAGUE" | "TOURNAMENT";
-export type MatchStatus = "LIVE" | "FT" | "UPCOMING";
+export type MatchStatus = "LIVE" | "HT" | "FT" | "UPCOMING";
 
 export interface Competition {
   id: string;

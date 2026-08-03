@@ -2,6 +2,7 @@ import { prisma } from "@/lib/db";
 import { getSessionUser } from "@/lib/auth";
 import { handleCorsPreflight } from "@/lib/cors";
 import { jsonData, jsonError, requireUser } from "@/lib/api-utils";
+import { schedulePushToAll } from "@/lib/push";
 
 export async function OPTIONS(request: Request) {
   return handleCorsPreflight(request) ?? new Response(null, { status: 204 });
@@ -42,6 +43,14 @@ export async function POST(request: Request) {
         authorId: session!.id
       }
     });
+    if (article.published) {
+      schedulePushToAll({
+        title: "News",
+        body: article.title,
+        url: "/news",
+        tag: `news-${article.id}`
+      });
+    }
     return jsonData(article, request, 201);
   }
 
@@ -53,6 +62,12 @@ export async function POST(request: Request) {
         level: body.level === "warning" ? "warning" : "info",
         authorId: session!.id
       }
+    });
+    schedulePushToAll({
+      title: announcement.level === "warning" ? "Important announcement" : "Announcement",
+      body: announcement.title,
+      url: "/announcements",
+      tag: `announcement-${announcement.id}`
     });
     return jsonData(announcement, request, 201);
   }

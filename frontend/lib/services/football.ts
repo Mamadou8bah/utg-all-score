@@ -89,11 +89,12 @@ export async function fetchMatchById(id: string) {
   });
 }
 
-export async function fetchMatchesByStatus(status: "LIVE" | "FT" | "UPCOMING") {
+export async function fetchMatchesByStatus(status: "LIVE" | "HT" | "FT" | "UPCOMING" | ("LIVE" | "HT")[]) {
+  const statuses = Array.isArray(status) ? status : [status];
   const matches = await prisma.match.findMany({
-    where: { status },
+    where: { status: { in: statuses } },
     include: matchInclude,
-    orderBy: { kickoff: status === "UPCOMING" ? "asc" : "desc" }
+    orderBy: { kickoff: statuses.includes("UPCOMING") && statuses.length === 1 ? "asc" : "desc" }
   });
   return matches.map((m) => serializeMatch(m)!);
 }

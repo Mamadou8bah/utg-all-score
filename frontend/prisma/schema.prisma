@@ -129,7 +129,7 @@ model Match {
   awayScore     Int          @default(0)
   venue         String
   kickoff       DateTime
-  status        String // LIVE | FT | UPCOMING
+  status        String // LIVE | HT | FT | UPCOMING
   timer         String?
   stage         String       @default("LEAGUE") // LEAGUE | GROUP | KNOCKOUT
   round         String?
@@ -216,4 +216,14 @@ model FootballEvent {
   venue       String
   date        DateTime
   description String
+}
+
+model PushSubscription {
+  id        String   @id @default(cuid())
+  endpoint  String   @unique
+  p256dh    String
+  auth      String
+  userAgent String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }

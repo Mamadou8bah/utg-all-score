@@ -304,11 +304,12 @@ export const OfflineStatus = () => {
 };
 
 export const NotificationToggle = () => {
-  const [status, setStatus] = useState<"idle" | "enabled" | "denied" | "unsupported">("idle");
+  const [status, setStatus] = useState<"idle" | "enabled" | "denied" | "unsupported" | "error">("idle");
   const [open, setOpen] = useState(false);
+  const [message, setMessage] = useState<string | null>(null);
 
   useEffect(() => {
-    if (!("Notification" in window)) {
+    if (!("Notification" in window) || !("serviceWorker" in navigator) || !("PushManager" in window)) {
       setStatus("unsupported");
       return;
     }
@@ -316,32 +317,81 @@ export const NotificationToggle = () => {
     if (Notification.permission === "denied") setStatus("denied");
   }, []);
 
+  const urlBase64ToUint8Array = (base64String: string) => {
+    const padding = "=".repeat((4 - (base64String.length % 4)) % 4);
+    const base64 = (base64String + padding).replace(/-/g, "+").replace(/_/g, "/");
+    const raw = window.atob(base64);
+    const output = new Uint8Array(raw.length);
+    for (let i = 0; i < raw.length; i += 1) output[i] = raw.charCodeAt(i);
+    return output;
+  };
+
   return (
     <>
       <Button variant="ghost" onClick={() => setOpen(true)}>
         Notifications
       </Button>
-      <Modal open={open} onClose={() => setOpen(false)} title="Push notifications" description="Enable alerts for live starts, official results, and urgent university sports announcements.">
+      <Modal
+        open={open}
+        onClose={() => setOpen(false)}
+        title="Push notifications"
+        description="Enable alerts for kickoff, half time, goals, full time, news, and announcements."
+      >
         <div className="space-y-4">
           <div className="rounded-3xl bg-slate-50 p-4 text-sm text-text-secondary">
             {status === "enabled" && "Browser notifications are enabled for this device."}
             {status === "denied" && "Notifications are blocked in this browser. Update browser settings to turn them back on."}
             {status === "unsupported" && "This browser does not support push notifications."}
-            {status === "idle" && "Grant permission to receive match starts, result drops, and announcement banners."}
+            {status === "idle" && "Grant permission to receive match starts, goals, results, and announcement banners."}
+            {status === "error" && (message || "Could not enable push notifications.")}
           </div>
           <div className="flex flex-wrap gap-3">
             <Button
               onClick={async () => {
-                if (!("Notification" in window)) {
+                if (!("Notification" in window) || !("serviceWorker" in navigator) || !("PushManager" in window)) {
                   setStatus("unsupported");
                   return;
                 }
+
+                const vapidPublicKey = process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY?.trim();
+                if (!vapidPublicKey) {
+                  setStatus("error");
+                  setMessage("Push is not configured (missing VAPID public key).");
+                  return;
+                }
+
                 const permission = await Notification.requestPermission();
-                if (permission === "granted") {
-                  setStatus("enabled");
-                  await fetch("/api/push/subscribe", { method: "POST" });
-                } else if (permission === "denied") {
+                if (permission === "denied") {
                   setStatus("denied");
+                  return;
+                }
+                if (permission !== "granted") return;
+
+                try {
+                  const registration = await navigator.serviceWorker.ready;
+                  const subscription = await registration.pushManager.subscribe({
+                    userVisibleOnly: true,
+                    applicationServerKey: urlBase64ToUint8Array(vapidPublicKey)
+                  });
+
+                  const res = await fetch("/api/push/subscribe", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify(subscription.toJSON())
+                  });
+
+                  if (!res.ok) {
+                    const err = await res.json().catch(() => null);
+                    setStatus("error");
+                    setMessage(err?.error || "Failed to save subscription.");
+                    return;
+                  }
+
+                  setStatus("enabled");
+                  setMessage(null);
+                } catch {
+                  setStatus("error");
+                  setMessage("Could not subscribe to push notifications.");
                 }
               }}
             >

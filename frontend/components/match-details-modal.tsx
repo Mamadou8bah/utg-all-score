@@ -82,6 +82,9 @@ export const MatchDetailsModal = ({
                   {match.timer}
                 </div>
               )}
+              {match.status === "HT" && (
+                <span className="text-[10px] font-black uppercase text-slate-300">Half Time</span>
+              )}
               {match.status === "FT" && (
                 <span className="text-[10px] font-black uppercase text-slate-300">Full Time</span>
               )}

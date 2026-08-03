@@ -1,4 +1,4 @@
-const VERSION = "utg-allscore-v2";
+const VERSION = "utg-allscore-v3";
 const APP_SHELL = [
   "/",
   "/live",
@@ -76,5 +76,42 @@ self.addEventListener("fetch", (event) => {
 
   event.respondWith(
     caches.match(event.request).then((response) => response || fetch(event.request).catch(() => caches.match("/offline")))
+  );
+});
+
+self.addEventListener("push", (event) => {
+  let data = { title: "UTG AllScore", body: "New update", url: "/", tag: "utg-allscore" };
+  try {
+    if (event.data) data = { ...data, ...event.data.json() };
+  } catch {
+    /* ignore malformed payload */
+  }
+
+  event.waitUntil(
+    self.registration.showNotification(data.title || "UTG AllScore", {
+      body: data.body || "",
+      icon: "/icons/icon-192.svg",
+      badge: "/icons/icon-192.svg",
+      tag: data.tag || "utg-allscore",
+      data: { url: data.url || "/" }
+    })
+  );
+});
+
+self.addEventListener("notificationclick", (event) => {
+  event.notification.close();
+  const targetUrl = event.notification.data?.url || "/";
+
+  event.waitUntil(
+    self.clients.matchAll({ type: "window", includeUncontrolled: true }).then((clients) => {
+      for (const client of clients) {
+        if ("focus" in client && client.url.includes(self.location.origin)) {
+          client.navigate(targetUrl);
+          return client.focus();
+        }
+      }
+      if (self.clients.openWindow) return self.clients.openWindow(targetUrl);
+      return undefined;
+    })
   );
 });

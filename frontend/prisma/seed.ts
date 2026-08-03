@@ -252,7 +252,7 @@ export async function seedDatabase() {
     away: string,
     venue: string,
     kickoff: Date,
-    status: "LIVE" | "FT" | "UPCOMING",
+    status: "LIVE" | "HT" | "FT" | "UPCOMING",
     homeScore: number,
     awayScore: number,
     opts: {

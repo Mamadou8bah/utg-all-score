@@ -2,6 +2,6 @@ import { fetchMatchesByStatus } from "@/lib/services/football";
 import { jsonData } from "@/lib/api-utils";
 
 export async function GET() {
-  const data = await fetchMatchesByStatus("LIVE");
+  const data = await fetchMatchesByStatus(["LIVE", "HT"]);
   return jsonData(data);
 }

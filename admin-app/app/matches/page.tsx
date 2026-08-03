@@ -105,6 +105,7 @@ export default function MatchesPage() {
             <Select value={form.status} onChange={(e) => setForm({ ...form, status: e.target.value })}>
               <option value="UPCOMING">Upcoming</option>
               <option value="LIVE">Live</option>
+              <option value="HT">Half Time</option>
               <option value="FT">Full Time</option>
             </Select>
           </Field>

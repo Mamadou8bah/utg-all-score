@@ -12,3 +12,6 @@ coverage
 
 frontend/prisma/dev.db
 frontend/prisma/prod.db
+/.idea/
+/agent-app/tsconfig.tsbuildinfo
+/frontend/tsconfig.tsbuildinfo
