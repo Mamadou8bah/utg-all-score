@@ -304,6 +304,7 @@ export const NotificationToggle = () => {
   const [open, setOpen] = useState(false);
   const [message, setMessage] = useState<string | null>(null);
   const [needsHomeScreen, setNeedsHomeScreen] = useState(false);
+  const [busy, setBusy] = useState(false);
 
   const isStandaloneDisplay = () => {
     const nav = window.navigator as Navigator & { standalone?: boolean };
@@ -339,7 +340,7 @@ export const NotificationToggle = () => {
         if (subscription && Notification.permission === "granted") setStatus("enabled");
         else setStatus("idle");
       })
-      .catch(() => setStatus(Notification.permission === "granted" ? "idle" : "idle"));
+      .catch(() => setStatus("idle"));
   }, []);
 
   const urlBase64ToUint8Array = (base64String: string) => {
@@ -351,6 +352,92 @@ export const NotificationToggle = () => {
     return output;
   };
 
+  const turnOffOnThisDevice = async () => {
+    setBusy(true);
+    try {
+      const registration = await navigator.serviceWorker.ready;
+      const subscription = await registration.pushManager.getSubscription();
+      if (subscription) {
+        const endpoint = subscription.endpoint;
+        await subscription.unsubscribe().catch(() => undefined);
+        await fetch("/api/push/subscribe", {
+          method: "DELETE",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ endpoint })
+        }).catch(() => undefined);
+      }
+      setStatus("idle");
+      setMessage(null);
+    } catch {
+      setStatus("error");
+      setMessage("Could not turn off notifications on this device.");
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  const enableAlerts = async () => {
+    if (needsHomeScreen) return;
+
+    if (!("Notification" in window) || !("serviceWorker" in navigator) || !("PushManager" in window)) {
+      setStatus("unsupported");
+      return;
+    }
+
+    const vapidPublicKey = process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY?.trim();
+    if (!vapidPublicKey) {
+      setStatus("error");
+      setMessage("Push is not configured (missing VAPID public key).");
+      return;
+    }
+
+    const permission = await Notification.requestPermission();
+    if (permission === "denied") {
+      setStatus("denied");
+      return;
+    }
+    if (permission !== "granted") return;
+
+    setBusy(true);
+    try {
+      const registration = await navigator.serviceWorker.ready;
+      const subscription = await registration.pushManager.subscribe({
+        userVisibleOnly: true,
+        applicationServerKey: urlBase64ToUint8Array(vapidPublicKey)
+      });
+
+      const res = await fetch("/api/push/subscribe", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(subscription.toJSON())
+      });
+
+      if (!res.ok) {
+        const err = await res.json().catch(() => null);
+        setStatus("error");
+        setMessage(err?.error || "Failed to save subscription.");
+        return;
+      }
+
+      setStatus("enabled");
+      setMessage(null);
+    } catch {
+      setStatus("error");
+      setMessage("Could not subscribe to push notifications.");
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  const enabled = status === "enabled";
+  const toggleDisabled = busy || needsHomeScreen || status === "denied" || status === "unsupported";
+
+  const onToggle = async () => {
+    if (toggleDisabled) return;
+    if (enabled) await turnOffOnThisDevice();
+    else await enableAlerts();
+  };
+
   return (
     <>
       <button
@@ -358,7 +445,7 @@ export const NotificationToggle = () => {
         onClick={() => setOpen(true)}
         className={cn(
           "p-2 text-slate-500 transition-all active:scale-90 rounded-2xl hover:bg-slate-50 hover:text-slate-950",
-          status === "enabled" && "text-primary"
+          enabled && "text-primary"
         )}
         aria-label="Notifications"
       >
@@ -368,7 +455,7 @@ export const NotificationToggle = () => {
         open={open}
         onClose={() => setOpen(false)}
         title="Push notifications"
-        description="Enable alerts for kickoff, half time, goals, full time, news, and announcements."
+        description="Alerts for kickoff, half time, goals, full time, news, and announcements."
       >
         <div className="space-y-4">
           {needsHomeScreen ? (
@@ -376,76 +463,54 @@ export const NotificationToggle = () => {
               On iPhone, add AllScore to your Home Screen first (Share → Add to Home Screen), then open it from the icon. The Allow prompt only appears in that installed app — not in a Safari tab.
             </div>
           ) : null}
-          <div className="rounded-3xl bg-slate-50 p-4 text-sm text-text-secondary">
-            {status === "enabled" && "Push notifications are enabled for this device."}
-            {status === "denied" && "Notifications are blocked in this browser. Update browser settings to turn them back on."}
-            {status === "unsupported" && "This browser does not support push notifications."}
-            {status === "idle" &&
-              (needsHomeScreen
-                ? "Install the app to Home Screen, open it from the icon, then tap Enable alerts."
-                : "Grant permission to receive match starts, goals, results, and announcement banners.")}
-            {status === "error" && (message || "Could not enable push notifications.")}
-          </div>
-          <div className="flex flex-wrap gap-3">
-            <Button
-              disabled={needsHomeScreen}
-              onClick={async () => {
-                if (needsHomeScreen) return;
 
-                if (!("Notification" in window) || !("serviceWorker" in navigator) || !("PushManager" in window)) {
-                  setStatus("unsupported");
-                  return;
-                }
-
-                const vapidPublicKey = process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY?.trim();
-                if (!vapidPublicKey) {
-                  setStatus("error");
-                  setMessage("Push is not configured (missing VAPID public key).");
-                  return;
-                }
-
-                const permission = await Notification.requestPermission();
-                if (permission === "denied") {
-                  setStatus("denied");
-                  return;
-                }
-                if (permission !== "granted") return;
-
-                try {
-                  const registration = await navigator.serviceWorker.ready;
-                  const subscription = await registration.pushManager.subscribe({
-                    userVisibleOnly: true,
-                    applicationServerKey: urlBase64ToUint8Array(vapidPublicKey)
-                  });
-
-                  const res = await fetch("/api/push/subscribe", {
-                    method: "POST",
-                    headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify(subscription.toJSON())
-                  });
-
-                  if (!res.ok) {
-                    const err = await res.json().catch(() => null);
-                    setStatus("error");
-                    setMessage(err?.error || "Failed to save subscription.");
-                    return;
-                  }
-
-                  setStatus("enabled");
-                  setMessage(null);
-                  setOpen(false);
-                } catch {
-                  setStatus("error");
-                  setMessage("Could not subscribe to push notifications.");
-                }
-              }}
+          <div className="flex items-center justify-between gap-4 rounded-3xl bg-slate-50 px-4 py-4">
+            <div className="min-w-0">
+              <p className="text-sm font-semibold text-slate-950">Alerts on this device</p>
+              <p className="mt-1 text-sm text-text-secondary">
+                {enabled ? "On — you’ll get match and news alerts." : "Off — turn on to receive alerts."}
+              </p>
+            </div>
+            <button
+              type="button"
+              role="switch"
+              aria-checked={enabled}
+              aria-label="Toggle push notifications"
+              disabled={toggleDisabled}
+              onClick={onToggle}
+              className={cn(
+                "relative h-8 w-14 shrink-0 rounded-full transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-200 disabled:cursor-not-allowed disabled:opacity-50",
+                enabled ? "bg-primary" : "bg-slate-300"
+              )}
             >
-              Enable alerts
-            </Button>
-            <Button variant="ghost" onClick={() => setOpen(false)}>
-              Maybe later
-            </Button>
+              <span
+                className={cn(
+                  "absolute top-1 left-1 h-6 w-6 rounded-full bg-white shadow transition-transform",
+                  enabled && "translate-x-6"
+                )}
+              />
+            </button>
           </div>
+
+          {status === "denied" ? (
+            <div className="rounded-3xl bg-slate-50 p-4 text-sm text-text-secondary">
+              Notifications are blocked in this browser. Update browser settings to turn them back on.
+            </div>
+          ) : null}
+          {status === "unsupported" ? (
+            <div className="rounded-3xl bg-slate-50 p-4 text-sm text-text-secondary">
+              This browser does not support push notifications.
+            </div>
+          ) : null}
+          {status === "error" ? (
+            <div className="rounded-3xl bg-slate-50 p-4 text-sm text-text-secondary">
+              {message || "Could not update push notifications."}
+            </div>
+          ) : null}
+
+          <Button variant="ghost" onClick={() => setOpen(false)}>
+            Done
+          </Button>
         </div>
       </Modal>
     </>
