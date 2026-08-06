@@ -13,8 +13,7 @@ import {
   CalendarDays, 
   Newspaper, 
   ChevronRight, 
-  Bell, 
-  Search 
+  Bell
 } from "lucide-react";
 
 type ButtonProps = React.ButtonHTMLAttributes<HTMLButtonElement> & {
@@ -214,8 +213,8 @@ export const Navbar = () => {
           ))}
         </nav>
 
-        {/* Center Logo (Always Centered) */}
-        <div className="absolute left-1/2 -translate-x-1/2 flex items-center z-50">
+        {/* Center Logo (desktop only) */}
+        <div className="absolute left-1/2 -translate-x-1/2 hidden md:flex items-center z-50">
           <Link href="/" className="flex items-center">
             <div className="relative h-11 w-11 overflow-hidden transition-transform active:scale-95">
               <img 
@@ -239,13 +238,8 @@ export const Navbar = () => {
           </Link>
         </div>
 
-        {/* Mobile View Elements */}
-        <div className="md:hidden flex items-center justify-between w-full">
-           <Link href="/news" className="p-2 text-slate-500 active:scale-90 transition-all" aria-label="News">
-              <Search size={22} strokeWidth={2.5} />
-           </Link>
-           {/* Logo is absolute in center */}
-           <div className="h-10 w-10" />
+        {/* Mobile / PWA: notifications only */}
+        <div className="md:hidden flex items-center justify-end w-full">
            <NotificationToggle />
         </div>
       </div>
