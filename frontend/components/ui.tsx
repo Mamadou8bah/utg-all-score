@@ -188,7 +188,7 @@ export const Navbar = () => {
   const pathname = usePathname();
 
   return (
-    <header className="hidden border-b border-slate-100 bg-background md:sticky md:top-0 md:z-40 md:block">
+    <header className="sticky top-0 z-40 border-b border-slate-100 bg-background">
       <div className="mx-auto flex max-w-7xl items-center justify-between px-4 py-2 sm:px-6 lg:px-8 h-16 relative">
         {/* PC Version Navigation (Left) */}
         <nav className="hidden md:flex items-center gap-1 flex-1">
@@ -229,6 +229,7 @@ export const Navbar = () => {
 
         {/* PC Version Navigation (Right) */}
         <div className="hidden md:flex items-center gap-2 flex-1 justify-end">
+          <NotificationToggle />
           <Link href="/news" className={cn(
             "text-sm font-black text-text-secondary hover:text-slate-950 px-4 py-2 rounded-2xl transition-all flex items-center gap-2",
             pathname === "/news" && "bg-blue-50 text-primary shadow-sm"
@@ -240,11 +241,12 @@ export const Navbar = () => {
 
         {/* Mobile View Elements */}
         <div className="md:hidden flex items-center justify-between w-full">
-           <Link href="/news" className="p-2 text-slate-500 active:scale-90 transition-all">
+           <Link href="/news" className="p-2 text-slate-500 active:scale-90 transition-all" aria-label="News">
               <Search size={22} strokeWidth={2.5} />
            </Link>
            {/* Logo is absolute in center */}
            <div className="h-10 w-10" />
+           <NotificationToggle />
         </div>
       </div>
     </header>
@@ -307,14 +309,43 @@ export const NotificationToggle = () => {
   const [status, setStatus] = useState<"idle" | "enabled" | "denied" | "unsupported" | "error">("idle");
   const [open, setOpen] = useState(false);
   const [message, setMessage] = useState<string | null>(null);
+  const [needsHomeScreen, setNeedsHomeScreen] = useState(false);
+
+  const isStandaloneDisplay = () => {
+    const nav = window.navigator as Navigator & { standalone?: boolean };
+    return Boolean(nav.standalone) || window.matchMedia("(display-mode: standalone)").matches;
+  };
+
+  const isIosDevice = () => /iPad|iPhone|iPod/.test(navigator.userAgent) || (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1);
 
   useEffect(() => {
+    const ios = isIosDevice();
+    const standalone = isStandaloneDisplay();
+    setNeedsHomeScreen(ios && !standalone);
+
     if (!("Notification" in window) || !("serviceWorker" in navigator) || !("PushManager" in window)) {
+      // iOS Safari tab often lacks PushManager until installed
+      if (ios && !standalone) {
+        setStatus("idle");
+        return;
+      }
       setStatus("unsupported");
       return;
     }
-    if (Notification.permission === "granted") setStatus("enabled");
-    if (Notification.permission === "denied") setStatus("denied");
+
+    if (Notification.permission === "denied") {
+      setStatus("denied");
+      return;
+    }
+
+    // Permission alone is not enough — confirm an active push subscription
+    navigator.serviceWorker.ready
+      .then((registration) => registration.pushManager.getSubscription())
+      .then((subscription) => {
+        if (subscription && Notification.permission === "granted") setStatus("enabled");
+        else setStatus("idle");
+      })
+      .catch(() => setStatus(Notification.permission === "granted" ? "idle" : "idle"));
   }, []);
 
   const urlBase64ToUint8Array = (base64String: string) => {
@@ -328,9 +359,17 @@ export const NotificationToggle = () => {
 
   return (
     <>
-      <Button variant="ghost" onClick={() => setOpen(true)}>
-        Notifications
-      </Button>
+      <button
+        type="button"
+        onClick={() => setOpen(true)}
+        className={cn(
+          "p-2 text-slate-500 transition-all active:scale-90 rounded-2xl hover:bg-slate-50 hover:text-slate-950",
+          status === "enabled" && "text-primary"
+        )}
+        aria-label="Notifications"
+      >
+        <Bell size={22} strokeWidth={2.5} />
+      </button>
       <Modal
         open={open}
         onClose={() => setOpen(false)}
@@ -338,16 +377,27 @@ export const NotificationToggle = () => {
         description="Enable alerts for kickoff, half time, goals, full time, news, and announcements."
       >
         <div className="space-y-4">
+          {needsHomeScreen ? (
+            <div className="rounded-3xl bg-amber-50 p-4 text-sm text-amber-950">
+              On iPhone, add AllScore to your Home Screen first (Share → Add to Home Screen), then open it from the icon. The Allow prompt only appears in that installed app — not in a Safari tab.
+            </div>
+          ) : null}
           <div className="rounded-3xl bg-slate-50 p-4 text-sm text-text-secondary">
-            {status === "enabled" && "Browser notifications are enabled for this device."}
+            {status === "enabled" && "Push notifications are enabled for this device."}
             {status === "denied" && "Notifications are blocked in this browser. Update browser settings to turn them back on."}
             {status === "unsupported" && "This browser does not support push notifications."}
-            {status === "idle" && "Grant permission to receive match starts, goals, results, and announcement banners."}
+            {status === "idle" &&
+              (needsHomeScreen
+                ? "Install the app to Home Screen, open it from the icon, then tap Enable alerts."
+                : "Grant permission to receive match starts, goals, results, and announcement banners.")}
             {status === "error" && (message || "Could not enable push notifications.")}
           </div>
           <div className="flex flex-wrap gap-3">
             <Button
+              disabled={needsHomeScreen}
               onClick={async () => {
+                if (needsHomeScreen) return;
+
                 if (!("Notification" in window) || !("serviceWorker" in navigator) || !("PushManager" in window)) {
                   setStatus("unsupported");
                   return;
