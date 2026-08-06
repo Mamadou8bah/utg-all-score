@@ -433,6 +433,7 @@ export const NotificationToggle = () => {
 
                   setStatus("enabled");
                   setMessage(null);
+                  setOpen(false);
                 } catch {
                   setStatus("error");
                   setMessage("Could not subscribe to push notifications.");
