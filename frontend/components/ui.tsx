@@ -166,9 +166,9 @@ export const Modal = ({
   if (!open) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-end justify-center bg-slate-900 p-4 md:items-center">
-      <div className="w-full max-w-lg rounded-[32px] bg-white p-6 shadow-float animate-slideUp">
-        <div className="flex items-start justify-between gap-4">
+    <div className="fixed inset-0 z-[60] flex items-center justify-center bg-slate-900/60 p-4 pb-[max(1rem,env(safe-area-inset-bottom))]">
+      <div className="flex w-full max-w-lg max-h-[min(85dvh,calc(100dvh-2rem))] flex-col overflow-hidden rounded-[32px] bg-white p-6 shadow-float animate-slideUp">
+        <div className="flex shrink-0 items-start justify-between gap-4">
           <div>
             <h3 className="text-xl font-semibold text-slate-950">{title}</h3>
             <p className="mt-2 text-sm leading-6 text-text-secondary">{description}</p>
@@ -177,7 +177,7 @@ export const Modal = ({
             Close
           </button>
         </div>
-        <div className="mt-5">{children}</div>
+        <div className="mt-5 min-h-0 overflow-y-auto">{children}</div>
       </div>
     </div>
   );
