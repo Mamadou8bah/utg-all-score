@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { AdminShell, Button, Card, Field, Input, Select } from "@/components/ui";
 import { adminNav } from "@/lib/nav";
 import { apiFetch, apiJson } from "@/lib/api";
@@ -13,7 +13,7 @@ type Agent = {
   schoolName: string | null;
   active: boolean;
   schoolId?: string | null;
-  assignedCompetitions?: Array<{ id: string; name: string }>;
+  assignedCompetitions?: Array<{ id: string; name: string; type?: string }>;
 };
 
 export default function AgentsPage() {
@@ -64,21 +64,39 @@ export default function AgentsPage() {
     if (res.ok) load();
   }
 
+  const schoolOptions = useMemo(() => schools, [schools]);
+
   return (
-    <AdminShell title="School Agents" subtitle="Agents belong to a school and can be assigned to general university-wide competitions." nav={adminNav}>
+    <AdminShell
+      title="School Agents"
+      subtitle="Agents belong to a school and can be assigned to school competitions, general competitions, and/or specific fixtures."
+      nav={adminNav}
+    >
       {message ? <p className="rounded-2xl bg-blue-50 px-4 py-3 text-sm text-primary">{message}</p> : null}
       <Card title="Create agent">
         <form className="grid gap-4 md:grid-cols-2" onSubmit={handleCreate}>
-          <Field label="Full name"><Input value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} required /></Field>
-          <Field label="Email"><Input type="email" value={form.email} onChange={(e) => setForm({ ...form, email: e.target.value })} required /></Field>
-          <Field label="Temporary password"><Input type="password" value={form.password} onChange={(e) => setForm({ ...form, password: e.target.value })} required /></Field>
+          <Field label="Full name">
+            <Input value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} required />
+          </Field>
+          <Field label="Email">
+            <Input type="email" value={form.email} onChange={(e) => setForm({ ...form, email: e.target.value })} required />
+          </Field>
+          <Field label="Temporary password">
+            <Input type="password" value={form.password} onChange={(e) => setForm({ ...form, password: e.target.value })} required />
+          </Field>
           <Field label="School">
             <Select value={form.schoolId} onChange={(e) => setForm({ ...form, schoolId: e.target.value })} required>
               <option value="">Select school</option>
-              {schools.map((s) => <option key={s.id} value={s.id}>{s.name}</option>)}
+              {schoolOptions.map((s) => (
+                <option key={s.id} value={s.id}>
+                  {s.name}
+                </option>
+              ))}
             </Select>
           </Field>
-          <div className="md:col-span-2"><Button type="submit">Add agent</Button></div>
+          <div className="md:col-span-2">
+            <Button type="submit">Add agent</Button>
+          </div>
         </form>
       </Card>
       <Card title="Registered agents">
@@ -89,38 +107,66 @@ export default function AgentsPage() {
                 <div className="grid gap-3 md:grid-cols-2">
                   <Input value={editForm.name} onChange={(e) => setEditForm({ ...editForm, name: e.target.value })} />
                   <Select value={editForm.schoolId} onChange={(e) => setEditForm({ ...editForm, schoolId: e.target.value })}>
-                    {schools.map((s) => <option key={s.id} value={s.id}>{s.name}</option>)}
+                    {schoolOptions.map((s) => (
+                      <option key={s.id} value={s.id}>
+                        {s.name}
+                      </option>
+                    ))}
                   </Select>
-                  <Input type="password" placeholder="New password (optional)" value={editForm.password} onChange={(e) => setEditForm({ ...editForm, password: e.target.value })} />
+                  <Input
+                    type="password"
+                    placeholder="New password (optional)"
+                    value={editForm.password}
+                    onChange={(e) => setEditForm({ ...editForm, password: e.target.value })}
+                  />
                   <label className="flex items-center gap-2 text-sm">
-                    <input type="checkbox" checked={editForm.active} onChange={(e) => setEditForm({ ...editForm, active: e.target.checked })} />
+                    <input
+                      type="checkbox"
+                      checked={editForm.active}
+                      onChange={(e) => setEditForm({ ...editForm, active: e.target.checked })}
+                    />
                     Active account
                   </label>
                   <div className="flex gap-2 md:col-span-2">
                     <Button onClick={() => saveEdit(agent.id)}>Save</Button>
-                    <Button variant="ghost" onClick={() => setEditingId(null)}>Cancel</Button>
+                    <Button variant="ghost" onClick={() => setEditingId(null)}>
+                      Cancel
+                    </Button>
                   </div>
                 </div>
               ) : (
                 <div className="flex items-center justify-between gap-4">
                   <div>
-                    <p className="font-semibold text-slate-950">{agent.name} {!agent.active ? <span className="text-error">(inactive)</span> : null}</p>
+                    <p className="font-semibold text-slate-950">
+                      {agent.name} {!agent.active ? <span className="text-error">(inactive)</span> : null}
+                    </p>
                     <p className="text-text-secondary">{agent.email}</p>
                     <p className="mt-1 text-primary">{agent.schoolName ?? "No school"}</p>
                     {agent.assignedCompetitions?.length ? (
                       <p className="mt-1 text-xs text-text-secondary">
-                        General competitions: {agent.assignedCompetitions.map((c) => c.name).join(", ")}
+                        Competitions: {agent.assignedCompetitions.map((c) => c.name).join(", ")}
                       </p>
                     ) : null}
                   </div>
                   <div className="flex gap-2">
-                    <Button variant="ghost" onClick={() => { setEditingId(agent.id); setEditForm({ name: agent.name, schoolId: agent.schoolId ?? "", active: agent.active, password: "" }); }}>Edit</Button>
-                    <Button variant="ghost" onClick={() => remove(agent.id, agent.name)}>Delete</Button>
+                    <Button
+                      variant="ghost"
+                      onClick={() => {
+                        setEditingId(agent.id);
+                        setEditForm({ name: agent.name, schoolId: agent.schoolId ?? "", active: agent.active, password: "" });
+                      }}
+                    >
+                      Edit
+                    </Button>
+                    <Button variant="ghost" onClick={() => remove(agent.id, agent.name)}>
+                      Delete
+                    </Button>
                   </div>
                 </div>
               )}
             </div>
           ))}
+          {!agents.length ? <p className="text-sm text-text-secondary">No agents registered yet.</p> : null}
         </div>
       </Card>
     </AdminShell>

@@ -97,12 +97,14 @@ Admin and agent apps need `NEXT_PUBLIC_API_URL` pointing to the frontend API.
 ## Admin capabilities
 
 - Schools, agents, teams (with logos + squads), competitions (with logos)
-- Link/unlink teams to competitions
-- Schedule and delete fixtures
-- Full edit/delete on all resources
+- Link/unlink teams to competitions (school comps limited to that school's teams)
+- Assign agents to school or general competitions (grants access to all fixtures)
+- Schedule fixtures from competition rosters; assign per-match agents
+- Full edit/delete on teams, players, competitions, and agents
 
 ## Agent capabilities
 
-- Update live scores, events, venue, lineups
+- See matches from competition assignment and/or per-fixture assignment
+- Update live scores, events, venue, lineups (players picked from team squads)
 - Publish and delete news articles and announcements
 - Upload cover images via Cloudinary

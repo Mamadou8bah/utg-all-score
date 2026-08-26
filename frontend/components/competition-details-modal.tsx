@@ -22,7 +22,13 @@ export const CompetitionDetailsModal = ({
   onClose: () => void 
 }) => {
   const { standings, fixtures, results } = useFootballBundle();
-  const { groups: competitionGroups, brackets, stats: competitionStats } = useCompetitionsBundle();
+  const { groups: competitionGroups, brackets, stats: competitionStats } = useCompetitionsBundle(
+    [],
+    {},
+    {},
+    {},
+    { includeExtras: true }
+  );
   const [selectedTeam, setSelectedTeam] = useState<string | null>(null);
   const [selectedMatch, setSelectedMatch] = useState<Match | null>(null);
 

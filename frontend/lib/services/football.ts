@@ -18,11 +18,40 @@ import type {
 } from "@/lib/types";
 
 const matchInclude = {
-  competition: { include: { school: true } },
+  competition: true,
   homeTeam: true,
   awayTeam: true,
   events: { orderBy: { minute: "asc" as const } },
   lineups: true
+};
+
+/** Lightweight list payload — no squad players. */
+export const matchIncludeList = matchInclude;
+
+/** Portal match payloads that need squad dropdowns for agents. */
+export const matchIncludeWithSquads = {
+  competition: true,
+  homeTeam: { include: { players: { orderBy: { number: "asc" as const } } } },
+  awayTeam: { include: { players: { orderBy: { number: "asc" as const } } } },
+  events: { orderBy: { minute: "asc" as const } },
+  lineups: true,
+  agents: { include: { user: true } }
+};
+
+/** Agent/admin match list without loading every team's full squad. */
+export const matchIncludePortalList = {
+  competition: true,
+  homeTeam: true,
+  awayTeam: true,
+  events: { orderBy: { minute: "asc" as const } },
+  lineups: true,
+  agents: { include: { user: true } }
+};
+
+type TeamWithPlayers = {
+  id: string;
+  name: string;
+  players?: Array<{ id: string; number: number; name: string; role: string; position?: string | null }>;
 };
 
 function parseJsonArray(value: string): string[] {
@@ -34,10 +63,28 @@ function parseJsonArray(value: string): string[] {
   }
 }
 
-export function serializeMatch(match: Awaited<ReturnType<typeof fetchMatchById>>): Match | null {
+type SerializableMatch = NonNullable<Awaited<ReturnType<typeof fetchMatchById>>> & {
+  agents?: Array<{ user: { id: string; name: string; email: string } }>;
+  homeTeam: TeamWithPlayers;
+  awayTeam: TeamWithPlayers;
+  events?: Array<{ minute: number; type: string; player: string; team: string; detail: string }>;
+  lineups?: Array<{ teamId: string; number: number; name: string; role: string; isSub: boolean }>;
+};
+
+function mapSquadPlayers(team: TeamWithPlayers) {
+  return (team.players ?? []).map((player) => ({
+    id: player.id,
+    number: player.number,
+    name: player.name,
+    role: player.role,
+    position: player.position ?? undefined
+  }));
+}
+
+export function serializeMatch(match: SerializableMatch | null): Match | null {
   if (!match) return null;
 
-  const events: MatchEvent[] = match.events.map((event) => ({
+  const events: MatchEvent[] = (match.events ?? []).map((event) => ({
     minute: event.minute,
     type: event.type,
     player: event.player,
@@ -45,21 +92,38 @@ export function serializeMatch(match: Awaited<ReturnType<typeof fetchMatchById>>
     detail: event.detail
   }));
 
-  const homeLineups = match.lineups.filter((l) => l.teamId === match.homeTeamId);
-  const awayLineups = match.lineups.filter((l) => l.teamId === match.awayTeamId);
+  const lineupRows = match.lineups ?? [];
+  const homeLineups: typeof lineupRows = [];
+  const awayLineups: typeof lineupRows = [];
+  for (const row of lineupRows) {
+    if (row.teamId === match.homeTeamId) homeLineups.push(row);
+    else if (row.teamId === match.awayTeamId) awayLineups.push(row);
+  }
+
+  const mapLineupSide = (rows: typeof lineupRows) => ({
+    starting: rows.filter((l) => !l.isSub).map(({ number, name, role }) => ({ number, name, role })),
+    subs: rows.filter((l) => l.isSub).map(({ number, name, role }) => ({ number, name, role }))
+  });
 
   const lineups =
     homeLineups.length || awayLineups.length
       ? {
-          home: {
-            starting: homeLineups.filter((l) => !l.isSub).map(({ number, name, role }) => ({ number, name, role })),
-            subs: homeLineups.filter((l) => l.isSub).map(({ number, name, role }) => ({ number, name, role }))
-          },
-          away: {
-            starting: awayLineups.filter((l) => !l.isSub).map(({ number, name, role }) => ({ number, name, role })),
-            subs: awayLineups.filter((l) => l.isSub).map(({ number, name, role }) => ({ number, name, role }))
-          }
+          home: mapLineupSide(homeLineups),
+          away: mapLineupSide(awayLineups)
         }
+      : undefined;
+
+  const agents = match.agents?.map((entry) => ({
+    id: entry.user.id,
+    name: entry.user.name,
+    email: entry.user.email
+  }));
+
+  const homeSquad = mapSquadPlayers(match.homeTeam);
+  const awaySquad = mapSquadPlayers(match.awayTeam);
+  const squads =
+    homeSquad.length || awaySquad.length
+      ? { home: homeSquad, away: awaySquad }
       : undefined;
 
   return {
@@ -68,6 +132,8 @@ export function serializeMatch(match: Awaited<ReturnType<typeof fetchMatchById>>
     competition: match.competition.name,
     home: match.homeTeam.name,
     away: match.awayTeam.name,
+    homeTeamId: match.homeTeamId,
+    awayTeamId: match.awayTeamId,
     homeScore: match.homeScore,
     awayScore: match.awayScore,
     venue: match.venue,
@@ -78,7 +144,9 @@ export function serializeMatch(match: Awaited<ReturnType<typeof fetchMatchById>>
     round: match.round ?? undefined,
     groupId: match.groupId ?? undefined,
     events,
-    lineups
+    agents,
+    lineups,
+    squads
   };
 }
 
@@ -89,20 +157,29 @@ export async function fetchMatchById(id: string) {
   });
 }
 
-export async function fetchMatchesByStatus(status: "LIVE" | "HT" | "FT" | "UPCOMING" | ("LIVE" | "HT")[]) {
+export async function fetchMatchesByStatus(
+  status: "LIVE" | "HT" | "FT" | "UPCOMING" | ("LIVE" | "HT")[],
+  options?: { take?: number; competitionSlug?: string }
+) {
   const statuses = Array.isArray(status) ? status : [status];
+  const upcomingOnly = statuses.includes("UPCOMING") && statuses.length === 1;
   const matches = await prisma.match.findMany({
-    where: { status: { in: statuses } },
-    include: matchInclude,
-    orderBy: { kickoff: statuses.includes("UPCOMING") && statuses.length === 1 ? "asc" : "desc" }
+    where: {
+      status: { in: statuses },
+      ...(options?.competitionSlug ? { competition: { slug: options.competitionSlug } } : {})
+    },
+    include: matchIncludeList,
+    orderBy: { kickoff: upcomingOnly ? "asc" : "desc" },
+    take: options?.take ?? (upcomingOnly ? 60 : 80)
   });
   return matches.map((m) => serializeMatch(m)!);
 }
 
-export async function fetchAllMatches() {
+export async function fetchAllMatches(take = 100) {
   const matches = await prisma.match.findMany({
-    include: matchInclude,
-    orderBy: { kickoff: "desc" }
+    include: matchIncludeList,
+    orderBy: { kickoff: "desc" },
+    take
   });
   return matches.map((m) => serializeMatch(m)!);
 }
@@ -152,10 +229,13 @@ export async function fetchAllKnockoutBrackets() {
     select: { slug: true }
   });
 
+  const brackets = await Promise.all(
+    tournaments.map(async (comp) => [comp.slug, await fetchKnockoutBracket(comp.slug)] as const)
+  );
+
   const result: Record<string, Awaited<ReturnType<typeof fetchKnockoutBracket>>> = {};
-  for (const comp of tournaments) {
-    const bracket = await fetchKnockoutBracket(comp.slug);
-    if (bracket.length) result[comp.slug] = bracket;
+  for (const [slug, bracket] of brackets) {
+    if (bracket.length) result[slug] = bracket;
   }
   return result;
 }
@@ -182,20 +262,47 @@ export async function fetchCompetitionGroups() {
 export async function fetchCompetitionStats(): Promise<Record<string, CompetitionStats>> {
   const competitions = await prisma.competition.findMany({
     include: {
-      teamEntries: true,
+      _count: { select: { teamEntries: true } },
+      teamEntries: { select: { teamId: true } },
       matches: {
         where: { status: "FT" },
-        include: { homeTeam: true, awayTeam: true, events: true }
+        select: {
+          homeScore: true,
+          awayScore: true,
+          stage: true,
+          round: true,
+          kickoff: true,
+          homeTeam: { select: { name: true } },
+          awayTeam: { select: { name: true } }
+        }
       },
-      standings: { include: { team: true } }
+      standings: {
+        include: { team: { select: { name: true } } }
+      }
     }
   });
+
+  const teamIds = [...new Set(competitions.flatMap((comp) => comp.teamEntries.map((entry) => entry.teamId)))];
+  const scorers =
+    teamIds.length === 0
+      ? []
+      : await prisma.player.findMany({
+          where: { teamId: { in: teamIds }, goals: { gt: 0 } },
+          select: {
+            name: true,
+            goals: true,
+            teamId: true,
+            team: { select: { name: true } }
+          },
+          orderBy: { goals: "desc" }
+        });
 
   const result: Record<string, CompetitionStats> = {};
 
   for (const comp of competitions) {
     const finishedMatches = comp.matches;
     const totalGoals = finishedMatches.reduce((sum, match) => sum + match.homeScore + match.awayScore, 0);
+    const competitionTeamIds = new Set(comp.teamEntries.map((entry) => entry.teamId));
 
     let highestScoringMatch: CompetitionStats["highestScoringMatch"] = null;
     for (const match of finishedMatches) {
@@ -209,19 +316,10 @@ export async function fetchCompetitionStats(): Promise<Record<string, Competitio
       }
     }
 
-    const scorerTally = new Map<string, { name: string; team: string; goals: number }>();
-    for (const match of finishedMatches) {
-      for (const event of match.events) {
-        if (!/goal/i.test(event.type) || /own/i.test(event.type)) continue;
-        const key = `${event.team}::${event.player}`;
-        const current = scorerTally.get(key) ?? { name: event.player, team: event.team, goals: 0 };
-        current.goals += 1;
-        scorerTally.set(key, current);
-      }
-    }
-
-    const topScorer =
-      [...scorerTally.values()].sort((a, b) => b.goals - a.goals)[0] ?? null;
+    const topScorerPlayer = scorers.find((player) => competitionTeamIds.has(player.teamId));
+    const topScorer = topScorerPlayer
+      ? { name: topScorerPlayer.name, team: topScorerPlayer.team.name, goals: topScorerPlayer.goals }
+      : null;
 
     const finalMatch = finishedMatches
       .filter((match) => match.stage === "KNOCKOUT" && match.round === "Final")
@@ -271,7 +369,7 @@ export async function fetchCompetitionStats(): Promise<Record<string, Competitio
       highestScoringMatch,
       matchesPlayed: finishedMatches.length,
       totalGoals,
-      teamCount: comp.teamEntries.length
+      teamCount: comp._count.teamEntries
     };
   }
 
@@ -281,7 +379,8 @@ export async function fetchCompetitionStats(): Promise<Record<string, Competitio
 export async function fetchNews(): Promise<NewsItem[]> {
   const items = await prisma.newsArticle.findMany({
     where: { published: true },
-    orderBy: { publishedAt: "desc" }
+    orderBy: { publishedAt: "desc" },
+    take: 30
   });
 
   return items.map((item) => ({
@@ -298,7 +397,8 @@ export async function fetchNews(): Promise<NewsItem[]> {
 export async function fetchAnnouncements(): Promise<AnnouncementItem[]> {
   const items = await prisma.announcement.findMany({
     where: { active: true },
-    orderBy: { createdAt: "desc" }
+    orderBy: { createdAt: "desc" },
+    take: 30
   });
 
   return items.map((item) => ({
@@ -360,26 +460,17 @@ export async function getAgentAssignedCompetitionIds(userId: string) {
 }
 
 export async function agentCanAccessMatch(userId: string, matchId: string) {
-  const user = await prisma.user.findUnique({
-    where: { id: userId },
-    include: {
-      school: { include: { teams: true } },
-      competitionAssignments: { select: { competitionId: true } }
-    }
+  const match = await prisma.match.findFirst({
+    where: {
+      id: matchId,
+      OR: [
+        { agents: { some: { userId } } },
+        { competition: { agents: { some: { userId } } } }
+      ]
+    },
+    select: { id: true }
   });
-  if (!user) return false;
-
-  const match = await prisma.match.findUnique({ where: { id: matchId } });
-  if (!match) return false;
-
-  if (user.competitionAssignments.some((entry) => entry.competitionId === match.competitionId)) {
-    return true;
-  }
-
-  if (!user.schoolId || !user.school) return false;
-
-  const teamIds = user.school.teams.map((t) => t.id);
-  return teamIds.includes(match.homeTeamId) || teamIds.includes(match.awayTeamId);
+  return Boolean(match);
 }
 
 export { recomputeStandings, recomputeCompetitionStandings, fetchKnockoutBracket };

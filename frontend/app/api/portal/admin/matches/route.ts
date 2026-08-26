@@ -4,6 +4,15 @@ import { handleCorsPreflight } from "@/lib/cors";
 import { serializeMatch } from "@/lib/services/football";
 import { jsonData, jsonError, requireUser } from "@/lib/api-utils";
 
+const adminMatchInclude = {
+  competition: true,
+  homeTeam: true,
+  awayTeam: true,
+  events: { orderBy: { minute: "asc" as const } },
+  lineups: true,
+  agents: { include: { user: true } }
+};
+
 export async function OPTIONS(request: Request) {
   return handleCorsPreflight(request) ?? new Response(null, { status: 204 });
 }
@@ -14,13 +23,7 @@ export async function GET(request: Request) {
   if (denied) return denied;
 
   const matches = await prisma.match.findMany({
-    include: {
-      competition: { include: { school: true } },
-      homeTeam: true,
-      awayTeam: true,
-      events: { orderBy: { minute: "asc" } },
-      lineups: true
-    },
+    include: adminMatchInclude,
     orderBy: { kickoff: "desc" },
     take: 100
   });
@@ -44,6 +47,11 @@ export async function POST(request: Request) {
   const groupId = body?.groupId || null;
   const nextMatchId = body?.nextMatchId || null;
   const nextMatchSlot = body?.nextMatchSlot || null;
+  const agentIds: string[] = Array.isArray(body?.agentIds)
+    ? body.agentIds.filter((id: unknown) => typeof id === "string" && id)
+    : body?.agentId
+      ? [String(body.agentId)]
+      : [];
 
   if (!competitionId || !homeTeamId || !awayTeamId || !kickoff) {
     return jsonError("Competition, home team, away team, and kickoff are required.", 400, request);
@@ -62,6 +70,24 @@ export async function POST(request: Request) {
   if (!competition) return jsonError("Competition not found.", 404, request);
   if (!homeTeam || !awayTeam) return jsonError("Team not found.", 404, request);
 
+  const linkedTeams = await prisma.competitionTeam.findMany({
+    where: { competitionId, teamId: { in: [homeTeamId, awayTeamId] } },
+    select: { teamId: true }
+  });
+  const linkedIds = new Set(linkedTeams.map((row) => row.teamId));
+  if (!linkedIds.has(homeTeamId) || !linkedIds.has(awayTeamId)) {
+    return jsonError("Both teams must be linked to the selected competition before scheduling.", 400, request);
+  }
+
+  if (agentIds.length) {
+    const agents = await prisma.user.findMany({
+      where: { id: { in: agentIds }, role: "AGENT", active: true }
+    });
+    if (agents.length !== agentIds.length) {
+      return jsonError("One or more selected agents are invalid or inactive.", 400, request);
+    }
+  }
+
   const stage = body?.stage || (competition.format === "TOURNAMENT" ? "GROUP" : "LEAGUE");
 
   const match = await prisma.match.create({
@@ -78,15 +104,12 @@ export async function POST(request: Request) {
       nextMatchId,
       nextMatchSlot,
       homeScore: 0,
-      awayScore: 0
+      awayScore: 0,
+      agents: agentIds.length
+        ? { create: agentIds.map((userId) => ({ userId })) }
+        : undefined
     },
-    include: {
-      competition: { include: { school: true } },
-      homeTeam: true,
-      awayTeam: true,
-      events: true,
-      lineups: true
-    }
+    include: adminMatchInclude
   });
 
   return jsonData(serializeMatch(match)!, request, 201);

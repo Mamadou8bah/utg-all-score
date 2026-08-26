@@ -26,30 +26,46 @@ export function useApiData<T>(endpoint: string, fallback: T) {
   return { data, loading };
 }
 
+type CompetitionsBundleOptions = {
+  /** Load groups/brackets/stats (heavy). Default is competitions list only. */
+  includeExtras?: boolean;
+};
+
 export function useCompetitionsBundle(
   fallbackCompetitions: Competition[] = [],
   fallbackGroups: Record<string, { id: string; name: string; teams: string[] }[]> = {},
   fallbackBrackets: Record<string, KnockoutRound[]> = {},
-  fallbackStats: Record<string, CompetitionStats> = {}
+  fallbackStats: Record<string, CompetitionStats> = {},
+  options: CompetitionsBundleOptions = {}
 ) {
   const [competitions, setCompetitions] = useState<Competition[]>(fallbackCompetitions);
   const [groups, setGroups] = useState<Record<string, { id: string; name: string; teams: string[] }[]>>(fallbackGroups);
   const [brackets, setBrackets] = useState(fallbackBrackets);
   const [stats, setStats] = useState<Record<string, CompetitionStats>>(fallbackStats);
   const [loading, setLoading] = useState(true);
+  const endpoint = options.includeExtras
+    ? "/api/competitions?include=groups,brackets,stats"
+    : "/api/competitions";
 
   useEffect(() => {
-    fetch("/api/competitions")
+    let active = true;
+    fetch(endpoint)
       .then((res) => res.json())
       .then((json) => {
+        if (!active) return;
         if (json.data?.competitions) setCompetitions(json.data.competitions);
         if (json.data?.groups) setGroups(json.data.groups);
         if (json.data?.brackets) setBrackets(json.data.brackets);
         if (json.data?.stats) setStats(json.data.stats);
       })
       .catch(() => {})
-      .finally(() => setLoading(false));
-  }, []);
+      .finally(() => {
+        if (active) setLoading(false);
+      });
+    return () => {
+      active = false;
+    };
+  }, [endpoint]);
 
   return { competitions, groups, brackets, stats, loading };
 }
@@ -63,6 +79,7 @@ export function useFootballBundle() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    let active = true;
     Promise.all([
       fetch("/api/standings").then((r) => r.json()),
       fetch("/api/fixtures").then((r) => r.json()),
@@ -71,6 +88,7 @@ export function useFootballBundle() {
       fetch("/api/athletes").then((r) => r.json())
     ])
       .then(([standingsRes, fixturesRes, resultsRes, teamsRes, athletesRes]) => {
+        if (!active) return;
         if (standingsRes.data) setStandings(standingsRes.data);
         if (fixturesRes.data) setFixtures(fixturesRes.data);
         if (resultsRes.data) setResults(resultsRes.data);
@@ -78,7 +96,12 @@ export function useFootballBundle() {
         if (athletesRes.data) setAthletes(athletesRes.data);
       })
       .catch(() => {})
-      .finally(() => setLoading(false));
+      .finally(() => {
+        if (active) setLoading(false);
+      });
+    return () => {
+      active = false;
+    };
   }, []);
 
   return { standings, fixtures, results, teams, athletes, loading };

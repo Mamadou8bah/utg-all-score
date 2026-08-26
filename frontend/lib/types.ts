@@ -20,12 +20,22 @@ export type MatchEvent = {
   detail: string;
 };
 
+export type SquadPlayer = {
+  id: string;
+  number: number;
+  name: string;
+  role: string;
+  position?: string;
+};
+
 export type Match = {
   id: string;
   competitionId: string;
   competition: string;
   home: string;
   away: string;
+  homeTeamId?: string;
+  awayTeamId?: string;
   homeScore: number;
   awayScore: number;
   venue: string;
@@ -36,6 +46,11 @@ export type Match = {
   round?: string;
   groupId?: string;
   events: MatchEvent[];
+  agents?: Array<{ id: string; name: string; email: string }>;
+  squads?: {
+    home: SquadPlayer[];
+    away: SquadPlayer[];
+  };
   lineups?: {
     home: {
       starting: { number: number; name: string; role: string }[];

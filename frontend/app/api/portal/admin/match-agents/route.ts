@@ -12,27 +12,34 @@ export async function GET(request: Request) {
   const denied = requireUser(session, ["ADMIN"], request);
   if (denied) return denied;
 
-  const competitionId = new URL(request.url).searchParams.get("competitionId");
+  const matchId = new URL(request.url).searchParams.get("matchId");
   const userId = new URL(request.url).searchParams.get("userId");
 
-  const entries = await prisma.competitionAgent.findMany({
+  const entries = await prisma.matchAgent.findMany({
     where: {
-      ...(competitionId ? { competitionId } : {}),
+      ...(matchId ? { matchId } : {}),
       ...(userId ? { userId } : {})
     },
     include: {
-      competition: true,
+      match: {
+        include: {
+          homeTeam: true,
+          awayTeam: true,
+          competition: true
+        }
+      },
       user: { include: { school: true } }
     },
-    orderBy: [{ competition: { name: "asc" } }, { user: { name: "asc" } }]
+    orderBy: [{ match: { kickoff: "desc" } }, { user: { name: "asc" } }]
   });
 
   return jsonData(
     entries.map((entry) => ({
-      competitionId: entry.competitionId,
+      matchId: entry.matchId,
       userId: entry.userId,
-      competitionName: entry.competition.name,
-      competitionType: entry.competition.type,
+      matchLabel: `${entry.match.homeTeam.name} vs ${entry.match.awayTeam.name}`,
+      competitionName: entry.match.competition.name,
+      kickoff: entry.match.kickoff.toISOString(),
       agentName: entry.user.name,
       agentEmail: entry.user.email,
       schoolName: entry.user.school?.name ?? null
@@ -47,22 +54,24 @@ export async function POST(request: Request) {
   if (denied) return denied;
 
   const body = await request.json().catch(() => null);
-  const competitionId = body?.competitionId;
+  const matchId = body?.matchId;
   const userId = body?.userId;
 
-  if (!competitionId || !userId) {
-    return jsonError("Competition and agent are required.", 400, request);
+  if (!matchId || !userId) {
+    return jsonError("Match and agent are required.", 400, request);
   }
 
-  const competition = await prisma.competition.findUnique({ where: { id: competitionId } });
-  if (!competition) return jsonError("Competition not found.", 404, request);
+  const match = await prisma.match.findUnique({ where: { id: matchId } });
+  if (!match) return jsonError("Match not found.", 404, request);
 
-  const agent = await prisma.user.findUnique({ where: { id: userId, role: "AGENT", active: true } });
-  if (!agent) return jsonError("Active agent not found.", 404, request);
+  const agent = await prisma.user.findUnique({ where: { id: userId } });
+  if (!agent || agent.role !== "AGENT" || !agent.active) {
+    return jsonError("Active agent not found.", 404, request);
+  }
 
-  const entry = await prisma.competitionAgent.upsert({
-    where: { competitionId_userId: { competitionId, userId } },
-    create: { competitionId, userId },
+  const entry = await prisma.matchAgent.upsert({
+    where: { matchId_userId: { matchId, userId } },
+    create: { matchId, userId },
     update: {}
   });
 
@@ -75,20 +84,20 @@ export async function DELETE(request: Request) {
   if (denied) return denied;
 
   const body = await request.json().catch(() => null);
-  const competitionId = body?.competitionId;
+  const matchId = body?.matchId;
   const userId = body?.userId;
 
-  if (!competitionId || !userId) {
-    return jsonError("Competition and agent are required.", 400, request);
+  if (!matchId || !userId) {
+    return jsonError("Match and agent are required.", 400, request);
   }
 
-  const entry = await prisma.competitionAgent.findUnique({
-    where: { competitionId_userId: { competitionId, userId } }
+  const entry = await prisma.matchAgent.findUnique({
+    where: { matchId_userId: { matchId, userId } }
   });
-  if (!entry) return jsonError("Agent is not assigned to this competition.", 404, request);
+  if (!entry) return jsonError("Agent is not assigned to this match.", 404, request);
 
-  await prisma.competitionAgent.delete({
-    where: { competitionId_userId: { competitionId, userId } }
+  await prisma.matchAgent.delete({
+    where: { matchId_userId: { matchId, userId } }
   });
 
   return jsonData({ ok: true }, request);

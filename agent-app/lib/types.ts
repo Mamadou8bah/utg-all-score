@@ -15,7 +15,15 @@ export type MatchEvent = {
   detail: string;
 };
 
-export type LineupPlayer = { number: number; name: string; role: string };
+export type LineupPlayer = { number: number; name: string; role: string; isSub?: boolean };
+
+export type SquadPlayer = {
+  id: string;
+  number: number;
+  name: string;
+  role: string;
+  position?: string;
+};
 
 export type Match = {
   id: string;
@@ -23,13 +31,21 @@ export type Match = {
   competition: string;
   home: string;
   away: string;
+  homeTeamId?: string;
+  awayTeamId?: string;
   homeScore: number;
   awayScore: number;
   venue: string;
   kickoff: string;
-  status: string;
+  status: "LIVE" | "HT" | "FT" | "UPCOMING" | string;
   timer?: string;
+  stage?: string;
+  round?: string;
   events: MatchEvent[];
+  squads?: {
+    home: SquadPlayer[];
+    away: SquadPlayer[];
+  };
   lineups?: {
     home: { starting: LineupPlayer[]; subs: LineupPlayer[] };
     away: { starting: LineupPlayer[]; subs: LineupPlayer[] };

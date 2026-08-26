@@ -29,11 +29,10 @@ export async function GET(request: Request) {
       active: agent.active,
       schoolId: agent.schoolId,
       schoolName: agent.school?.name ?? null,
-      assignedCompetitions: agent.competitionAssignments
-        .filter((entry) => entry.competition.type === "GENERAL")
-        .map((entry) => ({
+      assignedCompetitions: agent.competitionAssignments.map((entry) => ({
           id: entry.competitionId,
-          name: entry.competition.name
+          name: entry.competition.name,
+          type: entry.competition.type
         })),
       createdAt: agent.createdAt.toISOString()
     })),

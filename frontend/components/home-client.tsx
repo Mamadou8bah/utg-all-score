@@ -4,7 +4,7 @@ import { useState, useMemo, useEffect } from "react";
 import Link from "next/link";
 import { FixtureCard } from "@/components/cards";
 import { type Competition, type Match } from "@/lib/types";
-import { useApiData, useCompetitionsBundle } from "@/lib/use-api-data";
+import { useApiData } from "@/lib/use-api-data";
 import { CompetitionSwitcher } from "@/components/competition-switcher";
 import { DatePickerTimeline } from "@/components/date-picker-timeline";
 import { MatchDetailsModal } from "@/components/match-details-modal";
@@ -17,7 +17,6 @@ export default function HomeClient() {
   const { data: fixtures } = useApiData<Match[]>("/api/fixtures", []);
   const { data: results } = useApiData<Match[]>("/api/results", []);
   const { data: newsItems } = useApiData<any[]>("/api/news", []);
-  const { competitions } = useCompetitionsBundle();
   const [selectedComp, setSelectedComp] = useState<Competition | null>(null);
   const [selectedDate, setSelectedDate] = useState<Date>(new Date());
   const [selectedMatch, setSelectedMatch] = useState<Match | null>(null);
@@ -38,12 +37,6 @@ export default function HomeClient() {
     }, 5000);
     return () => clearInterval(timer);
   }, [featuredNews.length]);
-
-  useEffect(() => {
-    if (!selectedComp && competitions.length) {
-      setSelectedComp(competitions[0]);
-    }
-  }, [competitions, selectedComp]);
 
   const filteredFixtures = useMemo(
     () =>

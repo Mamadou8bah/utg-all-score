@@ -43,6 +43,15 @@ export async function POST(request: Request) {
     return jsonError("Competition and team are required.", 400, request);
   }
 
+  const competition = await prisma.competition.findUnique({ where: { id: competitionId } });
+  const team = await prisma.team.findUnique({ where: { id: teamId } });
+  if (!competition) return jsonError("Competition not found.", 404, request);
+  if (!team) return jsonError("Team not found.", 404, request);
+
+  if (competition.type === "SCHOOL" && competition.schoolId && team.schoolId && competition.schoolId !== team.schoolId) {
+    return jsonError("School competitions can only include teams from that school.", 400, request);
+  }
+
   const entry = await prisma.competitionTeam.upsert({
     where: { competitionId_teamId: { competitionId, teamId } },
     create: { competitionId, teamId },
