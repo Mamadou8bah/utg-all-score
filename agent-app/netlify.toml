@@ -1,0 +1,4 @@
+[build]
+  base = "agent-app"
+  command = "npm run build"
+  publish = ".next"

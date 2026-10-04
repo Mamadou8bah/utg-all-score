@@ -68,6 +68,38 @@ The latest production and mobile review, verified checks, and remaining deployme
 
 ## Production deployment
 
+### Netlify
+
+The root `netlify.toml` configures the public app with base directory `frontend`,
+build command `npm run build`, and publish directory `.next`. Netlify automatically
+uses its Next.js adapter for the API routes and server rendering.
+
+Add the values from `frontend/.env.example` to Netlify's environment variables
+for both builds and functions. Local `.env` files are not committed or uploaded.
+Use production PostgreSQL URLs and set `AUTH_SECRET`, portal URLs, and upload
+credentials as described below. Provision the database schema separately before
+using the app; the build does not run migrations or seed the database.
+
+Push the configuration to the connected branch and trigger a new deploy. The log
+should run `prisma generate && next build` and package the Next.js server functions.
+Publishing `frontend` directly without a build only uploads the source files.
+
+Deploy the admin and agent portals as separate Netlify projects connected to this
+repository. Set each project's **Base directory** in Netlify before deploying so
+Netlify discovers that app's `netlify.toml` instead of the public site's root config:
+
+| Project | Base directory | Configuration | Build command | Publish directory |
+|---------|----------------|---------------|---------------|-------------------|
+| Public | `frontend` | `netlify.toml` (repository root) | `npm run build` | `.next` |
+| Admin | `admin-app` | `admin-app/netlify.toml` | `npm run build` | `.next` |
+| Agent | `agent-app` | `agent-app/netlify.toml` | `npm run build` | `.next` |
+
+For both portals, configure `NEXT_PUBLIC_API_URL` with the deployed public site's
+HTTPS origin (without `/api`) and `NEXT_PUBLIC_PUBLIC_SITE_URL` with that same
+origin. Set these before building and redeploy after changing them. On the public
+project, set `ADMIN_APP_URL` and `AGENT_APP_URL` to the respective portal origins
+and redeploy so authentication requests are allowed by CORS.
+
 ### Vercel (recommended)
 
 All three apps deploy as **separate Vercel projects** with **Vercel Postgres** for the database.

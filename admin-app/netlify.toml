@@ -1,0 +1,4 @@
+[build]
+  base = "admin-app"
+  command = "npm run build"
+  publish = ".next"
