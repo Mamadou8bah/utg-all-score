@@ -2,13 +2,14 @@
 
 import { useMemo, useState } from "react";
 import { type Competition } from "@/lib/types";
+import { DataFeedback } from "@/components/data-feedback";
 import { useCompetitionsBundle } from "@/lib/use-api-data";
 import { CompetitionDetailsModal } from "@/components/competition-details-modal";
 import { ChevronRight, LayoutGrid, Trophy } from "lucide-react";
 
 export default function StandingsClient() {
   const [selectedComp, setSelectedComp] = useState<Competition | null>(null);
-  const { competitions } = useCompetitionsBundle();
+  const { competitions, loading, error, reload } = useCompetitionsBundle();
 
   const filteredCompetitions = useMemo(
     () => competitions.slice().sort((a, b) => a.name.localeCompare(b.name)),
@@ -18,7 +19,7 @@ export default function StandingsClient() {
   const CompetitionListItem = ({ competition }: { competition: Competition }) => (
     <button
       onClick={() => setSelectedComp(competition)}
-      className="group flex w-full items-center gap-3 rounded-2xl border border-slate-200 bg-white p-3 text-left shadow-sm transition hover:border-primary hover:bg-slate-50"
+      className="explore-row group w-full text-left"
     >
       <div className="flex h-12 w-12 shrink-0 items-center justify-center overflow-hidden rounded-xl bg-slate-100">
         {competition.logo ? (
@@ -47,8 +48,9 @@ export default function StandingsClient() {
 
   return (
     <div className="page-shell section-space pb-36">
-      {filteredCompetitions.length > 0 ? (
-        <div className="space-y-2">
+      <h1 className="page-title">Leagues</h1>
+      {loading || error ? <DataFeedback loading={loading} error={error} onRetry={reload} /> : filteredCompetitions.length > 0 ? (
+        <div>
           {filteredCompetitions.map((competition) => (
             <CompetitionListItem key={competition.id} competition={competition} />
           ))}

@@ -20,7 +20,7 @@ Recommended production domains (example):
 
 ## Deploy order
 
-1. **Public API** (`frontend`) — includes SQLite database and migrations
+1. **Public API** (`frontend`) — uses PostgreSQL and applies migrations
 2. **Admin app** — points to the live API URL
 3. **Agent app** — points to the live API URL
 
@@ -33,7 +33,10 @@ After all three are live, set CORS on the API (`ADMIN_APP_URL`, `AGENT_APP_URL`)
 ### 1. Public API (`frontend/.env`)
 
 ```env
-DATABASE_URL="file:/app/prisma/prod.db"
+DATABASE_URL="postgresql://user:password@host:5432/allscore?sslmode=require"
+DIRECT_URL="postgresql://user:password@host:5432/allscore?sslmode=require"
+ADMIN_INITIAL_PASSWORD="unique-initial-password-at-least-12-characters"
+SETUP_SECRET="unique-random-setup-secret"
 AUTH_SECRET="long-random-secret-min-32-chars"
 NEXT_PUBLIC_APP_URL="https://allscore.utgsu.edu.gm"
 ADMIN_APP_URL="https://admin.allscore.utgsu.edu.gm"
@@ -41,10 +44,9 @@ AGENT_APP_URL="https://agent.allscore.utgsu.edu.gm"
 CLOUDINARY_CLOUD_NAME="..."
 CLOUDINARY_API_KEY="..."
 CLOUDINARY_API_SECRET="..."
-RUN_SEED="true"
 ```
 
-Set `RUN_SEED=true` only on the **first** deploy, then set it back to `false`.
+Create the initial admin with `POST /api/setup/admin` and header `x-setup-secret`. Optional demo data is available through `POST /api/setup/seed` on an empty sports database. Remove `SETUP_SECRET` after setup.
 
 ### 2. Admin app (`admin-app` — build-time)
 
@@ -75,7 +77,7 @@ cp .env.example .env
 docker compose up -d --build
 ```
 
-SQLite is stored in a Docker volume (`sqlite_data`). Back it up regularly.
+Connect to a PostgreSQL service and configure scheduled database backups.
 
 ### Admin (separate host or same VPS)
 
@@ -100,8 +102,7 @@ docker compose up -d --build
 ```bash
 # API
 docker build -t utg-allscore-api ./frontend
-docker run -d -p 3000:3000 --env-file frontend/.env \
-  -v utg_sqlite:/app/prisma utg-allscore-api
+docker run -d -p 3000:3000 --env-file frontend/.env utg-allscore-api
 
 # Admin
 docker build -t utg-allscore-admin \
@@ -133,7 +134,7 @@ Put **nginx** or **Caddy** in front of each container for HTTPS.
 5. Update `ADMIN_APP_URL` / `AGENT_APP_URL` on the API service with final admin/agent URLs
 6. Redeploy admin + agent after URL changes
 
-The API service includes a **1 GB persistent disk** for SQLite at `/app/prisma`.
+Provide PostgreSQL DATABASE_URL and DIRECT_URL values for the API service.
 
 Health check: `GET /api/health`
 
@@ -153,14 +154,14 @@ For each service:
 
 1. Set root directory in Railway settings
 2. Add env vars (same as above)
-3. For the API: add a **volume** mounted at `/app/prisma`
+3. For the API: provision PostgreSQL and set DATABASE_URL and DIRECT_URL
 4. Generate a public domain or attach custom domain per service
 
 ---
 
-## Option D — Vercel (admin + agent only) + API elsewhere
+## Option D — Vercel
 
-The **public API must not go on Vercel** if you keep SQLite (no persistent filesystem). Host the API on Render, Railway, or a VPS.
+All three apps can deploy to Vercel with a managed PostgreSQL database. See [VERCEL.md](VERCEL.md) for the API deployment.
 
 Admin and agent can deploy to Vercel:
 
@@ -179,8 +180,8 @@ Admin and agent can deploy to Vercel:
 - [ ] Agent login works for a school agent account
 - [ ] Logo/image upload works (Cloudinary configured)
 - [ ] CORS: admin and agent can call API (no browser CORS errors)
-- [ ] `RUN_SEED` set to `false` after first deploy
-- [ ] SQLite volume backed up
+- [ ] `SETUP_SECRET` removed after initial setup
+- [ ] PostgreSQL backups configured
 
 ---
 
@@ -201,15 +202,15 @@ docker compose up --build
 |-------|-----|
 | Admin/agent show "Failed to fetch" | Check `NEXT_PUBLIC_API_URL` matches live API; rebuild app |
 | CORS errors in browser | Set `ADMIN_APP_URL` / `AGENT_APP_URL` on API to exact portal origins (no trailing slash) |
-| Database empty after restart | Ensure persistent volume is mounted at `/app/prisma` |
+| Database empty after restart | Check DATABASE_URL points to the persistent PostgreSQL service |
 | Migrations failed | Check API logs; run `prisma migrate deploy` inside container |
-| Need to re-seed | `docker exec <api-container> npx prisma db seed` |
+| Need to re-seed | Use the setup endpoint only on an empty database; production seeding refuses populated data |
 
 ---
 
 ## Security notes
 
 - Change `AUTH_SECRET` to a strong random value
-- Change default admin password after first login
+- Set a unique ADMIN_INITIAL_PASSWORD before creating the admin
 - Use HTTPS on all three domains
 - Do not commit `.env` files

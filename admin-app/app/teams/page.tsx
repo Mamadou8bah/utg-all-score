@@ -39,11 +39,13 @@ export default function TeamsPage() {
   async function loadSquad(teamId: string) {
     setSquadTeamId(teamId);
     setEditingPlayerId(null);
-    setPlayers(await apiJson<Player[]>(`/api/portal/admin/teams/${teamId}/players`));
+    setPlayers([]);
+    try { setPlayers(await apiJson<Player[]>(`/api/portal/admin/teams/${teamId}/players`)); }
+    catch { setMessage("Could not load this squad. Check your connection and try again."); }
   }
 
   useEffect(() => {
-    load().catch(() => {});
+    load().catch(() => setMessage("Unable to load updates. Check your connection and try again."));
   }, []);
 
   async function handleCreate(event: React.FormEvent) {
@@ -56,7 +58,7 @@ export default function TeamsPage() {
     setMessage(res.ok ? "Team created." : json.error || "Failed.");
     if (res.ok) {
       setForm({ name: "", schoolId: "", tone: "", logo: "" });
-      load();
+      void load().catch(() => setMessage("Could not refresh the latest data. Check your connection and try again."));
     }
   }
 
@@ -69,7 +71,7 @@ export default function TeamsPage() {
     setMessage(res.ok ? "Team updated." : json.error || "Failed.");
     if (res.ok) {
       setEditingTeamId(null);
-      load();
+      void load().catch(() => setMessage("Could not refresh the latest data. Check your connection and try again."));
     }
   }
 
@@ -80,7 +82,7 @@ export default function TeamsPage() {
     setMessage(res.ok ? "Team deleted." : json.error || "Failed.");
     if (res.ok) {
       if (squadTeamId === id) setSquadTeamId(null);
-      load();
+      void load().catch(() => setMessage("Could not refresh the latest data. Check your connection and try again."));
     }
   }
 
@@ -100,7 +102,7 @@ export default function TeamsPage() {
     if (res.ok) {
       setPlayerForm({ number: "", name: "", role: "MF", position: "" });
       loadSquad(squadTeamId);
-      load();
+      void load().catch(() => setMessage("Could not refresh the latest data. Check your connection and try again."));
     }
   }
 
@@ -118,7 +120,7 @@ export default function TeamsPage() {
     if (res.ok && squadTeamId) {
       setEditingPlayerId(null);
       loadSquad(squadTeamId);
-      load();
+      void load().catch(() => setMessage("Could not refresh the latest data. Check your connection and try again."));
     }
   }
 
@@ -126,7 +128,7 @@ export default function TeamsPage() {
     if (!confirm("Remove this player?")) return;
     const res = await apiFetch(`/api/portal/admin/players/${id}`, { method: "DELETE" });
     if (res.ok && squadTeamId) loadSquad(squadTeamId);
-    load();
+    void load().catch(() => setMessage("Could not refresh the latest data. Check your connection and try again."));
   }
 
   return (

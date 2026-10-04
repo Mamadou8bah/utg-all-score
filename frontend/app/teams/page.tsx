@@ -1,6 +1,7 @@
 "use client";
 
 import { PageHeader } from "@/components/ui";
+import { DataFeedback } from "@/components/data-feedback";
 import { useApiData } from "@/lib/use-api-data";
 import type { TeamProfile } from "@/lib/types";
 
@@ -17,7 +18,9 @@ function TeamMark({ name, logo }: { name: string; logo?: string }) {
 }
 
 export default function TeamsPage() {
-  const { data: teams } = useApiData<TeamProfile[]>("/api/teams", []);
+  const { data: teams, loading, error, reload } = useApiData<TeamProfile[]>("/api/teams", []);
+
+  if (loading || error) return <div className="page-shell"><DataFeedback loading={loading} error={error} onRetry={reload} /></div>;
 
   return (
     <div className="page-shell section-space space-y-8">

@@ -31,7 +31,7 @@ export const DatePickerTimeline = ({
   }
 
   return (
-    <div className="flex items-center gap-1 overflow-x-auto pb-2 px-1 no-scrollbar">
+    <div className="date-strip no-scrollbar" role="group" aria-label="Match dates">
       <input
         ref={inputRef}
         type="date"
@@ -45,7 +45,7 @@ export const DatePickerTimeline = ({
         type="button"
         onClick={openCalendar}
         aria-label="Pick a date"
-        className="flex-shrink-0 rounded-xl bg-white p-3 shadow-sm border border-slate-100 active:scale-95 transition-all text-text-secondary hover:border-blue-300 hover:text-primary"
+        className="date-strip__calendar"
       >
         <CalendarIcon size={18} />
       </button>
@@ -59,22 +59,11 @@ export const DatePickerTimeline = ({
             key={date.toISOString()}
             type="button"
             onClick={() => onDateChange(date)}
-            className={cn(
-              "relative flex flex-col items-center justify-center min-w-[64px] py-2.5 rounded-2xl transition-all border",
-              isSelected
-                ? "bg-primary border-primary text-white shadow-md"
-                : "bg-white border-slate-100 text-text-secondary hover:border-slate-200"
-            )}
+            aria-pressed={isSelected}
+            className={cn("date-strip__day", isSelected && "date-strip__day--active")}
           >
-            <span
-              className={cn(
-                "text-[10px] uppercase font-bold tracking-tighter",
-                isSelected ? "text-slate-300" : "text-slate-500"
-              )}
-            >
-              {format(date, "EEE")}
-            </span>
-            <span className="text-sm font-black mt-0.5">{format(date, "dd")}</span>
+            <span className="date-strip__wd">{format(date, "EEE")}</span>
+            <span className="date-strip__num">{format(date, "dd")}</span>
             {isToday && !isSelected ? (
               <div className="absolute top-1.5 right-2 h-1 w-1 rounded-full bg-primary" />
             ) : null}

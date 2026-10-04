@@ -9,9 +9,9 @@ export function AppShell({ children }: { children: React.ReactNode }) {
   return (
     <>
       <SplashScreen />
-      <div className="flex flex-col min-h-[var(--app-height)] bg-background">
+      <div className="app-shell">
         <Navbar />
-        <main className="flex-1 mobile-safe-bottom w-full overflow-x-hidden pt-2">{children}</main>
+        <main className="app-main">{children}</main>
         <MobileNav />
         <PwaBoot />
       </div>

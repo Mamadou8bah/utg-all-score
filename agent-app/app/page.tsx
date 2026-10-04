@@ -24,6 +24,7 @@ export default function AgentDashboardPage() {
   const [homeSubs, setHomeSubs] = useState<LineupPlayer[]>([]);
   const [awaySubs, setAwaySubs] = useState<LineupPlayer[]>([]);
   const [message, setMessage] = useState("");
+  const [saving, setSaving] = useState(false);
 
   const selected = matches.find((m) => m.id === selectedId);
   const homeSquad = selected?.squads?.home ?? [];
@@ -50,7 +51,7 @@ export default function AgentDashboardPage() {
 
   useEffect(() => {
     if (!selectedId) return;
-    loadMatchDetail(selectedId).catch(() => {});
+    loadMatchDetail(selectedId).catch(() => setMessage("Unable to load this match. Check your connection and try again."));
   }, [selectedId]);
 
   useEffect(() => {
@@ -95,6 +96,9 @@ export default function AgentDashboardPage() {
   }
 
   async function saveMatch() {
+    if (saving) return;
+    setSaving(true);
+    try {
     if (!selectedId) return;
     if (selected?.status === "UPCOMING" && scores.status === "UPCOMING") {
       const scoreChanging = scores.homeScore !== selected.homeScore || scores.awayScore !== selected.awayScore;
@@ -109,12 +113,19 @@ export default function AgentDashboardPage() {
     });
     const json = await res.json().catch(() => null);
     setMessage(res.ok ? "Match updated on public site." : json?.error || "Failed to update match.");
+    if (!res.ok) return;
     await load();
     if (selectedId) await loadMatchDetail(selectedId);
+    } catch (error) {
+      setMessage(error instanceof Error ? error.message : "Unable to save changes. Please try again.");
+    } finally { setSaving(false); }
   }
 
   async function addEvent(event: React.FormEvent) {
     event.preventDefault();
+    if (saving) return;
+    setSaving(true);
+    try {
     if (!selectedId) return;
     if (selected?.status === "UPCOMING") {
       setMessage("Set status to Live before adding match events.");
@@ -126,13 +137,20 @@ export default function AgentDashboardPage() {
     });
     const json = await res.json().catch(() => null);
     setMessage(res.ok ? "Event added." : json?.error || "Failed to add event.");
+    if (!res.ok) return;
     setEventForm({ minute: "", type: "Goal", player: "", team: selected?.home ?? "", detail: "" });
     await load();
     await loadMatchDetail(selectedId);
+    } catch (error) {
+      setMessage(error instanceof Error ? error.message : "Unable to save changes. Please try again.");
+    } finally { setSaving(false); }
   }
 
   async function saveLineups(event: React.FormEvent) {
     event.preventDefault();
+    if (saving) return;
+    setSaving(true);
+    try {
     if (!selectedId) return;
     const home = [
       ...homeLineup.filter((p) => p.name.trim()).map((p) => ({ ...p, isSub: false })),
@@ -148,8 +166,12 @@ export default function AgentDashboardPage() {
     });
     const json = await res.json().catch(() => null);
     setMessage(res.ok ? "Lineups published." : json?.error || "Failed to save lineups.");
+    if (!res.ok) return;
     await load();
     await loadMatchDetail(selectedId);
+    } catch (error) {
+      setMessage(error instanceof Error ? error.message : "Unable to save changes. Please try again.");
+    } finally { setSaving(false); }
   }
 
   function updateLineupRow(
@@ -367,7 +389,7 @@ export default function AgentDashboardPage() {
               </Field>
             </div>
             <div className="mt-4">
-              <Button onClick={saveMatch}>Publish to public site</Button>
+              <Button disabled={saving} onClick={saveMatch}>Publish to public site</Button>
             </div>
           </Card>
 
@@ -498,7 +520,7 @@ export default function AgentDashboardPage() {
                   </Field>
                 )}
                 <div className="md:col-span-2">
-                  <Button type="submit" variant="secondary">
+                  <Button disabled={saving} type="submit" variant="secondary">
                     Add event
                   </Button>
                 </div>
@@ -528,7 +550,7 @@ export default function AgentDashboardPage() {
                   </Button>
                 ) : null}
               </div>
-              <Button type="submit">Publish lineups</Button>
+              <Button disabled={saving} type="submit">Publish lineups</Button>
             </form>
           </Card>
         </>

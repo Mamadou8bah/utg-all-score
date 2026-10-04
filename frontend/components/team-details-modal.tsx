@@ -1,5 +1,7 @@
 "use client";
 
+import { DetailDialog } from "@/components/detail-dialog";
+
 import { useMemo } from "react";
 import { type Match } from "@/lib/types";
 import { useFootballBundle } from "@/lib/use-api-data";
@@ -20,24 +22,24 @@ export const TeamDetailsModal = ({
     const all = [...results, ...fixtures];
     return all.filter(m => m.home === teamName || m.away === teamName)
       .sort((a, b) => new Date(b.kickoff).getTime() - new Date(a.kickoff).getTime());
-  }, [teamName]);
+  }, [teamName, results, fixtures]);
 
-  const squad = useMemo(() => athletes.filter(a => a.team === teamName), [teamName]);
+  const squad = useMemo(() => athletes.filter(a => a.team === teamName), [teamName, athletes]);
 
   if (!teamData) {
     return (
-      <div className="fixed inset-0 z-[110] flex items-end justify-center bg-slate-900 p-4 md:items-center">
+      <DetailDialog label={teamName} onClose={onClose} className="fixed inset-0 z-[110] flex items-end justify-center bg-slate-900 p-4 md:items-center">
         <div className="w-full max-w-lg rounded-[32px] bg-white p-6 shadow-float">
           <p className="font-semibold text-slate-950">{teamName}</p>
           <p className="mt-2 text-sm text-text-secondary">Team profile loading or not yet registered.</p>
           <button onClick={onClose} className="mt-4 rounded-full bg-slate-100 px-4 py-2 text-sm">Close</button>
         </div>
-      </div>
+      </DetailDialog>
     );
   }
 
   return (
-    <div className="fixed inset-0 z-[100] flex items-end justify-center bg-slate-900 sm:items-center sm:p-4">
+    <DetailDialog label={teamName} onClose={onClose} className="fixed inset-0 z-[100] flex items-end justify-center bg-slate-900 sm:items-center sm:p-4">
       <div className="w-full max-w-xl bg-slate-50 rounded-t-[2.5rem] sm:rounded-[2.5rem] shadow-2xl flex flex-col max-h-[92vh] overflow-hidden animate-in slide-in-from-bottom duration-300">
         
         {/* Header / Cover */}
@@ -143,6 +145,6 @@ export const TeamDetailsModal = ({
 
         </div>
       </div>
-    </div>
+    </DetailDialog>
   );
 };

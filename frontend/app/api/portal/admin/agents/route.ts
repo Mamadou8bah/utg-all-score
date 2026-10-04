@@ -46,13 +46,13 @@ export async function POST(request: Request) {
   if (denied) return denied;
 
   const body = await request.json().catch(() => null);
-  const email = body?.email?.trim()?.toLowerCase();
-  const name = body?.name?.trim();
+  const email = typeof body?.email === "string" ? body.email.trim().toLowerCase() : "";
+  const name = typeof body?.name === "string" ? body.name.trim() : "";
   const password = body?.password;
   const schoolId = body?.schoolId;
 
-  if (!email || !name || !password || !schoolId) {
-    return jsonError("Name, email, password, and school are required.", 400, request);
+  if (!email || email.length > 254 || !name || name.length > 100 || typeof password !== "string" || password.length < 8 || password.length > 256 || typeof schoolId !== "string" || !schoolId) {
+    return jsonError("Name, email, school, and a password of 8 to 256 characters are required.", 400, request);
   }
 
   const school = await prisma.school.findUnique({ where: { id: schoolId } });

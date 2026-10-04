@@ -31,12 +31,27 @@ export async function apiFetch(path: string, init: RequestInit = {}) {
   }
   if (token) headers.set("Authorization", `Bearer ${token}`);
 
-  return fetch(apiUrl(path, API_URL), { ...init, headers });
+  let response: Response;
+  try {
+    response = await fetch(apiUrl(path, API_URL), {
+      ...init, cache: "no-store", headers, signal: init.signal ?? AbortSignal.timeout(isFormData ? 60000 : 30000)
+    });
+    if (!response.headers.get("content-type")?.includes("application/json")) {
+      response = Response.json({ error: "The server is unavailable. Please try again." }, { status: response.ok ? 502 : response.status });
+    }
+  } catch {
+    response = Response.json({ error: "Unable to connect. Check your connection and try again." }, { status: 503 });
+  }
+  if (response.status === 401 && path !== "/api/auth/login") {
+    clearToken();
+    window.location.replace("/login");
+  }
+  return response;
 }
 
 export async function apiJson<T>(path: string, init?: RequestInit) {
   const res = await apiFetch(path, init);
-  const json = await res.json();
+  const json = await res.json().catch(() => ({ error: "The server returned an unexpected response. Please try again." }));
   if (!res.ok) throw new Error(json.error || "Request failed");
   return json.data as T;
 }
@@ -45,7 +60,7 @@ export async function uploadImage(file: File): Promise<string> {
   const formData = new FormData();
   formData.append("file", file);
   const res = await apiFetch("/api/portal/admin/upload", { method: "POST", body: formData });
-  const json = await res.json();
+  const json = await res.json().catch(() => ({ error: "The server returned an unexpected response. Please try again." }));
   if (!res.ok) throw new Error(json.error || "Upload failed");
   return json.data.url as string;
 }

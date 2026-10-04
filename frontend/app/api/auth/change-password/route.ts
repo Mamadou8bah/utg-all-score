@@ -12,14 +12,14 @@ export async function POST(request: Request) {
   if (!user) return jsonError("Not authenticated.", 401, request);
 
   const body = await request.json().catch(() => null);
-  const currentPassword = body?.currentPassword?.trim();
-  const newPassword = body?.newPassword?.trim();
+  const currentPassword = typeof body?.currentPassword === "string" ? body.currentPassword : "";
+  const newPassword = typeof body?.newPassword === "string" ? body.newPassword : "";
 
   if (!currentPassword || !newPassword) {
     return jsonError("Current password and new password are required.", 400, request);
   }
 
-  if (newPassword.length < 8) {
+  if (newPassword.length < 8 || newPassword.length > 256) {
     return jsonError("New password must be at least 8 characters.", 400, request);
   }
 

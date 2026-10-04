@@ -1,7 +1,7 @@
 "use client";
 
 import type React from "react";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState, useRef } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { appMeta } from "@/lib/data";
@@ -78,7 +78,7 @@ export const PageHeader = ({
   description: string;
   actions?: React.ReactNode;
 }) => (
-  <div className="flex flex-col gap-3 md:flex-row md:items-end md:justify-between px-1">
+  <div className="page-heading flex flex-col gap-3 md:flex-row md:items-end md:justify-between">
     <div className="max-w-2xl">
       <p className="text-[10px] font-bold uppercase tracking-[0.32em] text-primary">{eyebrow}</p>
       <h1 className="mt-2 text-3xl font-bold tracking-tight text-slate-950 md:text-5xl">{title}</h1>
@@ -163,10 +163,20 @@ export const Modal = ({
   onClose: () => void;
   children: React.ReactNode;
 }) => {
+  const dialogRef = useRef<HTMLDialogElement>(null);
+  useEffect(() => {
+    const dialog = dialogRef.current;
+    if (!dialog || !open) return;
+    const focused = document.activeElement as HTMLElement | null;
+    dialog.showModal();
+    return () => { dialog.close(); focused?.focus(); };
+  }, [open]);
   if (!open) return null;
 
   return (
-    <div className="fixed inset-0 z-[60] flex items-center justify-center bg-slate-900/60 p-4 pb-[max(1rem,env(safe-area-inset-bottom))]">
+    <dialog ref={dialogRef} aria-label={title} onCancel={(event) => { event.preventDefault(); onClose(); }}
+      onClick={(event) => { if (event.target === event.currentTarget) onClose(); }}
+      className="fixed inset-0 m-0 h-dvh max-h-none w-screen max-w-none bg-slate-900/60 p-4 pb-[max(1rem,env(safe-area-inset-bottom))] open:flex items-center justify-center">
       <div className="flex w-full max-w-lg max-h-[min(85dvh,calc(100dvh-2rem))] flex-col overflow-hidden rounded-[32px] bg-white p-6 shadow-float animate-slideUp">
         <div className="flex shrink-0 items-start justify-between gap-4">
           <div>
@@ -179,70 +189,34 @@ export const Modal = ({
         </div>
         <div className="mt-5 min-h-0 overflow-y-auto">{children}</div>
       </div>
-    </div>
+    </dialog>
   );
 };
 
 export const Navbar = () => {
   const pathname = usePathname();
-
+  const links = [
+    { label: "Matches", path: "/" },
+    { label: "Live", path: "/live" },
+    { label: "Leagues", path: "/standings" },
+    { label: "News", path: "/news" },
+    { label: "More", path: "/more" }
+  ];
   return (
-    <header className="sticky top-0 z-40 border-b border-slate-100 bg-background">
-      <div className="mx-auto flex max-w-7xl items-center justify-between px-4 py-2 sm:px-6 lg:px-8 h-16 relative">
-        {/* PC Version Navigation (Left) */}
-        <nav className="hidden md:flex items-center gap-1 flex-1">
-          {[
-            { label: "Home", path: "/", icon: <Home size={18} /> },
-            { label: "Live", path: "/live", icon: <Radio size={18} /> },
-            { label: "Competitions", path: "/standings", icon: <LayoutGrid size={18} /> },
-            { label: "Fixtures", path: "/fixtures", icon: <CalendarDays size={18} /> },
-          ].map((item) => (
-            <Link 
-              key={item.path}
-              href={item.path}
-              className={cn(
-                "flex items-center gap-2 px-4 py-2 rounded-2xl text-sm font-black transition-all",
-                pathname === item.path 
-                  ? "bg-blue-50 text-primary shadow-sm" 
-                  : "text-text-secondary hover:bg-slate-50 hover:text-slate-950"
-              )}
-            >
-              {item.icon}
-              {item.label}
-            </Link>
-          ))}
-        </nav>
-
-        {/* Center Logo (desktop only) */}
-        <div className="absolute left-1/2 -translate-x-1/2 hidden md:flex items-center z-50">
-          <Link href="/" className="flex items-center">
-            <div className="relative h-11 w-11 overflow-hidden transition-transform active:scale-95">
-              <img 
-                src="https://res.cloudinary.com/dflsnes44/image/upload/q_auto/f_auto/v1775301714/ChatGPT_Image_Apr_4_2026_11_16_34_AM_dxzi5q.png" 
-                alt="UTG AllScore Logo" 
-                className="h-full w-full object-contain"
-              />
-            </div>
+    <header className="top-bar">
+      <Link href="/" className="top-bar__brand" aria-label="UTG AllScore home">
+        <img src="/images/utg-allscore-logo.png" alt="UTG AllScore logo" width={36} height={36} className="top-bar__logo" />
+        <span>UTG AllScore</span>
+      </Link>
+      <nav className="top-bar__nav" aria-label="Main navigation">
+        {links.map((link) => (
+          <Link key={link.path} href={link.path} aria-current={pathname === link.path ? "page" : undefined}
+            className={cn("top-bar__link", pathname === link.path && "top-bar__link--active")}>
+            {link.label}
           </Link>
-        </div>
-
-        {/* PC Version Navigation (Right) */}
-        <div className="hidden md:flex items-center gap-2 flex-1 justify-end">
-          <NotificationToggle />
-          <Link href="/news" className={cn(
-            "text-sm font-black text-text-secondary hover:text-slate-950 px-4 py-2 rounded-2xl transition-all flex items-center gap-2",
-            pathname === "/news" && "bg-blue-50 text-primary shadow-sm"
-          )}>
-            <Newspaper size={18} />
-            News
-          </Link>
-        </div>
-
-        {/* Mobile / PWA: notifications only */}
-        <div className="md:hidden flex items-center justify-end w-full">
-           <NotificationToggle />
-        </div>
-      </div>
+        ))}
+      </nav>
+      <div className="top-bar__actions"><NotificationToggle /></div>
     </header>
   );
 };

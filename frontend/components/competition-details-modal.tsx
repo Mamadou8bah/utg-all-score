@@ -1,6 +1,9 @@
 "use client";
 
+import { DetailDialog } from "@/components/detail-dialog";
+
 import { useState, useMemo } from "react";
+import { sharePage } from "@/lib/share";
 import { Badge, Button, Tabs } from "@/components/ui";
 import { X, Trophy, CalendarDays, LayoutGrid, Info, ChevronRight, Share2 } from "lucide-react";
 import { 
@@ -29,6 +32,7 @@ export const CompetitionDetailsModal = ({
     {},
     { includeExtras: true }
   );
+  const [shareMessage, setShareMessage] = useState<string | null>(null);
   const [selectedTeam, setSelectedTeam] = useState<string | null>(null);
   const [selectedMatch, setSelectedMatch] = useState<Match | null>(null);
 
@@ -173,7 +177,7 @@ export const CompetitionDetailsModal = ({
   }, [allCompStandings, bracket, compFixtures, compResults, compStats, competition, groups, leagueStandings]);
 
   return (
-    <div className="fixed inset-0 z-[100] flex items-stretch justify-center bg-slate-50 sm:items-center sm:bg-slate-900 sm:p-4">
+    <DetailDialog label={competition.name} onClose={onClose} className="fixed inset-0 z-[100] flex items-stretch justify-center bg-slate-50 sm:items-center sm:bg-slate-900 sm:p-4">
       <div 
         className="relative flex h-[100dvh] w-full max-w-4xl flex-col overflow-hidden bg-slate-50 shadow-2xl animate-in slide-in-from-bottom-full duration-300 sm:h-[92vh] sm:rounded-[40px]"
         onClick={(e) => e.stopPropagation()}
@@ -207,6 +211,7 @@ export const CompetitionDetailsModal = ({
             <div className="flex shrink-0 items-center gap-2 sm:gap-3">
                <button 
                  title="Share Competition"
+                 onClick={async () => setShareMessage(await sharePage(competition.name, `${window.location.origin}/standings`))}
                  className="hidden h-11 w-11 items-center justify-center rounded-full bg-slate-100 text-slate-500 transition-all hover:bg-slate-200 active:scale-95 sm:flex"
                >
                   <Share2 size={18} />
@@ -222,6 +227,7 @@ export const CompetitionDetailsModal = ({
           </div>
         </div>
 
+        {shareMessage ? <p role="status" className="bg-white px-4 py-2 text-sm">{shareMessage}</p> : null}
         {/* Scrollable Area */}
         <div className="flex-1 overflow-y-auto overflow-x-hidden bg-slate-50 px-3 py-4 sm:px-10 sm:py-6">
           <Tabs variant="pwa" tabs={tabs} />
@@ -243,6 +249,6 @@ export const CompetitionDetailsModal = ({
           />
         )}
       </div>
-    </div>
+    </DetailDialog>
   );
 };

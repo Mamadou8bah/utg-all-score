@@ -1,82 +1,75 @@
-const VERSION = "utg-allscore-v3";
-const APP_SHELL = [
-  "/",
-  "/live",
-  "/fixtures",
-  "/results",
-  "/standings",
-  "/news",
-  "/announcements",
-  "/events",
-  "/teams",
-  "/athletes",
-  "/offline",
-  "/icons/icon-192.svg",
-  "/icons/icon-512.svg"
-];
-const DATA_ENDPOINTS = [
-  "/api/live",
-  "/api/fixtures",
-  "/api/results",
-  "/api/news",
-  "/api/announcements",
-  "/api/events",
-  "/api/teams",
-  "/api/standings"
-];
+const PREFIX = "utg-allscore";
+const VERSION = `${PREFIX}-${new URLSearchParams(self.location.search || "").get("build") || "v6"}`;
+const APP_SHELL = ["/", "/live", "/fixtures", "/results", "/standings", "/news", "/more", "/announcements", "/events", "/teams", "/athletes", "/offline", "/icons/icon-192.png", "/icons/icon-512.png", "/images/utg-allscore-logo.png", "/images/football.png"];
+const DATA_ENDPOINTS = ["/api/live", "/api/fixtures", "/api/results", "/api/news", "/api/announcements", "/api/events", "/api/teams", "/api/standings", "/api/competitions", "/api/athletes"];
+
+
+async function cacheShellPage(cache, path) {
+  const response = await fetch(path);
+  if (!response.ok || response.redirected) return;
+  const html = await response.clone().text();
+  await cache.put(path, response);
+  const assets = new Set([...html.matchAll(/(?:src|href)="(\/_next\/static\/[^"<>]+)"/g)].map((match) => match[1].replaceAll("&amp;", "&")));
+  await Promise.all([...assets].map(async (asset) => {
+    try {
+      if (await cache.match(asset)) return;
+      const response = await fetch(asset);
+      if (response.ok) await cache.put(asset, response);
+    } catch { /* Optional assets can be retried after reconnecting. */ }
+  }));
+}
 
 self.addEventListener("install", (event) => {
-  event.waitUntil(caches.open(VERSION).then((cache) => cache.addAll(APP_SHELL).catch(() => undefined)));
-  self.skipWaiting();
+  event.waitUntil(caches.open(VERSION).then((cache) => Promise.all(APP_SHELL.map(async (path) => {
+    try {
+      if (!path.startsWith("/icons/") && !path.startsWith("/images/")) await cacheShellPage(cache, path);
+      else {
+        const response = await fetch(path);
+        if (response.ok) await cache.put(path, response);
+      }
+    } catch { /* The remaining shell entries can still be cached. */ }
+  }))));
+
 });
 
 self.addEventListener("activate", (event) => {
-  event.waitUntil(caches.keys().then((keys) => Promise.all(keys.filter((key) => key !== VERSION).map((key) => caches.delete(key)))));
-  self.clients.claim();
+  event.waitUntil((async () => {
+    const keys = await caches.keys();
+    await Promise.all(keys.filter((key) => key.startsWith(PREFIX) && key !== VERSION).map((key) => caches.delete(key)));
+    await self.clients.claim();
+  })());
 });
 
-const networkFirst = async (request) => {
-  const cache = await caches.open(VERSION);
-  try {
-    const fresh = await fetch(request);
-    cache.put(request, fresh.clone());
-    return fresh;
-  } catch {
-    return (await cache.match(request)) || caches.match("/offline");
-  }
-};
-
-const staleWhileRevalidate = async (request) => {
-  const cache = await caches.open(VERSION);
-  const cached = await cache.match(request);
-  const fetched = fetch(request)
-    .then((response) => {
-      cache.put(request, response.clone());
-      return response;
-    })
-    .catch(() => null);
-  return cached || fetched || caches.match("/offline");
-};
-
 self.addEventListener("fetch", (event) => {
-  if (event.request.method !== "GET") return;
-
-  const url = new URL(event.request.url);
-  if (url.origin !== self.location.origin) return;
-
-  if (DATA_ENDPOINTS.some((path) => url.pathname.startsWith(path))) {
-    event.respondWith(networkFirst(event.request));
-    return;
-  }
-
-  if (event.request.mode === "navigate") {
-    event.respondWith(staleWhileRevalidate(event.request));
-    return;
-  }
-
-  event.respondWith(
-    caches.match(event.request).then((response) => response || fetch(event.request).catch(() => caches.match("/offline")))
-  );
+  const request = event.request;
+  const url = new URL(request.url);
+  if (request.method !== "GET" || url.origin !== self.location.origin) return;
+  const data = DATA_ENDPOINTS.includes(url.pathname) && !request.headers.has("authorization");
+  if (url.pathname.startsWith("/api/") && !data) return;
+  const navigation = request.mode === "navigate";
+  const publicPage = navigation && !["/admin", "/login"].some((path) => url.pathname.startsWith(path));
+  const asset = url.pathname.startsWith("/_next/static/") || url.pathname.startsWith("/icons/") || url.pathname.startsWith("/images/");
+  // Do not cache Next.js RSC responses as HTML or intercept authenticated requests.
+  if (!navigation && !data && !asset) return;
+  event.respondWith((async () => {
+    const cache = await caches.open(VERSION);
+    if (asset) {
+      const cached = await cache.match(request);
+      if (cached) return cached;
+    }
+    try {
+      const response = await fetch(request);
+      if (response.ok && !response.redirected && (data || publicPage || asset)) await cache.put(request, response.clone()).catch(() => undefined);
+      if (!response.ok && data) return (await cache.match(request)) || response;
+      return response;
+    } catch {
+      const cached = (data || publicPage || asset) ? await cache.match(request) : null;
+      if (cached) return cached;
+      if (navigation) return (await cache.match("/offline")) || new Response("Offline. Reconnect and try again.", { status: 503, headers: { "Content-Type": "text/plain" } });
+      if (data) return new Response(JSON.stringify({ error: "Offline and no cached data available." }), { status: 503, headers: { "Content-Type": "application/json" } });
+      return Response.error();
+    }
+  })());
 });
 
 self.addEventListener("push", (event) => {
@@ -90,8 +83,8 @@ self.addEventListener("push", (event) => {
   event.waitUntil(
     self.registration.showNotification(data.title || "UTG AllScore", {
       body: data.body || "",
-      icon: "/icons/icon-192.svg",
-      badge: "/icons/icon-192.svg",
+      icon: "/icons/icon-192.png",
+      badge: "/icons/icon-192.png",
       tag: data.tag || "utg-allscore",
       data: { url: data.url || "/" }
     })
@@ -114,4 +107,9 @@ self.addEventListener("notificationclick", (event) => {
       return undefined;
     })
   );
+});
+
+// Activate an update only after the user has saved their work and chosen to reload.
+self.addEventListener("message", (event) => {
+  if (event.data?.type === "SKIP_WAITING") self.skipWaiting();
 });

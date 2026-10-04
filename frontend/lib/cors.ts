@@ -11,7 +11,7 @@ export function getAllowedOrigins() {
     .map((s) => s.trim())
     .filter(Boolean);
 
-  return [...new Set([...DEFAULT_ORIGINS, ...fromNamed, ...fromList].map(normalizeOrigin))];
+  return [...new Set([...(process.env.NODE_ENV === "production" ? [] : DEFAULT_ORIGINS), ...fromNamed, ...fromList].map(normalizeOrigin))];
 }
 
 export function corsHeaders(origin: string | null): Record<string, string> {
@@ -19,6 +19,7 @@ export function corsHeaders(origin: string | null): Record<string, string> {
   if (normalized && getAllowedOrigins().includes(normalized)) {
     return {
       "Access-Control-Allow-Origin": origin!,
+      "Vary": "Origin",
       "Access-Control-Allow-Methods": "GET, POST, PATCH, DELETE, OPTIONS",
       "Access-Control-Allow-Headers": "Content-Type, Authorization",
       "Access-Control-Max-Age": "86400"

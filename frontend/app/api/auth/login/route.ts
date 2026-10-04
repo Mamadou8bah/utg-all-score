@@ -9,11 +9,11 @@ export async function OPTIONS(request: Request) {
 
 export async function POST(request: Request) {
   const body = await request.json().catch(() => null);
-  const email = body?.email?.trim()?.toLowerCase();
+  const email = typeof body?.email === "string" ? body.email.trim().toLowerCase() : "";
   const password = body?.password;
   const expectedRole = body?.expectedRole;
 
-  if (!email || !password) {
+  if (!email || email.length > 254 || typeof password !== "string" || !password || password.length > 256 || (expectedRole && !["ADMIN", "AGENT"].includes(expectedRole))) {
     return jsonError("Email and password are required.", 400, request);
   }
 

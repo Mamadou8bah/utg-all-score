@@ -42,7 +42,8 @@ In **Project Settings → Environment Variables**, add:
 |------|-------|
 | `DATABASE_URL` | `@POSTGRES_PRISMA_URL` (reference the storage variable) |
 | `DIRECT_URL` | `@POSTGRES_URL_NON_POOLING` |
-| `AUTH_SECRET` | long random string (32+ chars) |
+| `AUTH_SECRET` | unique random string (32+ chars), enforced at runtime |
+| `ADMIN_INITIAL_PASSWORD` | unique initial admin password (12+ chars); required when creating the account |
 | `CLOUDINARY_CLOUD_NAME` | your Cloudinary cloud (e.g. `dflsnes44`) |
 | `CLOUDINARY_UPLOAD_PRESET` | unsigned preset name (recommended — see below) |
 | `CLOUDINARY_API_KEY` | your key (only if not using upload preset) |
@@ -67,7 +68,7 @@ Leave `NEXT_PUBLIC_APP_URL`, `ADMIN_APP_URL`, `AGENT_APP_URL` empty for now — 
 
 **Admin account** is created automatically on every API deploy (via `prisma/seed-admin.ts` during build).
 
-**Default admin:** `admin@utgsu.edu.gm` / `UTGSUAdmin2026!` — change after first login.
+**Initial admin:** `admin@utgsu.edu.gm` with the unique password configured in `ADMIN_INITIAL_PASSWORD`. Production has no default password.
 
 To load demo competitions, teams, and matches:
 

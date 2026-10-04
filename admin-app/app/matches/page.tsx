@@ -63,7 +63,7 @@ export default function MatchesPage() {
   }
 
   useEffect(() => {
-    load().catch(() => {});
+    load().catch(() => setMessage("Unable to load updates. Check your connection and try again."));
   }, []);
 
   const selectedCompetition = competitions.find((c) => c.id === form.competitionId);
@@ -113,7 +113,7 @@ export default function MatchesPage() {
     setMessage(res.ok ? "Fixture scheduled." : json.error || "Failed.");
     if (res.ok) {
       setForm({ ...form, kickoff: "", homeTeamId: "", awayTeamId: "", agentId: "" });
-      load();
+      void load().catch(() => setMessage("Could not refresh the latest data. Check your connection and try again."));
     }
   }
 
@@ -122,7 +122,7 @@ export default function MatchesPage() {
     const res = await apiFetch(`/api/portal/admin/matches/${id}`, { method: "DELETE" });
     const json = await res.json();
     setMessage(res.ok ? "Fixture deleted." : json.error || "Failed.");
-    if (res.ok) load();
+    if (res.ok) void load().catch(() => setMessage("Could not refresh the latest data. Check your connection and try again."));
   }
 
   async function assignAgent(matchId: string) {
@@ -139,7 +139,7 @@ export default function MatchesPage() {
     setMessage(res.ok ? "Agent assigned to match." : json.error || "Failed.");
     if (res.ok) {
       setAssignByMatch((prev) => ({ ...prev, [matchId]: "" }));
-      load();
+      void load().catch(() => setMessage("Could not refresh the latest data. Check your connection and try again."));
     }
   }
 
@@ -150,7 +150,7 @@ export default function MatchesPage() {
     });
     const json = await res.json();
     setMessage(res.ok ? "Agent unassigned." : json.error || "Failed.");
-    if (res.ok) load();
+    if (res.ok) void load().catch(() => setMessage("Could not refresh the latest data. Check your connection and try again."));
   }
 
   return (

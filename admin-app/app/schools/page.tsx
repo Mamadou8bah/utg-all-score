@@ -19,7 +19,7 @@ export default function SchoolsPage() {
   }
 
   useEffect(() => {
-    load().catch(() => {});
+    load().catch(() => setMessage("Unable to load updates. Check your connection and try again."));
   }, []);
 
   async function handleCreate(event: React.FormEvent) {
@@ -29,7 +29,7 @@ export default function SchoolsPage() {
     setMessage(res.ok ? "School created." : json.error || "Failed.");
     if (res.ok) {
       setForm({ name: "", shortName: "" });
-      load();
+      void load().catch(() => setMessage("Could not refresh the latest data. Check your connection and try again."));
     }
   }
 
@@ -39,7 +39,7 @@ export default function SchoolsPage() {
     setMessage(res.ok ? "School updated." : json.error || "Failed.");
     if (res.ok) {
       setEditingId(null);
-      load();
+      void load().catch(() => setMessage("Could not refresh the latest data. Check your connection and try again."));
     }
   }
 
@@ -48,7 +48,7 @@ export default function SchoolsPage() {
     const res = await apiFetch(`/api/portal/admin/schools/${id}`, { method: "DELETE" });
     const json = await res.json();
     setMessage(res.ok ? "School deleted." : json.error || "Failed.");
-    if (res.ok) load();
+    if (res.ok) void load().catch(() => setMessage("Could not refresh the latest data. Check your connection and try again."));
   }
 
   return (

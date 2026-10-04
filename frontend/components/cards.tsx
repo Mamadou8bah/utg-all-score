@@ -54,163 +54,50 @@ const TeamMark = ({ teamName, className }: { teamName: string; className: string
   </div>
 );
 
-export const LiveMatchCard = ({ match, onClick }: { match: Match, onClick?: () => void }) => (
-  <article 
-    onClick={onClick}
-    className="rounded-2xl border border-slate-100 bg-white p-4 shadow-sm active:bg-slate-50 transition-colors cursor-pointer"
-  >
-    <div className="flex items-center justify-between mb-3">
-      <div className="flex items-center gap-2">
-         <span className="flex h-1.5 w-1.5 rounded-full bg-live animate-flash" />
-         <span className="text-[10px] font-black uppercase tracking-tight text-live">{match.timer}</span>
-      </div>
-      <div className="flex items-center gap-1.5">
-        <img 
-          src="https://res.cloudinary.com/dflsnes44/image/upload/q_auto/f_auto/v1775301714/ChatGPT_Image_Apr_4_2026_11_16_34_AM_dxzi5q.png" 
-          alt="League Logo"
-          className="h-3 w-3 object-contain"
-        />
-        <p className="text-[9px] font-black text-text-secondary uppercase tracking-wider">{match.competition}</p>
-      </div>
-    </div>
-    
-    <div className="flex items-center gap-4">
-      <div className="flex-1 space-y-2">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <TeamMark teamName={match.home} className="h-5 w-5 rounded text-[10px]" />
-            <span className="text-sm font-black text-slate-950">{match.home}</span>
-          </div>
-          <span className="text-lg font-black text-live">{match.homeScore}</span>
-        </div>
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <TeamMark teamName={match.away} className="h-5 w-5 rounded text-[10px]" />
-            <span className="text-sm font-black text-slate-950">{match.away}</span>
-          </div>
-          <span className="text-lg font-black text-live">{match.awayScore}</span>
-        </div>
-      </div>
-    </div>
+export const MatchRow = ({ match, onClick }: { match: Match; onClick?: () => void }) => {
+  const live = match.status === "LIVE" || match.status === "HT";
+  const scored = match.status !== "UPCOMING";
+  return (
+    <button type="button" onClick={onClick} className="match-row"
+      aria-label={`${match.home} versus ${match.away}, ${scored ? `${match.homeScore} to ${match.awayScore}, ${match.status}` : formatTime(match.kickoff)}`}>
+      <span className="match-row__side match-row__side--home">
+        <span className="match-row__name">{match.home}</span>
+        <TeamMark teamName={match.home} className="crest crest--home" />
+      </span>
+      <span className="match-row__centre">
+        <span className={scored ? "match-row__score" : "match-row__kickoff"}>
+          {scored ? `${match.homeScore} – ${match.awayScore}` : formatTime(match.kickoff)}
+        </span>
+        <span className={cn("match-row__status", live && "match-row__status--live")}>
+          {live ? (match.status === "HT" ? "HT" : `LIVE ${match.timer || ""}`) : scored ? "FT" : "Scheduled"}
+        </span>
+      </span>
+      <span className="match-row__side match-row__side--away">
+        <TeamMark teamName={match.away} className="crest crest--away" />
+        <span className="match-row__name">{match.away}</span>
+      </span>
+    </button>
+  );
+};
 
-    {match.events.length > 0 && (
-      <div className="mt-3 pt-3 border-t border-slate-50 space-y-2">
-        {match.events.slice(-1).map((event) => (
-          <div key={`${match.id}-${event.minute}`} className="flex items-center gap-2 text-[10px]">
-            <span className="font-black text-primary">{event.minute}'</span>
-            <span className="font-bold text-text-secondary italic">{event.type} · {event.player}</span>
-          </div>
-        ))}
-      </div>
-    )}
-  </article>
-);
+export const LiveMatchCard = MatchRow;
+export const FixtureCard = MatchRow;
+export const ResultCard = MatchRow;
 
-export const FixtureCard = ({ match, onClick }: { match: Match, onClick?: () => void }) => (
-  <article 
-    onClick={onClick}
-    className="cursor-pointer rounded-2xl border border-slate-100 bg-white px-3 py-3 shadow-sm transition-colors active:bg-slate-50 sm:px-4"
-  >
-    <div className="flex items-center gap-3 sm:gap-4">
-      <div className="flex min-w-[44px] flex-col items-center justify-center border-r border-slate-50 py-1 pr-3 sm:min-w-[50px] sm:pr-4">
-        <span className="text-xs font-black text-slate-950">{formatTime(match.kickoff)}</span>
-        <span className="text-[9px] font-black text-text-secondary uppercase mt-0.5">{match.status}</span>
-      </div>
-      
-      <div className="min-w-0 flex-1 space-y-1.5">
-        <div className="flex items-center justify-between">
-          <div className="min-w-0 flex items-center gap-2">
-            <TeamMark teamName={match.home} className="h-4 w-4 rounded-[4px] text-[8px]" />
-            <span className="truncate text-xs font-black text-slate-950 sm:text-sm">{match.home}</span>
-          </div>
-          {match.status === "FT" && <span className="text-sm font-black text-slate-950">{match.homeScore}</span>}
-        </div>
-        <div className="flex items-center justify-between">
-          <div className="min-w-0 flex items-center gap-2">
-            <TeamMark teamName={match.away} className="h-4 w-4 rounded-[4px] text-[8px]" />
-            <span className="truncate text-xs font-black text-slate-950 sm:text-sm">{match.away}</span>
-          </div>
-          {match.status === "FT" && <span className="text-sm font-black text-slate-950">{match.awayScore}</span>}
-        </div>
-      </div>
-    </div>
-  </article>
-);
-
-export const ResultCard = ({ match, onClick }: { match: Match, onClick?: () => void }) => (
-  <article 
-    onClick={onClick}
-    className="group cursor-pointer rounded-2xl border border-slate-100 bg-white px-3 py-3 shadow-sm transition-colors active:bg-slate-50 sm:px-4"
-  >
-    <div className="flex items-center gap-3 sm:gap-4">
-      <div className="flex min-w-[44px] flex-col items-center justify-center border-r border-slate-50 py-1 pr-3 sm:min-w-[50px] sm:pr-4">
-        <span className="text-xs font-black text-secondary">FT</span>
-        <span className="text-[9px] font-black text-text-secondary uppercase mt-0.5">{formatDate(match.kickoff, { month: 'short', day: 'numeric', year: undefined })}</span>
-      </div>
-      
-      <div className="min-w-0 flex-1 space-y-1.5">
-        <div className="flex items-center justify-between">
-          <div className="min-w-0 flex items-center gap-2">
-            <TeamMark teamName={match.home} className="h-4 w-4 rounded-[4px] text-[8px] transition-colors group-hover:bg-slate-100" />
-            <span className="truncate text-xs font-black text-slate-950 sm:text-sm">{match.home}</span>
-          </div>
-          <span className="text-sm font-black text-secondary">{match.homeScore}</span>
-        </div>
-        <div className="flex items-center justify-between">
-          <div className="min-w-0 flex items-center gap-2">
-            <TeamMark teamName={match.away} className="h-4 w-4 rounded-[4px] text-[8px] transition-colors group-hover:bg-slate-100" />
-            <span className="truncate text-xs font-black text-slate-950 sm:text-sm">{match.away}</span>
-          </div>
-          <span className="text-sm font-black text-secondary">{match.awayScore}</span>
-        </div>
-      </div>
-    </div>
-  </article>
-);
-
-export const NewsCard = ({ 
-  item, 
-  onClick 
-}: { 
+export const NewsCard = ({ item, onClick }: {
   item: { title: string; excerpt: string; category: string; image?: string; publishedAt: string };
   onClick?: () => void;
 }) => (
-  <article 
-    onClick={onClick}
-    className="group relative cursor-pointer overflow-hidden rounded-[2.5rem] bg-white shadow-card transition-all hover:-translate-y-1 active:scale-[0.98]"
-  >
-    {item.image && (
-      <div className="relative h-48 w-full overflow-hidden">
-        <img 
-          src={item.image} 
-          alt={item.title}
-          className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-110"
-        />
-        <div className="absolute inset-x-0 bottom-0 h-16 bg-white" />
-      </div>
-    )}
-    <div className="p-6">
-      <div className="flex items-center justify-between mb-4">
-        <Badge variant="default" className="bg-slate-100 text-slate-900 border-none px-3 py-1 font-black text-[10px] uppercase">
-          {item.category}
-        </Badge>
-        <span className="text-[10px] font-bold text-text-secondary uppercase">
-          {formatDate(item.publishedAt, { month: 'short', day: 'numeric' })}
-        </span>
-      </div>
-      <h3 className="text-xl font-black leading-tight text-slate-950 group-hover:text-primary transition-colors">
-        {item.title}
-      </h3>
-      <p className="mt-3 text-sm font-medium leading-relaxed text-text-secondary line-clamp-2 italic">
-        "{item.excerpt}"
-      </p>
-      <div className="mt-6 flex items-center justify-end">
-        <div className="flex h-8 w-8 items-center justify-center rounded-full bg-slate-50 text-slate-400 group-hover:bg-primary group-hover:text-slate-950 transition-all">
-          <ChevronRight size={18} />
-        </div>
-      </div>
+  <button type="button" onClick={onClick} className="news-card text-left">
+    <div className="news-card__image">
+      {item.image ? <img src={item.image} alt="" className="absolute inset-0 h-full w-full object-cover" /> : null}
+      <span className="news-card__category">{item.category}</span>
     </div>
-  </article>
+    <div className="p-3">
+      <h2 className="text-[15px] font-bold leading-snug">{item.title}</h2>
+      <p className="mt-2 text-xs text-text-secondary">{formatDate(item.publishedAt, { month: "short", day: "numeric" })}</p>
+    </div>
+  </button>
 );
 
 export const AnnouncementCard = ({ item }: { item: { title: string; body: string; level: string } }) => (
@@ -264,7 +151,7 @@ export const StandingsTable = ({ rows, onTeamClick }: { rows: StandingRow[], onT
           </tr>
         </thead>
         <tbody>
-          {rows.sort((a,b) => b.pts - a.pts || b.gd - a.gd).map((row, index) => (
+          {[...rows].sort((a,b) => b.pts - a.pts || b.gd - a.gd).map((row, index) => (
             <tr 
               key={row.team} 
               className="border-t border-slate-100 last:border-0 hover:bg-slate-50 transition-colors"

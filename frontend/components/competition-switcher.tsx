@@ -26,7 +26,10 @@ export const CompetitionSwitcher = ({
 
   useEffect(() => {
     const saved = localStorage.getItem("favorite-competitions");
-    if (saved) setFavorites(JSON.parse(saved));
+    try {
+      const parsed: unknown = saved ? JSON.parse(saved) : [];
+      if (Array.isArray(parsed)) setFavorites(parsed.filter((value): value is string => typeof value === "string"));
+    } catch { /* Ignore invalid preferences stored by an older version. */ }
   }, []);
 
   const toggleFavorite = (e: React.MouseEvent, id: string) => {

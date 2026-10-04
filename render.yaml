@@ -16,13 +16,15 @@ services:
     dockerfilePath: ./Dockerfile
     plan: starter
     healthCheckPath: /api/health
-    disk:
-      name: sqlite
-      mountPath: /app/prisma
-      sizeGB: 1
     envVars:
       - key: DATABASE_URL
-        value: file:/app/prisma/prod.db
+        sync: false
+      - key: DIRECT_URL
+        sync: false
+      - key: ADMIN_INITIAL_PASSWORD
+        sync: false
+      - key: SETUP_SECRET
+        generateValue: true
       - key: AUTH_SECRET
         generateValue: true
       - key: NEXT_PUBLIC_APP_URL
@@ -37,8 +39,6 @@ services:
         sync: false
       - key: CLOUDINARY_API_SECRET
         sync: false
-      - key: RUN_SEED
-        value: "true"
 
   - type: web
     name: utg-allscore-admin

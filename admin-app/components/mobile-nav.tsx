@@ -11,11 +11,11 @@ export function AdminMobileNav() {
   const mounted = useMounted();
 
   if (!mounted) {
-    return <nav className="fixed bottom-0 left-0 right-0 z-50 h-[4.5rem] border-t border-slate-100 bg-white pb-[env(safe-area-inset-bottom)] lg:hidden" aria-hidden />;
+    return <nav aria-label="Main navigation" className="fixed bottom-0 left-0 right-0 z-50 h-[4.5rem] border-t border-slate-100 bg-white pb-[env(safe-area-inset-bottom)] lg:hidden" aria-hidden />;
   }
 
   return (
-    <nav className="fixed bottom-0 left-0 right-0 z-50 border-t border-slate-100 bg-white pb-[env(safe-area-inset-bottom)] lg:hidden">
+    <nav aria-label="Main navigation" className="fixed bottom-0 left-0 right-0 z-50 border-t border-slate-100 bg-white pb-[env(safe-area-inset-bottom)] lg:hidden">
       <div className="grid grid-cols-6 gap-0.5 px-1 pt-2">
         {adminNav.map((item) => {
           const isActive = pathname === item.href;
@@ -24,6 +24,7 @@ export function AdminMobileNav() {
             <Link
               key={item.href}
               href={item.href}
+              aria-current={isActive ? "page" : undefined}
               className={cn(
                 "flex flex-col items-center gap-1 px-0.5 pb-2 transition-transform active:scale-90",
                 isActive ? "text-primary" : "text-slate-400"

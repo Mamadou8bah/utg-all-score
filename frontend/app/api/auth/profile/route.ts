@@ -12,9 +12,9 @@ export async function PATCH(request: Request) {
   if (!user) return jsonError("Not authenticated.", 401, request);
 
   const body = await request.json().catch(() => null);
-  const name = body?.name?.trim();
+  const name = typeof body?.name === "string" ? body.name.trim() : "";
 
-  if (!name) {
+  if (!name || name.length > 100) {
     return jsonError("Name is required.", 400, request);
   }
 

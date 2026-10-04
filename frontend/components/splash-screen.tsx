@@ -4,9 +4,11 @@ import { useEffect, useState } from "react";
 import Image from "next/image";
 
 export function SplashScreen() {
-  const [shouldRender, setShouldRender] = useState(true);
+  const [shouldRender, setShouldRender] = useState(false);
 
   useEffect(() => {
+    if (!window.matchMedia("(display-mode: standalone)").matches) return;
+    setShouldRender(true);
     const removeTimer = setTimeout(() => {
       setShouldRender(false);
     }, 2000);

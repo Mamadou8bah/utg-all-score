@@ -4,7 +4,7 @@ Official UTGSU football hub — live scores, fixtures, results, and campus sport
 
 ## Architecture
 
-Three Next.js apps share one SQLite database via the public API:
+Three Next.js apps share one PostgreSQL database via the public API:
 
 | App | Port | Role |
 |-----|------|------|
@@ -62,7 +62,9 @@ cp frontend/.env.example frontend/.env
 docker compose up --build
 ```
 
-Services: public API `:3000`, admin `:3001`, agent `:3002`. SQLite persisted in Docker volume.
+Services: public API `:3000`, admin `:3001`, agent `:3002`. Use the PostgreSQL connection configured in DATABASE_URL.
+
+The latest production and mobile review, verified checks, and remaining deployment requirements are documented in [deploy/READINESS.md](deploy/READINESS.md).
 
 ## Production deployment
 

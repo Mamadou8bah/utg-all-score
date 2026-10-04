@@ -1,46 +1,30 @@
 "use client";
 
-import { Home, Radio, Calendar, LayoutGrid, Newspaper } from "lucide-react";
+import { Radio, Ellipsis, LayoutGrid, Newspaper } from "lucide-react";
 import { usePathname } from "next/navigation";
 import Link from "next/link";
 import { cn } from "@/lib/utils";
 
 export const MobileNav = () => {
   const pathname = usePathname();
-  
+
   const bottomLinks = [
-    { href: "/", label: "Home", icon: <Home size={22} /> },
+    { href: "/", label: "Matches", icon: <img src="/images/football.svg" alt="" aria-hidden="true" width={22} height={22} /> },
     { href: "/live", label: "Live", icon: <Radio size={22} /> },
-    { href: "/standings", label: "Competitions", icon: <LayoutGrid size={22} /> },
-    { href: "/fixtures", label: "Fixtures", icon: <Calendar size={22} /> },
-    { href: "/news", label: "News", icon: <Newspaper size={22} /> }
+    { href: "/standings", label: "Leagues", icon: <LayoutGrid size={22} /> },
+
+    { href: "/news", label: "News", icon: <Newspaper size={22} /> },
+    { href: "/more", label: "More", icon: <Ellipsis size={22} /> }
   ];
 
   return (
-    <nav className="fixed bottom-0 left-0 right-0 z-50 border-t border-slate-100 bg-white pb-[env(safe-area-inset-bottom)] md:hidden">
-      <div className="flex items-center justify-around px-2 py-3">
-        {bottomLinks.map((link) => {
-          const isActive = pathname === link.href;
-          return (
-            <Link
-              key={link.href}
-              href={link.href}
-              className={cn(
-                "flex flex-col items-center gap-1.5 px-3 transition-transform active:scale-90",
-                isActive ? "text-primary" : "text-slate-400"
-              )}
-            >
-              <div className={cn(
-                "p-2 rounded-xl transition-colors",
-                isActive ? "bg-blue-50" : ""
-              )}>
-                {link.icon}
-              </div>
-              <span className="text-[10px] font-black uppercase tracking-tight">{link.label}</span>
-            </Link>
-          );
-        })}
-      </div>
+    <nav className="bottom-nav" aria-label="Main navigation">
+      {bottomLinks.map((link) => (
+        <Link key={link.href} href={link.href} aria-current={pathname === link.href ? "page" : undefined}
+          className={cn("bottom-nav__item", pathname === link.href && "bottom-nav__item--active")}>
+          {link.icon}<span>{link.label}</span>
+        </Link>
+      ))}
     </nav>
   );
 };

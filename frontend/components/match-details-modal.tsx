@@ -1,5 +1,7 @@
 "use client";
 
+import { DetailDialog } from "@/components/detail-dialog";
+
 import { useState, useMemo } from "react";
 import { type Match } from "@/lib/types";
 import { useFootballBundle } from "@/lib/use-api-data";
@@ -22,7 +24,7 @@ export const MatchDetailsModal = ({
   const competitionStandings = useMemo(() => 
     standings.filter(s => s.competitionId === match.competitionId)
     .sort((a, b) => b.pts - a.pts),
-    [match.competitionId]
+    [match.competitionId, standings]
   );
 
   const teamHistory = useMemo(() => {
@@ -30,10 +32,10 @@ export const MatchDetailsModal = ({
       .filter(m => m.home === match.home || m.away === match.home || m.home === match.away || m.away === match.away)
       .sort((a, b) => new Date(b.kickoff).getTime() - new Date(a.kickoff).getTime());
     return allMatches.slice(0, 5);
-  }, [match]);
+  }, [match, results, fixtures]);
 
   return (
-    <div className="fixed inset-0 z-[100] flex flex-col bg-slate-100 md:items-center md:justify-center md:bg-slate-900 md:p-4">
+    <DetailDialog label={`${match.home} versus ${match.away}`} onClose={onClose} className="match-detail fixed inset-0 z-[100] flex flex-col bg-slate-100 md:items-center md:justify-center md:bg-slate-900 md:p-4">
       <div className="flex h-[100dvh] min-h-[100dvh] w-full max-w-2xl flex-col bg-white animate-slideUp md:h-[85vh] md:min-h-0 md:overflow-hidden md:rounded-[32px]">
         {/* Header Section */}
         <div className="bg-primary px-4 pt-4 pb-0 text-white relative">
@@ -48,7 +50,7 @@ export const MatchDetailsModal = ({
               </div>
               <span className="text-[10px] font-black uppercase tracking-[0.15em] text-white">{match.competition}</span>
             </div>
-            <button onClick={onClose} className="p-2 rounded-full bg-slate-800 hover:bg-slate-700 transition-colors">
+            <button aria-label="Close match details" onClick={onClose} className="p-2 rounded-full bg-slate-800 hover:bg-slate-700 transition-colors">
               <X size={20} />
             </button>
           </div>
@@ -102,16 +104,16 @@ export const MatchDetailsModal = ({
           </div>
 
           {/* Tab Navigation (SofaScore Style) */}
-          <div className="flex items-center gap-1 overflow-x-auto no-scrollbar px-2">
+          <div className="match-detail__tabs flex items-center overflow-x-auto no-scrollbar">
             {tabs.map((tab) => (
               <button
                 key={tab}
                 onClick={() => setActiveTab(tab)}
                 className={cn(
-                  "px-4 py-3 text-sm font-black transition-colors whitespace-nowrap border-b-2",
+                  "px-4 py-3 text-xs font-bold uppercase tracking-wide transition-colors whitespace-nowrap border-b-[3px]",
                   activeTab === tab 
                     ? "border-secondary text-white" 
-                    : "border-slate-200 text-slate-400 hover:text-white"
+                    : "border-transparent text-white/60 hover:text-white"
                 )}
               >
                 {tab}
@@ -174,7 +176,7 @@ export const MatchDetailsModal = ({
                   <Info size={16} className="text-secondary" />
                   <span className="text-sm font-black text-slate-900">Venue Info</span>
                 </div>
-                <span className="text-xs font-bold text-text-secondary">UTG Law Building Field</span>
+                <span className="text-xs font-bold text-text-secondary">{match.venue}</span>
               </div>
             </div>
           )}
@@ -184,11 +186,12 @@ export const MatchDetailsModal = ({
               <div className="bg-white rounded-2xl p-6 shadow-sm">
                 <div className="space-y-6">
                   {[
-                    { label: "Possession", home: "45%", away: "55%", hVal: 45, aVal: 55 },
-                    { label: "Attempts on goal", home: "12", away: "14", hVal: 12, aVal: 14 },
-                    { label: "Shots on target", home: "4", away: "6", hVal: 4, aVal: 6 },
-                    { label: "Corner kicks", home: "5", away: "3", hVal: 5, aVal: 3 },
-                    { label: "Yellow cards", home: "2", away: "1", hVal: 2, aVal: 1 },
+                    { label: "Goals", home: String(match.homeScore), away: String(match.awayScore), hVal: match.homeScore, aVal: match.awayScore },
+                    ...[{ label: "Recorded yellow cards", pattern: /yellow/i }, { label: "Recorded red cards", pattern: /red/i }].map(({ label, pattern }) => {
+                      const home = match.events.filter((event) => event.team === match.home && pattern.test(event.type)).length;
+                      const away = match.events.filter((event) => event.team === match.away && pattern.test(event.type)).length;
+                      return { label, home: String(home), away: String(away), hVal: home, aVal: away };
+                    })
                   ].map((stat, i) => (
                     <div key={i} className="space-y-2">
                       <div className="flex justify-between text-[10px] font-black uppercase tracking-wider text-text-secondary">
@@ -199,11 +202,11 @@ export const MatchDetailsModal = ({
                       <div className="flex h-1.5 w-full bg-slate-100 rounded-full overflow-hidden">
                         <div 
                           className="bg-primary h-full transition-all duration-1000" 
-                          style={{ width: `${(stat.hVal / (stat.hVal + stat.aVal)) * 100}%` }} 
+                          style={{ width: `${(stat.hVal / Math.max(1, stat.hVal + stat.aVal)) * 100}%` }}
                         />
                         <div 
                           className="bg-secondary h-full transition-all duration-1000" 
-                          style={{ width: `${(stat.aVal / (stat.hVal + stat.aVal)) * 100}%` }} 
+                          style={{ width: `${(stat.aVal / Math.max(1, stat.hVal + stat.aVal)) * 100}%` }}
                         />
                       </div>
                     </div>
@@ -211,7 +214,7 @@ export const MatchDetailsModal = ({
                 </div>
               </div>
               <div className="bg-white rounded-2xl p-6 shadow-sm text-center">
-                <p className="text-[10px] font-black text-text-secondary uppercase">Live stats update in real-time</p>
+                <p className="text-[10px] font-black text-text-secondary uppercase">Statistics from recorded match events</p>
               </div>
             </div>
           )}
@@ -367,6 +370,6 @@ export const MatchDetailsModal = ({
           )}
         </div>
       </div>
-    </div>
+    </DetailDialog>
   );
 };

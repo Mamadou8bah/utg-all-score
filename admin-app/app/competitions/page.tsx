@@ -65,7 +65,7 @@ export default function CompetitionsPage() {
   }
 
   useEffect(() => {
-    load().catch(() => {});
+    load().catch(() => setMessage("Unable to load updates. Check your connection and try again."));
   }, []);
 
   const linkCompetition = competitions.find((c) => c.id === linkForm.competitionId);
@@ -103,7 +103,7 @@ export default function CompetitionsPage() {
     setMessage(res.ok ? "Competition created." : json.error || "Failed.");
     if (res.ok) {
       setForm({ name: "", slug: "", type: "GENERAL", format: "LEAGUE", description: "", schoolId: "", logo: "" });
-      load();
+      void load().catch(() => setMessage("Could not refresh the latest data. Check your connection and try again."));
     }
   }
 
@@ -120,7 +120,7 @@ export default function CompetitionsPage() {
     setMessage(res.ok ? "Competition updated." : json.error || "Failed.");
     if (res.ok) {
       setEditingId(null);
-      load();
+      void load().catch(() => setMessage("Could not refresh the latest data. Check your connection and try again."));
     }
   }
 
@@ -129,7 +129,7 @@ export default function CompetitionsPage() {
     const res = await apiFetch(`/api/portal/admin/competitions/${id}`, { method: "DELETE" });
     const json = await res.json();
     setMessage(res.ok ? "Competition deleted." : json.error || "Failed.");
-    if (res.ok) load();
+    if (res.ok) void load().catch(() => setMessage("Could not refresh the latest data. Check your connection and try again."));
   }
 
   async function handleLink(event: React.FormEvent) {
@@ -139,7 +139,7 @@ export default function CompetitionsPage() {
     setMessage(res.ok ? "Team linked." : json.error || "Failed.");
     if (res.ok) {
       setLinkForm({ ...linkForm, teamId: "" });
-      load();
+      void load().catch(() => setMessage("Could not refresh the latest data. Check your connection and try again."));
     }
   }
 
@@ -150,7 +150,7 @@ export default function CompetitionsPage() {
     });
     const json = await res.json();
     setMessage(res.ok ? "Team unlinked." : json.error || "Failed.");
-    if (res.ok) load();
+    if (res.ok) void load().catch(() => setMessage("Could not refresh the latest data. Check your connection and try again."));
   }
 
   async function handleAssignAgent(event: React.FormEvent) {
@@ -163,7 +163,7 @@ export default function CompetitionsPage() {
     setMessage(res.ok ? "Agent assigned to competition." : json.error || "Failed.");
     if (res.ok) {
       setAgentForm({ competitionId: "", userId: "" });
-      load();
+      void load().catch(() => setMessage("Could not refresh the latest data. Check your connection and try again."));
     }
   }
 
@@ -174,7 +174,7 @@ export default function CompetitionsPage() {
     });
     const json = await res.json();
     setMessage(res.ok ? "Agent unassigned." : json.error || "Failed.");
-    if (res.ok) load();
+    if (res.ok) void load().catch(() => setMessage("Could not refresh the latest data. Check your connection and try again."));
   }
 
   async function generateFixtures(competitionId: string, name: string) {
@@ -186,7 +186,7 @@ export default function CompetitionsPage() {
     });
     const json = await res.json();
     setMessage(res.ok ? `Generated ${json.data?.count ?? 0} fixtures.` : json.error || "Failed.");
-    if (res.ok) load();
+    if (res.ok) void load().catch(() => setMessage("Could not refresh the latest data. Check your connection and try again."));
   }
 
   async function qualifyGroups(competitionId: string, name: string) {
@@ -205,7 +205,7 @@ export default function CompetitionsPage() {
       setMessage(
         `Qualified ${data?.qualified?.length ?? 0} teams. Updated ${data?.updatedCount ?? 0}, created ${data?.createdCount ?? 0} knockout fixtures.`
       );
-      load();
+      void load().catch(() => setMessage("Could not refresh the latest data. Check your connection and try again."));
     } else {
       setMessage(json.error || "Failed.");
     }

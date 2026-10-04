@@ -4,16 +4,19 @@ import { useState } from "react";
 import { FixtureCard, ResultCard } from "@/components/cards";
 import { PageHeader } from "@/components/ui";
 import { type Match } from "@/lib/types";
+import { DataFeedback } from "@/components/data-feedback";
 import { useApiData } from "@/lib/use-api-data";
 import { MatchDetailsModal } from "@/components/match-details-modal";
 
 export default function FixturesClient() {
   const [selectedMatch, setSelectedMatch] = useState<Match | null>(null);
-  const { data: fixtures } = useApiData<Match[]>("/api/fixtures", []);
-  const { data: results } = useApiData<Match[]>("/api/results", []);
+  const { data: fixtures, loading: fixturesLoading, error: fixturesError, reload: reloadFixtures } = useApiData<Match[]>("/api/fixtures", []);
+  const { data: results, loading: resultsLoading, error: resultsError, reload: reloadResults } = useApiData<Match[]>("/api/results", []);
+
+  if (fixturesLoading || resultsLoading || fixturesError || resultsError) return <div className="page-shell"><DataFeedback loading={fixturesLoading || resultsLoading} error={fixturesError || resultsError} onRetry={() => { reloadFixtures(); reloadResults(); }} /></div>;
 
   return (
-    <div className="page-shell section-space space-y-8">
+    <div className="page-shell section-space space-y-2">
       <PageHeader 
         eyebrow="Fixtures" 
         title="Past & Upcoming Fixtures" 
@@ -21,11 +24,11 @@ export default function FixturesClient() {
       />
       
       {results.length > 0 || fixtures.length > 0 ? (
-        <div className="space-y-8">
+        <div className="space-y-2">
           {results.length > 0 && (
-            <section className="space-y-3">
+            <section className="space-y-2">
               <h2 className="px-1 text-[10px] font-black uppercase tracking-[0.2em] text-primary">Past Fixtures</h2>
-              <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+              <div className="grid gap-0">
                 {results.map((match) => (
                   <ResultCard
                     key={match.id}
@@ -38,9 +41,9 @@ export default function FixturesClient() {
           )}
 
           {fixtures.length > 0 && (
-            <section className="space-y-3">
+            <section className="space-y-2">
               <h2 className="px-1 text-[10px] font-black uppercase tracking-[0.2em] text-text-secondary">Upcoming Fixtures</h2>
-              <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+              <div className="grid gap-0">
                 {fixtures.map((match) => (
                   <FixtureCard 
                     key={match.id} 

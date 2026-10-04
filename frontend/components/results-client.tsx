@@ -4,15 +4,18 @@ import { useState } from "react";
 import { ResultCard } from "@/components/cards";
 import { PageHeader } from "@/components/ui";
 import { type Match } from "@/lib/types";
+import { DataFeedback } from "@/components/data-feedback";
 import { useApiData } from "@/lib/use-api-data";
 import { MatchDetailsModal } from "@/components/match-details-modal";
 
 export default function ResultsClient() {
   const [selectedMatch, setSelectedMatch] = useState<Match | null>(null);
-  const { data: results } = useApiData<Match[]>("/api/results", []);
+  const { data: results, loading, error, reload } = useApiData<Match[]>("/api/results", []);
+
+  if (loading || error) return <div className="page-shell"><DataFeedback loading={loading} error={error} onRetry={reload} /></div>;
 
   return (
-    <div className="page-shell section-space space-y-8 pb-32">
+    <div className="page-shell section-space space-y-2 pb-32">
       <PageHeader 
         eyebrow="Results" 
         title="Recent Match History" 
@@ -20,7 +23,7 @@ export default function ResultsClient() {
       />
       
       {results.length > 0 ? (
-        <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+        <div className="grid gap-0">
           {results.map((match) => (
             <ResultCard 
               key={match.id} 

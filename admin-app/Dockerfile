@@ -17,6 +17,7 @@ RUN npm run build
 FROM node:22-alpine AS runner
 WORKDIR /app
 ENV NODE_ENV=production
+ENV HOSTNAME=0.0.0.0
 ENV PORT=3001
 ENV NEXT_TELEMETRY_DISABLED=1
 

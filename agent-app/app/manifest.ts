@@ -1,5 +1,5 @@
 import type { MetadataRoute } from "next";
-import { APP_ICON, PWA_BACKGROUND, PWA_THEME_COLOR } from "@/lib/branding";
+import { PWA_BACKGROUND, PWA_THEME_COLOR } from "@/lib/branding";
 
 export default function manifest(): MetadataRoute.Manifest {
   return {
@@ -15,9 +15,9 @@ export default function manifest(): MetadataRoute.Manifest {
     orientation: "any",
     categories: ["sports", "productivity"],
     icons: [
-      { src: APP_ICON, sizes: "192x192", type: "image/png", purpose: "any" },
-      { src: APP_ICON, sizes: "512x512", type: "image/png", purpose: "any" },
-      { src: APP_ICON, sizes: "512x512", type: "image/png", purpose: "maskable" }
+      { src: "/icons/icon-192.png", sizes: "192x192", type: "image/png", purpose: "any" },
+      { src: "/icons/icon-512.png", sizes: "512x512", type: "image/png", purpose: "any" },
+      { src: "/icons/icon-512.png", sizes: "512x512", type: "image/png", purpose: "maskable" }
     ]
   };
 }

@@ -13,6 +13,10 @@ export function middleware(request: NextRequest) {
   }
 
   const response = NextResponse.next();
+  if (isApi) {
+    response.headers.set("Cache-Control", "no-store");
+    response.headers.set("Vary", "Origin");
+  }
   if (isApi && allowed) {
     Object.entries(headers).forEach(([key, value]) => {
       response.headers.set(key, value);

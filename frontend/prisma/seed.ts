@@ -6,7 +6,6 @@ import {
 } from "../lib/services/competition-engine";
 import {
   DEFAULT_ADMIN_EMAIL,
-  DEFAULT_ADMIN_PASSWORD,
   ensureDefaultAdmin
 } from "../lib/bootstrap-admin";
 
@@ -53,6 +52,16 @@ const facultyTeams = [
 
 export async function seedDatabase() {
   console.log("Seeding UTG AllScore football database...");
+  if (process.env.NODE_ENV === "production") {
+    const populated = await Promise.all([
+      prisma.school.count(), prisma.team.count(), prisma.match.count(),
+      prisma.user.count({ where: { role: "AGENT" } }), prisma.competition.count(),
+      prisma.newsArticle.count(), prisma.announcement.count(), prisma.footballEvent.count()
+    ]);
+    if (populated.some((count) => count > 0)) throw new Error("Production seeding requires an empty sports database. Existing data will not be deleted.");
+    // Validate initial credentials before any destructive seed operations.
+    await ensureDefaultAdmin(prisma);
+  }
 
   await prisma.lineupPlayer.deleteMany();
   await prisma.matchEvent.deleteMany();
@@ -67,7 +76,7 @@ export async function seedDatabase() {
   await prisma.footballEvent.deleteMany();
   await prisma.competition.deleteMany();
   await prisma.team.deleteMany();
-  await prisma.user.deleteMany();
+  await prisma.user.deleteMany({ where: process.env.NODE_ENV === "production" ? { role: "AGENT" } : {} });
   await prisma.school.deleteMany();
 
   const schoolMap = new Map<string, string>();
@@ -572,7 +581,7 @@ export async function seedDatabase() {
 
   console.log("\n✅ Seed complete!");
   console.log(`   Admin login: ${DEFAULT_ADMIN_EMAIL}`);
-  console.log(`   Admin password: ${DEFAULT_ADMIN_PASSWORD}`);
+  console.log("   Admin password: configured initial password (existing accounts are preserved)");
   console.log("   Admin app:  http://localhost:3001/login");
   console.log("   Agent app:  http://localhost:3002/login");
   console.log("   Public site: http://localhost:3000\n");

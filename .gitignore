@@ -15,3 +15,13 @@ frontend/prisma/prod.db
 /.idea/
 /agent-app/tsconfig.tsbuildinfo
 /frontend/tsconfig.tsbuildinfo
+
+# Isolated readiness builds
+.next-readiness/
+
+# Temporary mobile browser diagnostics
+.next-mobile-debug/
+
+.next-production-check/
+.readiness-browser/
+/admin-app/tsconfig.tsbuildinfo

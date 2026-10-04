@@ -15,12 +15,17 @@
     "start:public": "npm run start --prefix frontend",
     "start:admin": "npm run start --prefix admin-app",
     "start:agent": "npm run start --prefix agent-app",
-    "lint": "npm run lint --prefix frontend",
+    "lint": "npm run lint --prefix frontend && npm run lint --prefix admin-app && npm run lint --prefix agent-app",
     "db:migrate": "npm run db:migrate --prefix frontend",
     "db:seed": "npm run db:seed --prefix frontend",
     "db:reset": "npm run db:reset --prefix frontend",
     "deploy:frontend": "docker compose -f deploy/frontend/docker-compose.yml up -d --build",
     "deploy:admin": "docker compose -f deploy/admin-app/docker-compose.yml up -d --build",
-    "deploy:agent": "docker compose -f deploy/agent-app/docker-compose.yml up -d --build"
+    "deploy:agent": "docker compose -f deploy/agent-app/docker-compose.yml up -d --build",
+    "typecheck": "npm run lint --prefix frontend && npm run lint --prefix admin-app && npm run lint --prefix agent-app",
+    "test:pwa": "node scripts/test-service-workers.mjs",
+    "check:offline": "node scripts/check-service-workers.cjs",
+    "check:config": "node scripts/check-production-config.cjs",
+    "test:mobile": "node scripts/test-mobile.cjs"
   }
 }

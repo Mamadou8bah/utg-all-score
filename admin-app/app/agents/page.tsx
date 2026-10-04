@@ -30,7 +30,7 @@ export default function AgentsPage() {
   }
 
   useEffect(() => {
-    load().catch(() => {});
+    load().catch(() => setMessage("Unable to load updates. Check your connection and try again."));
   }, []);
 
   async function handleCreate(event: React.FormEvent) {
@@ -40,7 +40,7 @@ export default function AgentsPage() {
     setMessage(res.ok ? "Agent created." : json.error || "Failed.");
     if (res.ok) {
       setForm({ name: "", email: "", password: "", schoolId: "" });
-      load();
+      void load().catch(() => setMessage("Could not refresh the latest data. Check your connection and try again."));
     }
   }
 
@@ -52,7 +52,7 @@ export default function AgentsPage() {
     setMessage(res.ok ? "Agent updated." : json.error || "Failed.");
     if (res.ok) {
       setEditingId(null);
-      load();
+      void load().catch(() => setMessage("Could not refresh the latest data. Check your connection and try again."));
     }
   }
 
@@ -61,7 +61,7 @@ export default function AgentsPage() {
     const res = await apiFetch(`/api/portal/admin/agents/${id}`, { method: "DELETE" });
     const json = await res.json();
     setMessage(res.ok ? "Agent deleted." : json.error || "Failed.");
-    if (res.ok) load();
+    if (res.ok) void load().catch(() => setMessage("Could not refresh the latest data. Check your connection and try again."));
   }
 
   const schoolOptions = useMemo(() => schools, [schools]);

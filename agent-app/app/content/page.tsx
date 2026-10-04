@@ -23,7 +23,7 @@ export default function AgentContentPage() {
   }
 
   useEffect(() => {
-    load().catch(() => {});
+    load().catch(() => setMessage("Unable to load updates. Check your connection and try again."));
   }, []);
 
   async function publishNews(event: React.FormEvent) {
@@ -39,7 +39,7 @@ export default function AgentContentPage() {
     setMessage(res.ok ? "News published." : "Failed to publish news.");
     if (res.ok) {
       setNewsForm({ title: "", excerpt: "", body: "", category: "Football", image: "" });
-      load();
+      void load().catch(() => setMessage("Could not refresh your content. Check your connection and try again."));
     }
   }
 
@@ -52,7 +52,7 @@ export default function AgentContentPage() {
     setMessage(res.ok ? "Announcement published." : "Failed to publish announcement.");
     if (res.ok) {
       setAlertForm({ title: "", body: "", level: "info" });
-      load();
+      void load().catch(() => setMessage("Could not refresh your content. Check your connection and try again."));
     }
   }
 
@@ -60,7 +60,7 @@ export default function AgentContentPage() {
     if (!confirm("Delete this item?")) return;
     const res = await apiFetch("/api/portal/content", { method: "DELETE", body: JSON.stringify({ type, id }) });
     setMessage(res.ok ? "Deleted." : "Failed to delete.");
-    if (res.ok) load();
+    if (res.ok) void load().catch(() => setMessage("Could not refresh your content. Check your connection and try again."));
   }
 
   return (

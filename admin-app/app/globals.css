@@ -73,3 +73,23 @@
     }
   }
 }
+
+/* Mobile input, keyboard focus, and display cutout support. */
+body { padding-left: env(safe-area-inset-left); padding-right: env(safe-area-inset-right); }
+button, a, input, select, textarea { touch-action: manipulation; }
+:focus-visible { outline: 2px solid var(--primary); outline-offset: 3px; }
+@media (max-width: 767px) {
+  input, select, textarea { font-size: 16px !important; }
+  button, input:not([type="checkbox"]):not([type="radio"]), select { min-height: 44px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+  *, *::before, *::after { animation-duration: .01ms !important; animation-iteration-count: 1 !important; transition-duration: .01ms !important; }
+}
+
+/* Keep app content scrolling beneath the header and mobile tabs. */
+.portal-shell { height: 100dvh; overflow: hidden; }
+.portal-header { flex-shrink: 0; padding-top: env(safe-area-inset-top); }
+.portal-scroll { min-height: 0; overflow-y: auto; overscroll-behavior-y: contain; }
+.keyboard-open nav[aria-label="Main navigation"] { display: none; }
+.keyboard-open .mobile-safe-bottom { padding-bottom: 1rem; }

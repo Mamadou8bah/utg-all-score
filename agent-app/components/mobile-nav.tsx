@@ -20,7 +20,7 @@ export function AgentMobileNav() {
   }
 
   return (
-    <nav className="fixed bottom-0 left-0 right-0 z-50 border-t border-slate-100 bg-white pb-[env(safe-area-inset-bottom)] lg:hidden">
+    <nav aria-label="Main navigation" className="fixed bottom-0 left-0 right-0 z-50 border-t border-slate-100 bg-white pb-[env(safe-area-inset-bottom)] lg:hidden">
       <div className="grid grid-cols-2 px-2 pt-2">
         {agentNav.map((item) => {
           const isActive = pathname === item.href;
@@ -29,6 +29,7 @@ export function AgentMobileNav() {
             <Link
               key={item.href}
               href={item.href}
+              aria-current={isActive ? "page" : undefined}
               className={cn(
                 "flex flex-col items-center gap-1 px-2 pb-2 transition-transform active:scale-90",
                 isActive ? "text-primary" : "text-slate-400"

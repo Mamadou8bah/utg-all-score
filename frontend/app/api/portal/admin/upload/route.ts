@@ -34,11 +34,11 @@ export async function POST(request: Request) {
     return jsonError("Only JPEG, PNG, WebP, GIF, or SVG images are allowed.", 400, request);
   }
 
-  const buffer = Buffer.from(await file.arrayBuffer());
-  if (buffer.length > MAX_BYTES) {
+  if (file.size > MAX_BYTES) {
     return jsonError("Image must be under 5 MB.", 400, request);
   }
 
+  const buffer = Buffer.from(await file.arrayBuffer());
   const filename = file instanceof File ? file.name : "logo.png";
 
   try {

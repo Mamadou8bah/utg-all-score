@@ -26,8 +26,8 @@ export function AgentShell({
   const pathname = usePathname();
 
   return (
-    <div className="flex min-h-[var(--app-height)] flex-col">
-      <header className="sticky top-0 z-40 border-b border-slate-100 bg-white">
+    <div className="portal-shell flex flex-col">
+      <header className="portal-header sticky top-0 z-40 border-b border-slate-100 bg-white">
         <div className="flex h-14 items-center justify-between px-4 sm:px-6">
           <Link href="/" className="flex min-w-0 items-center gap-2.5">
             <img src={APP_LOGO} alt={APP_NAME} className="h-9 w-9 shrink-0 object-contain" />
@@ -58,7 +58,7 @@ export function AgentShell({
         </div>
       </header>
 
-      <div className="mx-auto flex w-full max-w-7xl flex-1 gap-6 px-4 py-4 sm:px-6 lg:py-8 xl:px-8">
+      <div className="portal-scroll mx-auto flex w-full max-w-7xl flex-1 gap-6 px-4 py-4 sm:px-6 lg:py-8 xl:px-8">
         <aside className="sticky top-20 hidden h-fit w-60 shrink-0 rounded-[32px] bg-slate-950 p-4 text-white shadow-float lg:block">
           <p className="px-3 py-2 text-xs font-bold uppercase tracking-[0.28em] text-slate-400">Matchday</p>
           <nav className="mt-2 flex flex-col gap-1">

@@ -5,6 +5,7 @@ export const cn = (...inputs: ClassValue[]) => twMerge(clsx(inputs));
 
 export const formatDate = (value: string, options?: Intl.DateTimeFormatOptions) =>
   new Intl.DateTimeFormat("en-GB", {
+    timeZone: "Africa/Banjul",
     day: "numeric",
     month: "short",
     year: "numeric",
@@ -13,6 +14,7 @@ export const formatDate = (value: string, options?: Intl.DateTimeFormatOptions) 
 
 export const formatTime = (value: string) =>
   new Intl.DateTimeFormat("en-GB", {
+    timeZone: "Africa/Banjul",
     hour: "2-digit",
     minute: "2-digit"
   }).format(new Date(value));

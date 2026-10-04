@@ -1,8 +1,11 @@
 "use client";
 
+import { DetailDialog } from "@/components/detail-dialog";
+
 import { useState } from "react";
 import { Badge, Button } from "@/components/ui";
-import { X, Calendar, Share2, MessageCircle, Clock, BookOpen } from "lucide-react";
+import { X, Calendar, Share2, Clock, BookOpen } from "lucide-react";
+import { sharePage } from "@/lib/share";
 import { formatDate } from "@/lib/utils";
 
 interface NewsItem {
@@ -12,6 +15,7 @@ interface NewsItem {
   category: string;
   image?: string;
   publishedAt: string;
+  body?: string;
 }
 
 export const NewsDetailsModal = ({ 
@@ -21,10 +25,12 @@ export const NewsDetailsModal = ({
   item: NewsItem; 
   onClose: () => void 
 }) => {
+  const [shareMessage, setShareMessage] = useState<string | null>(null);
   if (!item) return null;
+  const readingMinutes = Math.max(1, Math.ceil((item.body || item.excerpt).split(/\s+/).length / 200));
 
   return (
-    <div className="fixed inset-0 z-[100] flex items-stretch justify-center bg-white sm:items-center sm:bg-slate-900 sm:p-4">
+    <DetailDialog label={item.title} onClose={onClose} className="fixed inset-0 z-[100] flex items-stretch justify-center bg-white sm:items-center sm:bg-slate-900 sm:p-4">
       <div 
         className="relative flex h-[100dvh] max-h-none w-full max-w-2xl flex-col overflow-hidden bg-white shadow-2xl animate-in slide-in-from-bottom-full duration-300 sm:h-auto sm:max-h-[92vh] sm:rounded-[40px]"
         onClick={(e) => e.stopPropagation()}
@@ -32,6 +38,7 @@ export const NewsDetailsModal = ({
         {/* Header/Close */}
         <div className="absolute top-4 right-4 z-10">
           <button 
+            aria-label="Close article"
             onClick={onClose}
             className="flex h-10 w-10 items-center justify-center rounded-full bg-slate-700 text-white  transition hover:bg-slate-600 active:scale-90 sm:bg-slate-100 sm:text-slate-600 sm:hover:bg-slate-200"
           >
@@ -62,6 +69,7 @@ export const NewsDetailsModal = ({
           )}
 
           <div className="p-6 sm:p-10">
+            {!item.image ? <h1 className="mb-4 text-2xl font-bold">{item.title}</h1> : null}
             {/* Meta Info */}
             <div className="mb-8 flex flex-wrap items-center gap-6 border-b border-slate-100 pb-8 text-sm text-text-secondary">
               <div className="flex items-center gap-2">
@@ -70,11 +78,11 @@ export const NewsDetailsModal = ({
               </div>
               <div className="flex items-center gap-2">
                 <Clock size={16} />
-                <span className="font-bold">4 min read</span>
+                <span className="font-bold">{readingMinutes} min read</span>
               </div>
               <div className="flex items-center gap-2">
                 <BookOpen size={16} />
-                <span className="font-bold">Match Analysis</span>
+                <span className="font-bold">{item.category}</span>
               </div>
             </div>
 
@@ -85,30 +93,17 @@ export const NewsDetailsModal = ({
               </p>
               
               <div className="space-y-6 text-base leading-8 text-slate-600 font-medium">
-                <p>
-                  UTG Main Campus — In a stunning display of tactical discipline and raw speed, the latest round of matches in the VC Tournament has left fans and analysts alike breathless. The atmosphere under the campus lights was electric as students from all faculties gathered to support their respective teams.
-                </p>
-                <p>
-                  "We've been training for this specific transition play for weeks," said the team captain during a post-match interview. "AllScore has made it easier for us to track our performance and see where we need to improve. Today, it all came together."
-                </p>
-                <p>
-                  The game changed in the 72nd minute when a quick interchange in the midfield opened up space for a devastating cross. The resulting goal sent the crowd into a frenzy, solidifying the team's position at the top of the table. With only three fixtures remaining, every point is now critical in the race for the Dean's Cup.
-                </p>
-                <p>
-                  Faculty officials have noted an increase in athlete engagement since the rollout of the digital live-scoring system. "The transparency and speed of updates are game-changers for university sports," noted the Sports Director. "Stay tuned to AllScore for the official match-day highlights and updated standings."
-                </p>
+                {item.body?.split(/\n\s*\n/).filter(Boolean).map((paragraph, index) => <p key={index} className="whitespace-pre-line">{paragraph}</p>)}
               </div>
             </div>
 
             {/* Interaction Footer */}
             <div className="mt-12 flex items-center justify-between border-t border-slate-100 pt-8">
               <div className="flex items-center gap-4">
-                <Button variant="ghost" className="h-12 w-12 rounded-full p-0 flex items-center justify-center ring-slate-100">
+                <Button variant="ghost" aria-label="Share article" onClick={async () => setShareMessage(await sharePage(item.title, `${window.location.origin}/news`, item.excerpt))} className="h-12 w-12 rounded-full p-0 flex items-center justify-center ring-slate-100">
                   <Share2 size={20} className="text-slate-600" />
                 </Button>
-                <Button variant="ghost" className="h-12 w-12 rounded-full p-0 flex items-center justify-center ring-slate-100">
-                  <MessageCircle size={20} className="text-slate-600" />
-                </Button>
+                {shareMessage ? <span role="status" className="text-xs text-text-secondary">{shareMessage}</span> : null}
               </div>
               <Button onClick={onClose} className="rounded-2xl px-8 py-3.5 font-black uppercase tracking-widest text-xs">
                 Back to Feed
@@ -117,6 +112,6 @@ export const NewsDetailsModal = ({
           </div>
         </div>
       </div>
-    </div>
+    </DetailDialog>
   );
 };
