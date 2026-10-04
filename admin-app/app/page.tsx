@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useState } from "react";
 import Link from "next/link";
-import { AdminShell, Card } from "@/components/ui";
+import { AdminShell, Card, Skeleton } from "@/components/ui";
 import { adminNav } from "@/lib/nav";
 import { apiJson, PUBLIC_SITE_URL } from "@/lib/api";
 import type { Match } from "@/lib/types";
@@ -57,7 +57,7 @@ export default function AdminDashboardPage() {
         ].map((stat) => (
           <Card key={stat.label}>
             <p className="text-xs font-semibold text-text-secondary sm:text-sm">{stat.label}</p>
-            <p className="mt-1 text-2xl font-bold text-slate-950 sm:mt-2 sm:text-3xl">{loading || error ? "—" : stat.value}</p>
+            {loading ? <Skeleton className="mt-2 h-9 w-16 rounded-lg" /> : <p className="mt-1 text-2xl font-bold text-slate-950 sm:mt-2 sm:text-3xl">{error ? "—" : stat.value}</p>}
           </Card>
         ))}
       </div>

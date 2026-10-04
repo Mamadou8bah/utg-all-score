@@ -10,6 +10,27 @@ import { APP_LOGO, APP_NAME } from "@/lib/branding";
 import { AgentMobileNav } from "@/components/mobile-nav";
 import type { AgentNavItem } from "@/lib/nav";
 
+export function Skeleton({ className = "" }: { className?: string }) {
+  return <div className={cn("animate-pulse rounded-2xl bg-slate-200", className)} />;
+}
+
+export function PortalSkeleton() {
+  return (
+    <div className="space-y-6" role="status" aria-label="Loading page">
+      <span className="sr-only">Loading page</span>
+      <div className="space-y-3">
+        <Skeleton className="h-3 w-28 rounded-full" />
+        <Skeleton className="h-10 w-64 rounded-xl" />
+        <Skeleton className="h-4 w-80 max-w-full rounded-full" />
+      </div>
+      <div className="grid gap-4 sm:grid-cols-2">
+        {Array.from({ length: 4 }, (_, index) => <Skeleton key={index} className="h-32" />)}
+      </div>
+      <Skeleton className="h-56 w-full" />
+    </div>
+  );
+}
+
 export function AgentShell({
   title,
   subtitle,

@@ -1,11 +1,24 @@
 "use client";
 
+import { SkeletonBlock } from "@/components/cards";
+
+function DataSkeleton() {
+  return (
+    <div className="space-y-3" role="status" aria-label="Loading content">
+      <span className="sr-only">Loading content</span>
+      <SkeletonBlock className="h-28 w-full rounded-2xl" />
+      <SkeletonBlock className="h-20 w-full rounded-2xl" />
+      <SkeletonBlock className="h-20 w-full rounded-2xl" />
+    </div>
+  );
+}
+
 export function DataFeedback({ loading, error, onRetry }: {
   loading?: boolean;
   error?: string | null;
   onRetry: () => void;
 }) {
-  if (loading) return <p className="empty-state" role="status">Loading updates...</p>;
+  if (loading) return <DataSkeleton />;
   if (!error) return null;
   return (
     <div role="alert" className="border-b border-red-200 bg-red-50 p-4 text-center text-sm text-red-900">

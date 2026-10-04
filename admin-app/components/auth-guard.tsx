@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { usePathname, useRouter } from "next/navigation";
 import { getToken } from "@/lib/api";
+import { PortalSkeleton } from "@/components/ui";
 
 export function AuthGuard({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
@@ -16,5 +17,5 @@ export function AuthGuard({ children }: { children: React.ReactNode }) {
     else setChecked(true);
   }, [pathname, router]);
 
-  return publicPage || checked ? <>{children}</> : null;
+  return publicPage || checked ? <>{children}</> : <PortalSkeleton />;
 }
