@@ -15,7 +15,8 @@
     "db:reset": "prisma migrate reset --force",
     "postinstall": "prisma generate",
     "typecheck": "tsc --noEmit",
-    "test:auth": "tsx scripts/check-auth.ts"
+    "test:auth": "tsx scripts/check-auth.ts",
+    "test:search": "tsx scripts/check-search.ts"
   },
   "prisma": {
     "seed": "tsx prisma/seed.ts"

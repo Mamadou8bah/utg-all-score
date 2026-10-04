@@ -13,7 +13,7 @@ import {
   CalendarDays, 
   Newspaper, 
   ChevronRight, 
-  Bell
+  Search
 } from "lucide-react";
 
 type ButtonProps = React.ButtonHTMLAttributes<HTMLButtonElement> & {
@@ -25,7 +25,7 @@ export const Button = ({ className, variant = "primary", ...props }: ButtonProps
     className={cn(
       "inline-flex items-center justify-center rounded-full px-5 py-3 text-sm font-semibold transition duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-200 disabled:cursor-not-allowed disabled:bg-slate-300 disabled:text-slate-500 disabled:shadow-none disabled:hover:translate-y-0",
       variant === "primary" && "bg-primary text-white shadow-float hover:-translate-y-0.5 hover:bg-[#004688] active:translate-y-0",
-      variant === "secondary" && "bg-secondary text-slate-950 hover:bg-[#E6B000] active:scale-[0.99]",
+      variant === "secondary" && "bg-secondary text-white hover:bg-[#E6B000] active:scale-[0.99]",
       variant === "ghost" && "bg-white text-text-primary ring-1 ring-slate-200 hover:bg-white",
       variant === "destructive" && "bg-error text-white hover:bg-red-700",
       className
@@ -109,12 +109,13 @@ export const Tabs = ({
             return (
               <button
                 key={tab.id}
+                aria-pressed={tab.id === selected.id}
                 onClick={() => setActiveTab(tab.id)}
                 className={cn(
-                  "whitespace-nowrap rounded-2xl px-6 py-3 text-sm font-black transition-all active:scale-95",
+                  "app-tab whitespace-nowrap px-6 py-3 text-sm font-bold transition-colors",
                   isActive 
-                    ? "bg-primary text-white shadow-lg" 
-                    : "bg-white text-slate-400 hover:bg-slate-50 hover:text-slate-600 ring-1 ring-slate-100"
+                    ? "app-tab--active text-primary"
+                    : "text-slate-500 hover:text-primary"
                 )}
               >
                 {tab.label}
@@ -135,10 +136,11 @@ export const Tabs = ({
         {tabs.map((tab) => (
           <button
             key={tab.id}
-            onClick={() => setActiveTab(tab.id)}
+            aria-pressed={tab.id === selected.id}
+                onClick={() => setActiveTab(tab.id)}
             className={cn(
-              "rounded-full px-4 py-2 text-sm font-medium transition",
-              tab.id === selected.id ? "bg-primary text-white" : "bg-slate-100 text-text-secondary hover:bg-slate-200"
+              "app-tab px-4 py-2 text-sm font-medium transition",
+              tab.id === selected.id ? "app-tab--active text-primary" : "text-text-secondary hover:text-primary"
             )}
           >
             {tab.label}
@@ -210,13 +212,13 @@ export const Navbar = () => {
       </Link>
       <nav className="top-bar__nav" aria-label="Main navigation">
         {links.map((link) => (
-          <Link key={link.path} href={link.path} aria-current={pathname === link.path ? "page" : undefined}
-            className={cn("top-bar__link", pathname === link.path && "top-bar__link--active")}>
+          <Link key={link.path} href={link.path} aria-current={(pathname === link.path || (link.path === "/more" && pathname === "/settings")) ? "page" : undefined}
+            className={cn("top-bar__link", (pathname === link.path || (link.path === "/more" && pathname === "/settings")) && "top-bar__link--active")}>
             {link.label}
           </Link>
         ))}
       </nav>
-      <div className="top-bar__actions"><NotificationToggle /></div>
+      <div className="top-bar__actions"><Link href="/search" aria-label="Search AllScore" className="global-search-link"><Search size={21} /></Link></div>
     </header>
   );
 };
@@ -273,9 +275,8 @@ export const OfflineStatus = () => {
   return <div className={cn("rounded-full px-4 py-2 text-sm font-medium", online ? "bg-green-50 text-success" : "bg-amber-50 text-warning")}>{online ? "Online and syncing" : "Offline mode active"}</div>;
 };
 
-export const NotificationToggle = () => {
+export const NotificationSettings = () => {
   const [status, setStatus] = useState<"idle" | "enabled" | "denied" | "unsupported" | "error">("idle");
-  const [open, setOpen] = useState(false);
   const [message, setMessage] = useState<string | null>(null);
   const [needsHomeScreen, setNeedsHomeScreen] = useState(false);
   const [busy, setBusy] = useState(false);
@@ -361,7 +362,7 @@ export const NotificationToggle = () => {
     const vapidPublicKey = process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY?.trim();
     if (!vapidPublicKey) {
       setStatus("error");
-      setMessage("Push is not configured (missing VAPID public key).");
+      setMessage("Notifications are not available right now. Please try again later.");
       return;
     }
 
@@ -413,24 +414,6 @@ export const NotificationToggle = () => {
   };
 
   return (
-    <>
-      <button
-        type="button"
-        onClick={() => setOpen(true)}
-        className={cn(
-          "p-2 text-slate-500 transition-all active:scale-90 rounded-2xl hover:bg-slate-50 hover:text-slate-950",
-          enabled && "text-primary"
-        )}
-        aria-label="Notifications"
-      >
-        <Bell size={22} strokeWidth={2.5} />
-      </button>
-      <Modal
-        open={open}
-        onClose={() => setOpen(false)}
-        title="Push notifications"
-        description="Alerts for kickoff, half time, goals, full time, news, and announcements."
-      >
         <div className="space-y-4">
           {needsHomeScreen ? (
             <div className="rounded-3xl bg-amber-50 p-4 text-sm text-amber-950">
@@ -482,12 +465,7 @@ export const NotificationToggle = () => {
             </div>
           ) : null}
 
-          <Button variant="ghost" onClick={() => setOpen(false)}>
-            Done
-          </Button>
         </div>
-      </Modal>
-    </>
   );
 };
 

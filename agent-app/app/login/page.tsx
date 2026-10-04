@@ -37,13 +37,13 @@ export default function AgentLoginPage() {
   }
 
   return (
-    <div className="flex min-h-[var(--app-height)] flex-col px-4 py-6 sm:items-center sm:justify-center sm:py-10">
+    <div className="portal-login flex min-h-[var(--app-height)] flex-col px-4 py-6 sm:items-center sm:justify-center sm:py-10">
       <div className="mx-auto flex w-full max-w-md flex-1 flex-col justify-center gap-5 sm:max-w-5xl sm:gap-6 lg:grid lg:max-w-5xl lg:grid-cols-[1fr_420px] lg:items-stretch">
-        <section className="rounded-[28px] border border-slate-100 bg-slate-950 p-6 text-white shadow-float sm:rounded-[36px] sm:p-8">
+        <section className="rounded-[28px] border border-slate-100 bg-primary p-6 text-white shadow-float sm:rounded-[36px] sm:p-8">
           <div className="flex items-center gap-4">
             <img src={APP_LOGO} alt={APP_NAME} className="h-12 w-12 object-contain sm:h-14 sm:w-14" />
             <div>
-              <p className="text-[10px] font-bold uppercase tracking-[0.32em] text-primary">{APP_NAME}</p>
+              <p className="text-[10px] font-bold uppercase tracking-[0.32em] text-white">{APP_NAME}</p>
               <p className="text-sm font-bold text-white">Agent Application</p>
             </div>
           </div>

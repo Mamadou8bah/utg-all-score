@@ -308,15 +308,18 @@ export default function AgentDashboardPage() {
               key={match.id}
               type="button"
               onClick={() => setSelectedId(match.id)}
-              className={`w-full rounded-[20px] p-4 text-left text-sm transition ${selectedId === match.id ? "bg-blue-50 ring-2 ring-blue-300" : "bg-slate-50 hover:bg-slate-100"}`}
+              aria-pressed={selectedId === match.id}
+              className="portal-match-choice"
             >
-              <p className="font-semibold text-slate-950">
-                {match.home} {match.homeScore} - {match.awayScore} {match.away}
-              </p>
-              <p className="text-text-secondary">
+              <span className="portal-match-meta">
                 {match.competition} · {match.status}
                 {match.timer ? ` · ${match.timer}` : ""}
-              </p>
+              </span>
+              <span className="portal-match-scoreline">
+                <span>{match.home}</span>
+                <strong>{match.homeScore} – {match.awayScore}</strong>
+                <span>{match.away}</span>
+              </span>
             </button>
           ))}
           {!matches.length ? (

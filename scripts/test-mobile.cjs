@@ -9,7 +9,7 @@ const { chromium } = require(process.env.PLAYWRIGHT_MODULE || 'playwright');
   const competition = { id: 'test-league', name: 'University League', type: 'GENERAL', description: 'Test', format: 'LEAGUE' };
   try {
     for (const [app, port, paths] of [
-      ['frontend', Number(process.env.PUBLIC_TEST_PORT || 3100), ['/', '/live', '/fixtures', '/results', '/standings', '/news', '/more', '/teams', '/athletes', '/events', '/announcements']],
+      ['frontend', Number(process.env.PUBLIC_TEST_PORT || 3100), ['/', '/live', '/fixtures', '/results', '/standings', '/news', '/more', '/teams', '/athletes', '/events', '/announcements', '/search']],
       ['admin-app', portBase + 1, ['/login', '/', '/schools', '/agents', '/teams', '/competitions', '/matches', '/offline']],
       ['agent-app', portBase + 2, ['/login', '/', '/content', '/offline']]
     ]) {

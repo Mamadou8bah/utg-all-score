@@ -1,7 +1,8 @@
 import Link from "next/link";
-import { CalendarDays, Trophy, Users, Megaphone, Medal, ChevronRight, Calendar } from "lucide-react";
+import { CalendarDays, Trophy, Users, Megaphone, Medal, ChevronRight, Calendar, Settings } from "lucide-react";
 
 const links = [
+  { href: "/settings", label: "Settings", description: "Notifications and device preferences", icon: Settings },
   { href: "/fixtures", label: "Fixtures", description: "Upcoming games and past fixtures", icon: CalendarDays },
   { href: "/results", label: "Results", description: "Full-time scores and match reports", icon: Trophy },
   { href: "/teams", label: "Teams", description: "Explore university teams", icon: Users },

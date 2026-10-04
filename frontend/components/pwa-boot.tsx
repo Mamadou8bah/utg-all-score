@@ -76,7 +76,7 @@ export function PwaBoot() {
     <div role="status" aria-live="polite" className="fixed inset-x-4 bottom-[calc(5.5rem+env(safe-area-inset-bottom))] z-[120] rounded-2xl bg-slate-950 px-4 py-3 text-sm text-white shadow-float lg:bottom-4 lg:left-auto lg:right-4 lg:w-[360px]">
       {updateReady ? (
         <div className="flex items-center justify-between gap-3">
-          <span>A new version is ready. Save your work before updating.</span>
+          <span>A new version is ready. Update now for the latest scores and features.</span>
           <button type="button" className="shrink-0 rounded-lg bg-white px-3 py-2 font-semibold text-slate-950"
             onClick={() => {
               if (!registration.current?.waiting) return;

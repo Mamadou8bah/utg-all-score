@@ -5,10 +5,10 @@ const config: Config = {
   theme: {
     extend: {
       colors: {
-        primary: "#0055A4",
-        secondary: "#FFC72C",
+        primary: "#0c1c8c",
+        secondary: "#ce1126",
         accent: "#0F766E",
-        background: "#F5F7FA",
+        background: "#f0f0f0",
         surface: "#FFFFFF",
         "text-primary": "#1F2937",
         "text-secondary": "#4B5563",
@@ -24,8 +24,8 @@ const config: Config = {
         "3xl": "2.5rem"
       },
       boxShadow: {
-        card: "0 10px 30px #CBD5E1",
-        float: "0 22px 50px #94A3B8"
+        card: "0 2px 12px rgb(12 28 140 / 0.05)",
+        float: "0 8px 24px rgb(12 28 140 / 0.12)"
       },
       animation: {
         slideUp: "slideUp 0.5s ease forwards"

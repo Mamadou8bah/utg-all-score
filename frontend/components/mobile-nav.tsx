@@ -20,8 +20,8 @@ export const MobileNav = () => {
   return (
     <nav className="bottom-nav" aria-label="Main navigation">
       {bottomLinks.map((link) => (
-        <Link key={link.href} href={link.href} aria-current={pathname === link.href ? "page" : undefined}
-          className={cn("bottom-nav__item", pathname === link.href && "bottom-nav__item--active")}>
+        <Link key={link.href} href={link.href} aria-current={(pathname === link.href || (link.href === "/more" && pathname === "/settings")) ? "page" : undefined}
+          className={cn("bottom-nav__item", (pathname === link.href || (link.href === "/more" && pathname === "/settings")) && "bottom-nav__item--active")}>
           {link.icon}<span>{link.label}</span>
         </Link>
       ))}

@@ -1,12 +1,12 @@
 import type { Metadata, Viewport } from "next";
-import { Manrope, Sora } from "next/font/google";
+import { DM_Sans, Barlow_Condensed } from "next/font/google";
 import "./globals.css";
 import { AuthGuard } from "@/components/auth-guard";
 import { PwaBoot } from "@/components/pwa-boot";
 import { APP_ICON, PWA_THEME_COLOR } from "@/lib/branding";
 
-const bodyFont = Manrope({ subsets: ["latin"], variable: "--font-body" });
-const headingFont = Sora({ subsets: ["latin"], variable: "--font-heading" });
+const bodyFont = DM_Sans({ subsets: ["latin"], variable: "--font-body" });
+const headingFont = Barlow_Condensed({ subsets: ["latin"], weight: ["500", "600", "700"], variable: "--font-heading" });
 
 export const metadata: Metadata = {
   title: "UTG AllScore Admin",

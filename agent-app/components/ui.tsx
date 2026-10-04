@@ -3,7 +3,7 @@
 import type { ReactNode } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { LogOut } from "lucide-react";
+import { LogOut, Search } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { PUBLIC_SITE_URL } from "@/lib/api";
 import { APP_LOGO, APP_NAME } from "@/lib/branding";
@@ -48,76 +48,30 @@ export function AgentShell({
 
   return (
     <div className="portal-shell flex flex-col">
-      <header className="portal-header sticky top-0 z-40 border-b border-slate-100 bg-white">
-        <div className="flex h-14 items-center justify-between px-4 sm:px-6">
-          <Link href="/" className="flex min-w-0 items-center gap-2.5">
-            <img src={APP_LOGO} alt={APP_NAME} className="h-9 w-9 shrink-0 object-contain" />
-            <div className="min-w-0 lg:hidden">
-              <p className="truncate text-[9px] font-black uppercase tracking-[0.2em] text-primary">{APP_NAME}</p>
-              <p className="truncate text-sm font-bold text-slate-950">{title}</p>
-            </div>
-            <div className="hidden min-w-0 lg:block">
-              <p className="text-[10px] font-bold uppercase tracking-[0.32em] text-primary">{APP_NAME}</p>
-              <p className="text-sm font-bold text-slate-950">Agent</p>
-            </div>
+      <header className="portal-header">
+        <div className="portal-topbar">
+          <Link href="/" className="portal-brand">
+            <img src={APP_LOGO} alt="" className="portal-logo" />
+            <span>{APP_NAME}<small>Agent</small></span>
           </Link>
-          <div className="flex shrink-0 items-center gap-2">
-            <span className="hidden rounded-full bg-blue-50 px-3 py-1 text-[10px] font-bold uppercase tracking-[0.14em] text-primary sm:inline">
-              Agent
-            </span>
-            {onLogout ? (
-              <button
-                onClick={onLogout}
-                aria-label="Sign out"
-                className="flex h-10 w-10 items-center justify-center rounded-full border border-slate-200 bg-white text-slate-600 shadow-sm transition active:scale-95 lg:w-auto lg:gap-2 lg:px-4 lg:py-2"
-              >
-                <LogOut size={18} className="lg:hidden" />
-                <span className="hidden text-sm font-semibold lg:inline">Sign out</span>
-              </button>
-            ) : null}
-          </div>
+          <div className="portal-actions"><a href={`${PUBLIC_SITE_URL}/search`} aria-label="Search AllScore" className="global-search-link"><Search size={21} /></a>{onLogout ? <button onClick={onLogout} aria-label="Sign out" className="portal-signout"><LogOut size={20} /></button> : null}</div>
         </div>
+        <nav className="portal-desktop-nav" aria-label="Desktop navigation">
+          {nav.map((item) => <Link key={item.href} href={item.href} aria-current={pathname === item.href ? "page" : undefined}>{item.label}</Link>)}
+          <a href={PUBLIC_SITE_URL}>Public site ↗</a>
+        </nav>
       </header>
-
-      <div className="portal-scroll mx-auto flex w-full max-w-7xl flex-1 gap-6 px-4 py-4 sm:px-6 lg:py-8 xl:px-8">
-        <aside className="sticky top-20 hidden h-fit w-60 shrink-0 rounded-[32px] bg-slate-950 p-4 text-white shadow-float lg:block">
-          <p className="px-3 py-2 text-xs font-bold uppercase tracking-[0.28em] text-slate-400">Matchday</p>
-          <nav className="mt-2 flex flex-col gap-1">
-            {nav.map((item) => {
-              const Icon = item.icon;
-              return (
-                <Link
-                  key={item.href}
-                  href={item.href}
-                  className={cn(
-                    "flex items-center gap-3 rounded-2xl px-4 py-3 text-sm font-medium transition hover:bg-slate-800",
-                    pathname === item.href && "bg-white text-slate-950"
-                  )}
-                >
-                  <Icon size={18} />
-                  {item.label}
-                </Link>
-              );
-            })}
-          </nav>
-          <div className="mt-6 border-t border-slate-700 px-3 pt-4">
-            <a href={PUBLIC_SITE_URL} className="text-sm text-slate-300 transition hover:text-white">
-              ← Public AllScore site
-            </a>
-          </div>
-        </aside>
-
-        <main className="mobile-safe-bottom min-w-0 flex-1 space-y-4 animate-slideUp lg:space-y-6">
-          <div className="hidden lg:block">
-            <p className="text-[10px] font-bold uppercase tracking-[0.32em] text-primary">Football Agent</p>
-            <h1 className="mt-2 text-4xl font-bold tracking-tight text-slate-950">{title}</h1>
-            <p className="mt-2 text-base text-text-secondary">{subtitle}</p>
-          </div>
-          <p className="text-sm text-text-secondary lg:hidden">{subtitle}</p>
-          {children}
+      <div className="portal-scroll">
+        <main className="portal-content">
+          <section className="portal-hero">
+            <p className="portal-eyebrow">UTG Football · Matchday</p>
+            <h1>{title}</h1>
+            <p>{subtitle}</p>
+            <a href={PUBLIC_SITE_URL} className="portal-public-link">View AllScore ↗</a>
+          </section>
+          <div className="portal-page">{children}</div>
         </main>
       </div>
-
       <AgentMobileNav />
     </div>
   );
@@ -125,8 +79,8 @@ export function AgentShell({
 
 export function Card({ title, children }: { title?: string; children: ReactNode }) {
   return (
-    <section className="rounded-[24px] border border-slate-100 bg-white p-4 shadow-card sm:rounded-[28px] sm:p-5">
-      {title ? <h2 className="mb-3 text-base font-semibold text-slate-950 sm:mb-4 sm:text-lg">{title}</h2> : null}
+    <section className="portal-card">
+      {title ? <h2 className="portal-card-title">{title}</h2> : null}
       {children}
     </section>
   );
@@ -187,9 +141,9 @@ export function Button({
     <button
       {...props}
       className={cn(
-        "inline-flex items-center justify-center rounded-full px-5 py-3 text-sm font-semibold transition duration-200 disabled:cursor-not-allowed disabled:bg-slate-300 disabled:text-slate-500 disabled:shadow-none",
-        variant === "primary" && "bg-primary text-white shadow-float hover:-translate-y-0.5 hover:bg-[#004688]",
-        variant === "secondary" && "bg-secondary text-slate-950 hover:bg-[#E6B000]",
+        "inline-flex items-center justify-center rounded-xl px-5 py-3 text-sm font-semibold transition duration-200 disabled:cursor-not-allowed disabled:bg-slate-300 disabled:text-slate-500 disabled:shadow-none",
+        variant === "primary" && "bg-primary text-white hover:bg-[#08145f]",
+        variant === "secondary" && "bg-secondary text-white hover:bg-[#b80f22]",
         variant === "ghost" && "border border-slate-200 bg-white text-slate-950 hover:bg-slate-50",
         className
       )}
