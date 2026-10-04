@@ -328,3 +328,39 @@ h1, h2, h3 { letter-spacing: -.035em; }
 
 .app-tab { border-bottom: 3px solid transparent; border-radius: 0; background: transparent; }
 .app-tab--active { border-bottom-color: var(--secondary); }
+
+/* Reference alignment: compact, flat football panels in AllScore's existing palette. */
+.top-bar { min-height: 48px; height: calc(48px + env(safe-area-inset-top)); padding-left: 12px; padding-right: 12px; }
+.top-bar__brand { font-family: var(--font-heading), sans-serif; font-size: 1.35rem; text-transform: uppercase; letter-spacing: .02em; }
+.top-bar__logo { border-radius: 4px; }
+.secondary-strip { min-height: 44px; gap: 4px; padding: 0 8px; }
+.filter-chip { font-size: .72rem; font-weight: 600; text-transform: uppercase; letter-spacing: .04em; }
+.date-strip { padding: 0; gap: 0; }
+.date-strip__day--active, .date-strip__day--active .date-strip__wd { color: var(--secondary); }
+.league-group { margin: 10px 0 0; border: 0; border-radius: 0; }
+.league-group__header { width: 100%; text-align: left; padding: 8px 12px; background: white; color: #1a1a1a; text-transform: uppercase; letter-spacing: .05em; }
+.league-group__header:hover { background: #e8eaf4; }
+.match-row { min-height: 56px; padding: 10px 12px; }
+.match-row__score { background: transparent; color: #1a1a1a; padding: 0; border-radius: 0; font-family: var(--font-heading), sans-serif; font-size: 1.35rem; letter-spacing: .04em; }
+.page-heading, .page-title { padding: 12px; background: white; color: #1a1a1a; border-bottom: 1px solid var(--gm-border); }
+.page-heading h1, .page-title { font-size: 1.45rem; color: #1a1a1a; text-transform: uppercase; letter-spacing: 0; }
+.page-heading h1 + p { color: #6b6b6b; }
+.explore-row { border: 0; border-bottom: 1px solid var(--gm-border); border-radius: 0; margin: 0; }
+.news-card { border-radius: 0; margin: 0; }
+.news-card__image { height: 140px; }
+.news-list { display: grid; gap: 10px; }
+.news-featured { position: relative; display: flex; align-items: flex-end; width: 100%; min-height: 240px; padding: 24px 18px; overflow: hidden; text-align: left; background: var(--primary); color: white; }
+.news-featured > img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+.news-featured::after { content: ""; position: absolute; inset: 0; background: linear-gradient(to top, #08145fee, #08145f45); }
+.news-featured__content { position: relative; z-index: 1; max-width: 700px; }
+.news-featured__label { font-size: .65rem; font-weight: 700; text-transform: uppercase; letter-spacing: .08em; }
+.news-featured h2 { margin: 10px 0; font-size: clamp(1.8rem, 4vw, 2.8rem); line-height: 1.1; }
+.news-featured__meta { font-size: .75rem; }
+.bottom-nav { padding-top: 0; padding-bottom: env(safe-area-inset-bottom); }
+.bottom-nav__item { font-size: .62rem; text-transform: uppercase; gap: 2px; }
+@media (min-width: 900px) {
+  .top-bar { height: calc(56px + env(safe-area-inset-top)); padding-left: 28px; padding-right: 28px; }
+  .match-row { min-height: 60px; padding: 14px 16px; }
+  .league-group__header { padding: 12px 16px; }
+  .news-list { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}

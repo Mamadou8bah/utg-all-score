@@ -1,14 +1,14 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import Link from "next/link";
+import { CompetitionDetailsModal } from "@/components/competition-details-modal";
 import { isSameDay } from "date-fns";
 import { DataFeedback } from "@/components/data-feedback";
 import { MatchRow } from "@/components/cards";
 import { DatePickerTimeline } from "@/components/date-picker-timeline";
 import { MatchDetailsModal } from "@/components/match-details-modal";
 import { useApiData, useCompetitionsBundle } from "@/lib/use-api-data";
-import type { Match } from "@/lib/types";
+import type { Competition, Match } from "@/lib/types";
 import { cn } from "@/lib/utils";
 
 export default function HomeClient() {
@@ -19,6 +19,7 @@ export default function HomeClient() {
   const [date, setDate] = useState(new Date());
   const [filter, setFilter] = useState("all");
   const [scope, setScope] = useState("all");
+  const [selectedCompetition, setSelectedCompetition] = useState<Competition | null>(null);
   const [selectedMatch, setSelectedMatch] = useState<Match | null>(null);
   const error = fixturesError || resultsError || liveError || competitionsError;
   const reload = () => { reloadFixtures(); reloadResults(); reloadLive(); reloadCompetitions(); };
@@ -61,12 +62,13 @@ export default function HomeClient() {
         <div className="empty-state">No fixtures for this day with the current filters.</div>
       ) : groups.map((group) => (
         <section key={group.id} className="league-group" aria-label={group.name}>
-          <Link href="/standings" className="league-group__header">
+          <button type="button" className="league-group__header" onClick={() => setSelectedCompetition(competitions.find((competition) => competition.id === group.id) ?? null)}>
             <span>{group.name}</span><span className="league-group__meta">{group.matches.length} {group.matches.length === 1 ? "match" : "matches"}</span>
-          </Link>
+          </button>
           {group.matches.map((match) => <MatchRow key={match.id} match={match} onClick={() => setSelectedMatch(match)} />)}
         </section>
       ))}
+      {selectedCompetition ? <CompetitionDetailsModal competition={selectedCompetition} onClose={() => setSelectedCompetition(null)} /> : null}
       {selectedMatch ? <MatchDetailsModal match={[...live, ...fixtures, ...results].find((match) => match.id === selectedMatch.id) ?? selectedMatch} onClose={() => setSelectedMatch(null)} /> : null}
     </div>
   );
