@@ -72,7 +72,8 @@ The latest production and mobile review, verified checks, and remaining deployme
 
 The root `netlify.toml` configures the public app with base directory `frontend`,
 build command `npm run build`, and publish directory `.next`. Netlify automatically
-uses its Next.js adapter for the API routes and server rendering.
+uses the explicitly configured `@netlify/plugin-nextjs` adapter for the API routes
+and server rendering. Each app installs the adapter as a development dependency.
 
 Add the values from `frontend/.env.example` to Netlify's environment variables
 for both builds and functions. Local `.env` files are not committed or uploaded.
@@ -83,6 +84,10 @@ using the app; the build does not run migrations or seed the database.
 Push the configuration to the connected branch and trigger a new deploy. The log
 should run `prisma generate && next build` and package the Next.js server functions.
 Publishing `frontend` directly without a build only uploads the source files.
+If the build succeeds but the log has no Next.js adapter hooks and uploads no
+server functions, verify that the adapter is enabled in Netlify and remove any
+`NETLIFY_NEXT_PLUGIN_SKIP=true` environment variable. Clear the deploy cache and
+redeploy after changing these settings.
 
 Deploy the admin and agent portals as separate Netlify projects connected to this
 repository. Set each project's **Base directory** in Netlify before deploying so
