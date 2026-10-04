@@ -485,3 +485,18 @@ html.dark-theme { color-scheme: dark; --background: #121212; --gm-border: #33394
 .dark-theme .search-input-wrap, .dark-theme .search-input-wrap input { background: #252b34; color: #f2f2f2; }
 .dark-theme .match-row__status--live { color: #65d7a5; }
 .dark-theme .date-strip__day--active, .dark-theme .date-strip__day--active .date-strip__wd { color: #ff9ca9; }
+
+/* Mobile tab bar: roomy touch targets and a clear selected destination. */
+.bottom-nav { gap: 2px; padding: 6px 8px calc(6px + env(safe-area-inset-bottom)); border-top: 1px solid var(--gm-border); box-shadow: 0 -4px 18px #08145f06; }
+.bottom-nav__item { min-width: 0; min-height: 58px; gap: 3px; padding: 0 2px; border-bottom: 0; border-radius: 10px; color: #687181; text-transform: none; font-size: 11px; font-weight: 500; line-height: 1.2; }
+.bottom-nav__icon { position: relative; display: grid; place-items: center; width: 52px; max-width: 100%; height: 32px; border-radius: 16px; transition: background .18s, color .18s; }
+.bottom-nav__icon img { object-fit: contain; }
+.bottom-nav__item--active { color: var(--primary); background: transparent; font-weight: 700; }
+.bottom-nav__item--active .bottom-nav__icon { background: #e8eaf8; }
+.bottom-nav__item--active .bottom-nav__icon::after { content: ""; position: absolute; bottom: 2px; width: 12px; height: 2px; border-radius: 2px; background: var(--secondary); }
+.bottom-nav__item:active .bottom-nav__icon { background: #dde2f4; }
+.bottom-nav__item:focus-visible { outline: 2px solid var(--primary); outline-offset: -2px; }
+.dark-theme .bottom-nav__item { color: #abb4c2; }
+.dark-theme .bottom-nav__item--active { color: #c4ccff; }
+.dark-theme .bottom-nav__item--active .bottom-nav__icon, .dark-theme .bottom-nav__item:active .bottom-nav__icon { background: #303951; }
+@media (max-width: 359px) { .bottom-nav { padding-left: 4px; padding-right: 4px; gap: 0; } .bottom-nav__item { font-size: 10px; } }
