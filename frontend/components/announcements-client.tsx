@@ -12,10 +12,10 @@ export default function AnnouncementsClient() {
   if (loading || error) return <div className="page-shell"><DataFeedback loading={loading} error={error} onRetry={reload} /></div>;
 
   return (
-    <div className="page-shell section-space space-y-8">
+    <div className="page-shell section-space">
       <PageHeader eyebrow="Announcements" title="Football notices" description="Venue changes, results windows, and official sports communication." />
       {!announcements.length ? <p className="empty-state">No announcements published yet.</p> : null}
-      <div className="grid gap-4 md:grid-cols-2">
+      <div className="reference-list">
         {announcements.map((item) => <AnnouncementCard key={item.id} item={item} />)}
       </div>
     </div>

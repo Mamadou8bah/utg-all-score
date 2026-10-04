@@ -17,7 +17,7 @@ export function DetailDialog({ children, label, onClose, className }: {
   }, []);
 
   return <dialog ref={ref} aria-label={label}
-    onCancel={(event) => { event.preventDefault(); onClose(); }}
+    onCancel={(event) => { event.preventDefault(); event.stopPropagation(); onClose(); }}
     onClick={(event) => { if (event.target === event.currentTarget) onClose(); }}
     className={`detail-dialog ${className}`}>{children}</dialog>;
 }

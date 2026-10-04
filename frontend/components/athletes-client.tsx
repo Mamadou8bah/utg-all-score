@@ -12,10 +12,10 @@ export default function AthletesClient() {
   if (loading || error) return <div className="page-shell"><DataFeedback loading={loading} error={error} onRetry={reload} /></div>;
 
   return (
-    <div className="page-shell section-space space-y-8">
+    <div className="page-shell section-space">
       <PageHeader eyebrow="Football Players" title="Top UTG football contributors" description="Goal scorers and playmakers from VC Tournament, Unity Shield, and school leagues." />
       {!athletes.length ? <p className="empty-state">No athletes published yet.</p> : null}
-      <div className="grid gap-4">
+      <div className="reference-list">
         {athletes.map((athlete) => <AthleteHighlightCard key={athlete.id} athlete={athlete} />)}
       </div>
     </div>

@@ -9,19 +9,19 @@ import { cn, formatTime, formatDate } from "@/lib/utils";
 import { X, Calendar, MapPin, TrendingUp, Info, ListOrdered, History } from "lucide-react";
 import { TeamDetailsModal } from "@/components/team-details-modal";
 
-export const MatchDetailsModal = ({ 
-  match, 
-  onClose 
-}: { 
-  match: Match, 
-  onClose: () => void 
+export const MatchDetailsModal = ({
+  match,
+  onClose
+}: {
+  match: Match,
+  onClose: () => void
 }) => {
   const { standings, results, fixtures } = useFootballBundle();
   const [activeTab, setActiveTab] = useState("Details");
   const [selectedTeam, setSelectedTeam] = useState<string | null>(null);
   const tabs = ["Details", "Stats", "Lineups", "H2H", "Standings"];
 
-  const competitionStandings = useMemo(() => 
+  const competitionStandings = useMemo(() =>
     standings.filter(s => s.competitionId === match.competitionId)
     .sort((a, b) => b.pts - a.pts),
     [match.competitionId, standings]
@@ -35,15 +35,15 @@ export const MatchDetailsModal = ({
   }, [match, results, fixtures]);
 
   return (
-    <DetailDialog label={`${match.home} versus ${match.away}`} onClose={onClose} className="match-detail fixed inset-0 z-[100] flex flex-col bg-slate-100 md:items-center md:justify-center md:bg-slate-900 md:p-4">
+    <DetailDialog label={`${match.home} versus ${match.away}`} onClose={onClose} className="reference-match match-detail fixed inset-0 z-[100] flex flex-col bg-slate-100 md:items-center md:justify-center md:bg-slate-900 md:p-4">
       <div className="flex h-[100dvh] min-h-[100dvh] w-full max-w-2xl flex-col bg-white animate-slideUp md:h-[85vh] md:min-h-0 md:overflow-hidden md:rounded-[32px]">
         {/* Header Section */}
         <div className="bg-primary px-4 pt-4 pb-0 text-white relative">
           <div className="flex items-center justify-between mb-4">
             <div className="flex items-center gap-2">
               <div className="h-6 w-6 rounded-md bg-white p-0.5 overflow-hidden">
-                <img 
-                  src="https://res.cloudinary.com/dflsnes44/image/upload/q_auto/f_auto/v1775301714/ChatGPT_Image_Apr_4_2026_11_16_34_AM_dxzi5q.png" 
+                <img
+                  src="/images/utg-allscore-logo.png"
                   alt="Logo"
                   className="h-full w-full object-contain"
                 />
@@ -56,7 +56,7 @@ export const MatchDetailsModal = ({
           </div>
 
           <div className="flex items-center justify-between px-2 pb-8">
-            <button 
+            <button
               onClick={() => setSelectedTeam(match.home)}
               className="flex flex-col items-center gap-2 flex-1 group active:scale-95 transition-transform"
             >
@@ -92,7 +92,7 @@ export const MatchDetailsModal = ({
               )}
             </div>
 
-            <button 
+            <button
               onClick={() => setSelectedTeam(match.away)}
               className="flex flex-col items-center gap-2 flex-1 group active:scale-95 transition-transform"
             >
@@ -111,8 +111,8 @@ export const MatchDetailsModal = ({
                 onClick={() => setActiveTab(tab)}
                 className={cn(
                   "px-4 py-3 text-xs font-bold uppercase tracking-wide transition-colors whitespace-nowrap border-b-[3px]",
-                  activeTab === tab 
-                    ? "border-secondary text-white" 
+                  activeTab === tab
+                    ? "border-secondary text-white"
                     : "border-transparent text-white/60 hover:text-white"
                 )}
               >
@@ -124,12 +124,12 @@ export const MatchDetailsModal = ({
 
         {/* Content Section */}
         <div className="flex-1 overflow-y-auto no-scrollbar bg-slate-50 relative">
-          
+
           {/* Team Details Modal (Nested Overlay) */}
           {selectedTeam && (
-            <TeamDetailsModal 
-              teamName={selectedTeam} 
-              onClose={() => setSelectedTeam(null)} 
+            <TeamDetailsModal
+              teamName={selectedTeam}
+              onClose={() => setSelectedTeam(null)}
             />
           )}
 
@@ -200,12 +200,12 @@ export const MatchDetailsModal = ({
                         <span className="text-secondary">{stat.away}</span>
                       </div>
                       <div className="flex h-1.5 w-full bg-slate-100 rounded-full overflow-hidden">
-                        <div 
-                          className="bg-primary h-full transition-all duration-1000" 
+                        <div
+                          className="bg-primary h-full transition-all duration-1000"
                           style={{ width: `${(stat.hVal / Math.max(1, stat.hVal + stat.aVal)) * 100}%` }}
                         />
-                        <div 
-                          className="bg-secondary h-full transition-all duration-1000" 
+                        <div
+                          className="bg-secondary h-full transition-all duration-1000"
                           style={{ width: `${(stat.aVal / Math.max(1, stat.hVal + stat.aVal)) * 100}%` }}
                         />
                       </div>
@@ -261,8 +261,8 @@ export const MatchDetailsModal = ({
                 </div>
                 <div className="divide-y divide-slate-50">
                   {competitionStandings.map((team, idx) => (
-                    <button 
-                      key={idx} 
+                    <button
+                      key={idx}
                       onClick={() => setSelectedTeam(team.team)}
                       className={cn(
                         "w-full px-4 py-3 flex items-center justify-between text-sm transition-colors hover:bg-slate-50",
@@ -297,7 +297,7 @@ export const MatchDetailsModal = ({
                        </div>
                        <span className="text-xs font-black truncate">{match.home}</span>
                     </div>
-                    
+
                     <div className="bg-white rounded-2xl p-4 shadow-sm space-y-4">
                       <div className="space-y-2">
                         <p className="text-[10px] font-black text-text-secondary uppercase tracking-widest border-b border-slate-50 pb-1">Starting XI</p>
@@ -330,7 +330,7 @@ export const MatchDetailsModal = ({
                          {match.away[0]}
                        </div>
                     </div>
-                    
+
                     <div className="bg-white rounded-2xl p-4 shadow-sm space-y-4">
                       <div className="space-y-2">
                         <p className="text-[10px] font-black text-text-secondary uppercase tracking-widest border-b border-slate-50 pb-1 text-right">Starting XI</p>

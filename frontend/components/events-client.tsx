@@ -12,10 +12,10 @@ export default function EventsClient() {
   if (loading || error) return <div className="page-shell"><DataFeedback loading={loading} error={error} onRetry={reload} /></div>;
 
   return (
-    <div className="page-shell section-space space-y-8">
+    <div className="page-shell section-space">
       <PageHeader eyebrow="Football Calendar" title="Football events" description="Finals, knockout rounds, and official football programming." />
       {!events.length ? <p className="empty-state">No events scheduled yet.</p> : null}
-      <div className="grid gap-4 md:grid-cols-2">
+      <div className="reference-list">
         {events.map((event) => <EventCard key={event.id} event={event} />)}
       </div>
     </div>

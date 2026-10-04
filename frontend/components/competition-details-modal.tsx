@@ -1,254 +1,56 @@
 "use client";
-
+import { useMemo, useState } from "react";
+import { ArrowLeft } from "lucide-react";
 import { DetailDialog } from "@/components/detail-dialog";
-
-import { useState, useMemo } from "react";
-import { sharePage } from "@/lib/share";
-import { Badge, Button, Tabs } from "@/components/ui";
-import { X, Trophy, CalendarDays, LayoutGrid, Info, ChevronRight, Share2 } from "lucide-react";
-import { 
-  type Competition, 
-  type Match, 
-  type StandingRow 
-} from "@/lib/types";
-import { useCompetitionsBundle, useFootballBundle } from "@/lib/use-api-data";
-import { StandingsTable, FixtureCard, ResultCard } from "@/components/cards";
-import { KnockoutBracket } from "@/components/knockout-bracket";
-import { TeamDetailsModal } from "@/components/team-details-modal";
+import { DataFeedback } from "@/components/data-feedback";
+import { MatchRow, StandingsTable } from "@/components/cards";
 import { MatchDetailsModal } from "@/components/match-details-modal";
+import { TeamDetailsModal } from "@/components/team-details-modal";
+import { KnockoutBracket } from "@/components/knockout-bracket";
+import { useApiData, useCompetitionsBundle } from "@/lib/use-api-data";
+import type { Competition, Match, StandingRow } from "@/lib/types";
 
-export const CompetitionDetailsModal = ({ 
-  competition, 
-  onClose 
-}: { 
-  competition: Competition; 
-  onClose: () => void 
-}) => {
-  const { standings, fixtures, results } = useFootballBundle();
-  const { groups: competitionGroups, brackets, stats: competitionStats } = useCompetitionsBundle(
-    [],
-    {},
-    {},
-    {},
-    { includeExtras: true }
-  );
-  const [shareMessage, setShareMessage] = useState<string | null>(null);
-  const [selectedTeam, setSelectedTeam] = useState<string | null>(null);
+export function CompetitionDetailsModal({ competition, onClose }: { competition: Competition; onClose: () => void }) {
+  const [tab, setTab] = useState("Fixtures");
   const [selectedMatch, setSelectedMatch] = useState<Match | null>(null);
-
-  if (!competition) return null;
-
-  const allCompStandings = standings.filter((s) => s.competitionId === competition.id);
-  const leagueStandings = allCompStandings.filter((s) => !s.groupKey || s.groupKey === "");
-  const compFixtures = fixtures.filter(f => f.competitionId === competition.id);
-  const compResults = results.filter(r => r.competitionId === competition.id);
-  const groups = competitionGroups[competition.id];
-  const bracket = brackets[competition.id];
-  const compStats = competitionStats[competition.id];
-
-  const tabs = useMemo(() => {
-    const base = [
-      {
-        id: "standings",
-        label: "Standings",
-        content: (
-          <div className="space-y-6 animate-in slide-in-from-bottom-2 duration-400 sm:space-y-8">
-            {competition.format === "LEAGUE" ? (
-              <div className="space-y-3 sm:space-y-4">
-                <h2 className="px-1 text-[10px] font-black uppercase tracking-[0.2em] text-text-secondary">Official League Hierarchy</h2>
-                <StandingsTable rows={leagueStandings} onTeamClick={(name) => setSelectedTeam(name)} />
-              </div>
-            ) : groups ? (
-              <div className="grid gap-5 sm:grid-cols-2 sm:gap-8">
-                {groups.map((group) => (
-                  <div key={group.id} className="space-y-3 sm:space-y-4">
-                    <h2 className="px-1 text-[10px] font-black uppercase tracking-[0.2em] text-primary">{group.name}</h2>
-                    <StandingsTable rows={allCompStandings.filter((s) => s.groupKey === group.id)} onTeamClick={(name) => setSelectedTeam(name)} />
-                  </div>
-                ))}
-              </div>
-            ) : (
-              <StandingsTable rows={leagueStandings} onTeamClick={(name) => setSelectedTeam(name)} />
-            )}
-          </div>
-        )
-      },
-      {
-        id: "matches",
-        label: "Schedule",
-        content: (
-          <div className="space-y-6 animate-in slide-in-from-bottom-2 duration-400 sm:space-y-8">
-            {compFixtures.length > 0 && (
-              <section className="space-y-4">
-                <h2 className="px-1 text-[10px] font-black uppercase tracking-[0.2em] text-text-secondary">Upcoming Fixtures</h2>
-                <div className="grid gap-3">
-                  {compFixtures.map((match) => (
-                    <FixtureCard key={match.id} match={match} onClick={() => setSelectedMatch(match)} />
-                  ))}
-                </div>
-              </section>
-            )}
-            {compResults.length > 0 && (
-              <section className="space-y-4">
-                <h2 className="px-1 text-[10px] font-black uppercase tracking-[0.2em] text-primary">Concluded Results</h2>
-                <div className="grid gap-3">
-                  {compResults.map((match) => (
-                    <ResultCard key={match.id} match={match} onClick={() => setSelectedMatch(match)} />
-                  ))}
-                </div>
-              </section>
-            )}
-          </div>
-        )
-      },
-      {
-        id: "info",
-        label: "History",
-        content: (
-          <div className="max-w-2xl space-y-6 px-1 animate-in slide-in-from-bottom-2 duration-400">
-            <div className="rounded-3xl border border-slate-100 bg-white p-5 shadow-sm sm:rounded-[32px] sm:p-8">
-              <h2 className="mb-4 text-xl font-black text-slate-950">About this competition</h2>
-              <p className="mb-6 text-sm font-medium leading-8 text-slate-600">{competition.description}</p>
-              <div className="grid gap-3 sm:grid-cols-2 sm:gap-4">
-                <div className="rounded-2xl bg-slate-50 p-4">
-                  <p className="mb-1 text-[10px] font-black uppercase tracking-widest text-slate-400">
-                    {compStats?.leaderLabel ?? "Current Leader"}
-                  </p>
-                  <p className="font-black text-slate-950">{compStats?.reigningChampion ?? "TBD"}</p>
-                </div>
-                <div className="rounded-2xl bg-slate-50 p-4">
-                  <p className="mb-1 text-[10px] font-black uppercase tracking-widest text-slate-400">Top Scorer</p>
-                  <p className="font-black text-slate-950">
-                    {compStats?.topScorer
-                      ? `${compStats.topScorer.name} (${compStats.topScorer.goals})`
-                      : "TBD"}
-                  </p>
-                  {compStats?.topScorer ? (
-                    <p className="mt-1 text-xs font-medium text-text-secondary">{compStats.topScorer.team}</p>
-                  ) : null}
-                </div>
-                <div className="rounded-2xl bg-slate-50 p-4">
-                  <p className="mb-1 text-[10px] font-black uppercase tracking-widest text-slate-400">Highest Scoring Match</p>
-                  <p className="font-black text-slate-950">
-                    {compStats?.highestScoringMatch
-                      ? `${compStats.highestScoringMatch.totalGoals} goals`
-                      : "TBD"}
-                  </p>
-                  {compStats?.highestScoringMatch ? (
-                    <p className="mt-1 text-xs font-medium text-text-secondary">
-                      {compStats.highestScoringMatch.home} vs {compStats.highestScoringMatch.away}
-                    </p>
-                  ) : null}
-                </div>
-                <div className="rounded-2xl bg-slate-50 p-4">
-                  <p className="mb-1 text-[10px] font-black uppercase tracking-widest text-slate-400">Season Totals</p>
-                  <p className="font-black text-slate-950">{compStats?.totalGoals ?? 0} goals</p>
-                  <p className="mt-1 text-xs font-medium text-text-secondary">
-                    {compStats?.matchesPlayed ?? 0} matches · {compStats?.teamCount ?? 0} teams
-                  </p>
-                </div>
-              </div>
-            </div>
-          </div>
-        )
-      }
-    ];
-
-    if (competition.format === "TOURNAMENT") {
-      base.splice(1, 0, {
-        id: "knockout",
-        label: "Knockout",
-        content: (
-          <div className="animate-in slide-in-from-bottom-2 duration-400">
-            {bracket?.length ? (
-              <KnockoutBracket rounds={bracket} />
-            ) : (
-              <div className="rounded-[32px] border border-dashed border-slate-200 bg-slate-50 p-12 text-center">
-                <LayoutGrid size={40} className="mx-auto mb-4 text-slate-200" />
-                <p className="text-sm font-black uppercase tracking-widest text-slate-400">Knockout rounds not scheduled yet</p>
-              </div>
-            )}
-          </div>
-        )
-      });
+  const [selectedTeam, setSelectedTeam] = useState<string | null>(null);
+  const fixtures = useApiData<Match[]>("/api/fixtures", []);
+  const results = useApiData<Match[]>("/api/results", []);
+  const live = useApiData<Match[]>("/api/live", []);
+  const table = useApiData<StandingRow[]>("/api/standings", []);
+  const extras = useCompetitionsBundle([], {}, {}, {}, { includeExtras: true });
+  const matches = useMemo(() => [...new Map([...results.data, ...fixtures.data, ...live.data].map(m => [m.id,m])).values()].filter(m => m.competitionId === competition.id).sort((a,b) => a.kickoff.localeCompare(b.kickoff)), [results.data, fixtures.data, live.data, competition.id]);
+  const rows = table.data.filter(r => r.competitionId === competition.id);
+  const groups = [...new Set(rows.map(r => r.groupKey || ""))];
+  const leaders = useMemo(() => {
+    const map = new Map<string, { player: string; team: string; goals: number; assists: number; yellow: number; red: number }>();
+    for (const m of matches) for (const e of m.events || []) {
+      const rawType = e.type.toLowerCase();
+      const type = /yellow/.test(rawType) ? "yellow" : /red/.test(rawType) ? "red" : /assist/.test(rawType) ? "assist" : /goal/.test(rawType) && !/own/.test(rawType) ? "goal" : rawType;
+      if (!e.player || !["goal", "assist", "yellow", "red"].includes(type)) continue;
+      const key = `${e.team}:${e.player}`;
+      const row = map.get(key) || { player: e.player, team: e.team, goals: 0, assists: 0, yellow: 0, red: 0 };
+      if (type === "goal") row.goals++; if (type === "assist") row.assists++; if (type === "yellow") row.yellow++; if (type === "red") row.red++;
+      map.set(key, row);
     }
-
-    return base;
-  }, [allCompStandings, bracket, compFixtures, compResults, compStats, competition, groups, leagueStandings]);
-
-  return (
-    <DetailDialog label={competition.name} onClose={onClose} className="fixed inset-0 z-[100] flex items-stretch justify-center bg-slate-50 sm:items-center sm:bg-slate-900 sm:p-4">
-      <div 
-        className="relative flex h-[100dvh] w-full max-w-4xl flex-col overflow-hidden bg-slate-50 shadow-2xl animate-in slide-in-from-bottom-full duration-300 sm:h-[92vh] sm:rounded-[40px]"
-        onClick={(e) => e.stopPropagation()}
-      >
-        {/* Sticky Header */}
-        <div className="sticky top-0 z-20 bg-white px-4 py-4 shadow-sm sm:px-10 sm:py-6">
-          <div className="flex items-start justify-between gap-3">
-            <div className="flex min-w-0 items-center gap-3 sm:gap-5">
-              <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl bg-slate-50 ring-1 ring-slate-100 sm:h-20 sm:w-20 sm:rounded-[24px]">
-                {competition.logo ? (
-                  <img src={competition.logo} alt="" className="h-9 w-9 object-contain sm:h-12 sm:w-12" />
-                ) : (
-                  <Trophy size={28} className="text-slate-200 sm:size-8" />
-                )}
-              </div>
-              <div className="min-w-0">
-                <Badge variant="default" className="mb-1 max-w-full truncate border-none bg-blue-50 text-[8px] font-black tracking-[0.14em] text-primary sm:text-[9px] sm:tracking-[0.2em]">
-                  {competition.type === "GENERAL" ? "Official University Athletics" : competition.schoolName}
-                </Badge>
-                <h1 className="break-words text-xl font-black leading-tight text-slate-950 sm:text-3xl">
-                  {competition.name}
-                </h1>
-                <p className="mt-1 flex flex-wrap items-center gap-2 text-[10px] font-bold text-text-secondary sm:text-xs">
-                   UTG AllScore Verified 
-                   <span className="h-1 w-1 rounded-full bg-slate-300" />
-                   2026 Season
-                </p>
-              </div>
-            </div>
-            
-            <div className="flex shrink-0 items-center gap-2 sm:gap-3">
-               <button 
-                 title="Share Competition"
-                 onClick={async () => setShareMessage(await sharePage(competition.name, `${window.location.origin}/standings`))}
-                 className="hidden h-11 w-11 items-center justify-center rounded-full bg-slate-100 text-slate-500 transition-all hover:bg-slate-200 active:scale-95 sm:flex"
-               >
-                  <Share2 size={18} />
-               </button>
-               <button 
-                  onClick={onClose}
-                  title="Close Modal"
-                  className="flex h-10 w-10 items-center justify-center rounded-full bg-slate-950 text-white shadow-xl transition-all hover:bg-slate-800 active:scale-95 sm:h-11 sm:w-11"
-                >
-                  <X size={20} />
-                </button>
-            </div>
-          </div>
-        </div>
-
-        {shareMessage ? <p role="status" className="bg-white px-4 py-2 text-sm">{shareMessage}</p> : null}
-        {/* Scrollable Area */}
-        <div className="flex-1 overflow-y-auto overflow-x-hidden bg-slate-50 px-3 py-4 sm:px-10 sm:py-6">
-          <Tabs variant="pwa" tabs={tabs} />
-        </div>
-
-        {/* Nested Team Modal */}
-        {selectedTeam && (
-          <TeamDetailsModal 
-            teamName={selectedTeam} 
-            onClose={() => setSelectedTeam(null)} 
-          />
-        )}
-
-        {/* Nested Match Modal */}
-        {selectedMatch && (
-          <MatchDetailsModal 
-            match={selectedMatch} 
-            onClose={() => setSelectedMatch(null)} 
-          />
-        )}
+    return [...map.values()];
+  }, [matches]);
+  const feedLoading = fixtures.loading || results.loading || live.loading;
+  const feedError = fixtures.error || results.error || live.error;
+  const retry = () => { fixtures.reload(); results.reload(); live.reload(); };
+  const metric = tab === "Scorers" ? "goals" : tab === "Assists" ? "assists" : "yellow";
+  const ranked = leaders.filter(r => tab === "Cards" ? r.yellow + r.red > 0 : r[metric] > 0).sort((a,b) => tab === "Cards" ? (b.yellow + b.red) - (a.yellow + a.red) : b[metric] - a[metric]);
+  const tabs = ["Fixtures", "Table", "Scorers", "Assists", "Cards", ...(competition.format === "TOURNAMENT" ? ["Knockout"] : [])];
+  return <DetailDialog label={competition.name} onClose={onClose} className="reference-detail fixed inset-0 z-[100]">
+    <div className="reference-detail__frame">
+      <header className="detail-topline"><button type="button" aria-label="Close competition details" onClick={onClose}><ArrowLeft size={20} /></button><h1>{competition.name}</h1></header>
+      <p className="detail-subtitle">{competition.type === "GENERAL" ? "University" : competition.schoolName || "School"} · {competition.format === "LEAGUE" ? "League" : "Tournament"}</p>
+      <div className="sub-tabs" role="group" aria-label="Competition sections">{tabs.map(t => <button type="button" key={t} className={`sub-tab${tab === t ? " sub-tab--active" : ""}`} aria-pressed={tab === t} onClick={() => setTab(t)}>{t}</button>)}</div>
+      <div className="reference-detail__body">
+        {tab === "Table" ? table.loading || table.error ? <DataFeedback loading={table.loading} error={table.error} onRetry={table.reload} /> : rows.length ? groups.map(g => <section key={g}>{g ? <h2 className="panel-title">{g}</h2> : null}<StandingsTable rows={rows.filter(r => (r.groupKey || "") === g)} onTeamClick={setSelectedTeam} /></section>) : <div className="empty-state">No standings recorded yet.</div> : tab === "Knockout" ? extras.loading || extras.error ? <DataFeedback loading={extras.loading} error={extras.error} onRetry={extras.reload} /> : extras.brackets[competition.id]?.length ? <KnockoutBracket rounds={extras.brackets[competition.id]} /> : <div className="empty-state">Knockout rounds not scheduled yet.</div> : feedLoading || feedError ? <DataFeedback loading={feedLoading} error={feedError} onRetry={retry} /> : tab === "Fixtures" ? matches.length ? matches.map(m => <MatchRow key={m.id} match={m} onClick={() => setSelectedMatch(m)} />) : <div className="empty-state">No fixtures scheduled yet.</div> : ranked.length ? ranked.map((r,i) => <button type="button" key={`${r.team}:${r.player}`} className="list-item scorer-row" onClick={() => setSelectedTeam(r.team)}><span className="scorer-rank">{i + 1}</span><div><div className="list-item__title">{r.player}</div><div className="list-item__meta">{r.team}</div></div><strong className="scorer-total">{tab === "Cards" ? `${r.yellow} yellow · ${r.red} red` : r[metric]}</strong></button>) : <div className="empty-state">No {tab.toLowerCase()} recorded yet.</div>}
       </div>
-    </DetailDialog>
-  );
-};
+    </div>
+    {selectedMatch ? <MatchDetailsModal match={matches.find(m => m.id === selectedMatch.id) || selectedMatch} onClose={() => setSelectedMatch(null)} /> : null}
+    {selectedTeam ? <TeamDetailsModal teamName={selectedTeam} onClose={() => setSelectedTeam(null)} /> : null}
+  </DetailDialog>;
+}

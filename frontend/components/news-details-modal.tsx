@@ -30,7 +30,7 @@ export const NewsDetailsModal = ({
   const readingMinutes = Math.max(1, Math.ceil((item.body || item.excerpt).split(/\s+/).length / 200));
 
   return (
-    <DetailDialog label={item.title} onClose={onClose} className="fixed inset-0 z-[100] flex items-stretch justify-center bg-white sm:items-center sm:bg-slate-900 sm:p-4">
+    <DetailDialog label={item.title} onClose={onClose} className="reference-article fixed inset-0 z-[100] flex items-stretch justify-center bg-white sm:items-center sm:bg-slate-900 sm:p-4">
       <div 
         className="relative flex h-[100dvh] max-h-none w-full max-w-2xl flex-col overflow-hidden bg-white shadow-2xl animate-in slide-in-from-bottom-full duration-300 sm:h-auto sm:max-h-[92vh] sm:rounded-[40px]"
         onClick={(e) => e.stopPropagation()}
@@ -56,7 +56,7 @@ export const NewsDetailsModal = ({
                 alt={item.title}
                 className="h-full w-full object-cover"
               />
-              <div className="absolute inset-x-0 bottom-0 h-32 bg-slate-950" />
+              <div className="absolute inset-x-0 bottom-0 h-32 bg-gradient-to-t from-slate-950 to-transparent" />
               <div className="absolute bottom-6 left-6 right-6">
                 <Badge variant="live" className="mb-3 bg-slate-700 text-white  border-none px-4 py-1.5 font-black tracking-[0.2em]">
                   {item.category}

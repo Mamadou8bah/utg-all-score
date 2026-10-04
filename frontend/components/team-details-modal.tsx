@@ -1,150 +1,30 @@
 "use client";
-
+import { useState } from "react";
+import { ArrowLeft } from "lucide-react";
 import { DetailDialog } from "@/components/detail-dialog";
-
-import { useMemo } from "react";
-import { type Match } from "@/lib/types";
+import { DataFeedback } from "@/components/data-feedback";
+import { MatchRow } from "@/components/cards";
+import { MatchDetailsModal } from "@/components/match-details-modal";
 import { useFootballBundle } from "@/lib/use-api-data";
-import { cn, formatDate } from "@/lib/utils";
-import { X, Trophy, Users, History, LayoutDashboard, Star } from "lucide-react";
+import type { Match } from "@/lib/types";
 
-export const TeamDetailsModal = ({ 
-  teamName, 
-  onClose 
-}: { 
-  teamName: string, 
-  onClose: () => void 
-}) => {
-  const { results, fixtures, teams, athletes } = useFootballBundle();
-  const teamData = useMemo(() => teams.find(t => t.name === teamName), [teamName, teams]);
-  
-  const teamMatches = useMemo(() => {
-    const all = [...results, ...fixtures];
-    return all.filter(m => m.home === teamName || m.away === teamName)
-      .sort((a, b) => new Date(b.kickoff).getTime() - new Date(a.kickoff).getTime());
-  }, [teamName, results, fixtures]);
-
-  const squad = useMemo(() => athletes.filter(a => a.team === teamName), [teamName, athletes]);
-
-  if (!teamData) {
-    return (
-      <DetailDialog label={teamName} onClose={onClose} className="fixed inset-0 z-[110] flex items-end justify-center bg-slate-900 p-4 md:items-center">
-        <div className="w-full max-w-lg rounded-[32px] bg-white p-6 shadow-float">
-          <p className="font-semibold text-slate-950">{teamName}</p>
-          <p className="mt-2 text-sm text-text-secondary">Team profile loading or not yet registered.</p>
-          <button onClick={onClose} className="mt-4 rounded-full bg-slate-100 px-4 py-2 text-sm">Close</button>
-        </div>
-      </DetailDialog>
-    );
-  }
-
-  return (
-    <DetailDialog label={teamName} onClose={onClose} className="fixed inset-0 z-[100] flex items-end justify-center bg-slate-900 sm:items-center sm:p-4">
-      <div className="w-full max-w-xl bg-slate-50 rounded-t-[2.5rem] sm:rounded-[2.5rem] shadow-2xl flex flex-col max-h-[92vh] overflow-hidden animate-in slide-in-from-bottom duration-300">
-        
-        {/* Header / Cover */}
-        <div className="relative h-40 bg-slate-900 overflow-hidden shrink-0">
-          <div className="absolute top-6 left-6 right-6 flex items-start justify-between z-10">
-            <button onClick={onClose} className="p-2 rounded-full bg-slate-800 text-white hover:bg-slate-700 transition-colors">
-              <X size={20} />
-            </button>
-            <button className="p-2 rounded-full bg-slate-800 text-white hover:bg-slate-700 transition-colors">
-              <Star size={20} />
-            </button>
-          </div>
-          
-          <div className="absolute -bottom-8 left-1/2 -translate-x-1/2 flex flex-col items-center text-center w-full px-6">
-            <div className="h-20 w-20 bg-white rounded-3xl shadow-xl flex items-center justify-center text-3xl font-black text-slate-400 mb-2 border-4 border-slate-50">
-              {teamData.logo ? (
-                <img src={teamData.logo} alt="" className="h-full w-full object-contain p-2" />
-              ) : (
-                teamName[0]
-              )}
-            </div>
-            <h2 className="text-xl font-black text-slate-950 truncate max-w-full">{teamName}</h2>
-            <p className="text-[10px] font-bold text-text-secondary uppercase tracking-widest mt-1">Official University Team</p>
-          </div>
-        </div>
-
-        {/* Content */}
-        <div className="flex-1 overflow-y-auto pt-10 px-6 pb-24 space-y-6">
-          
-          {/* Info Cards */}
-          <div className="grid grid-cols-2 gap-3">
-            <div className="bg-white rounded-[2rem] p-4 shadow-sm border border-slate-100">
-               <div className="flex items-center gap-2 mb-1 text-primary">
-                 <Trophy size={14} />
-                 <span className="text-[10px] font-black uppercase tracking-wider">Form</span>
-               </div>
-               <div className="flex gap-1.5">
-                 {['W', 'D', 'W', 'W', 'L'].map((res, i) => (
-                   <span key={i} className={cn(
-                     "w-5 h-5 rounded-md flex items-center justify-center text-[10px] font-black text-white",
-                     res === 'W' ? "bg-green-500" : res === 'D' ? "bg-amber-500" : "bg-red-500"
-                   )}>{res}</span>
-                 ))}
-               </div>
-            </div>
-            <div className="bg-white rounded-[2rem] p-4 shadow-sm border border-slate-100">
-               <div className="flex items-center gap-2 mb-1 text-secondary">
-                 <Users size={14} />
-                 <span className="text-[10px] font-black uppercase tracking-wider">Players</span>
-               </div>
-               <span className="text-lg font-black text-slate-950">{squad.length || 18} Active</span>
-            </div>
-          </div>
-
-          {/* About */}
-          <section className="space-y-3">
-            <h3 className="text-xs font-black uppercase tracking-widest text-slate-950 flex items-center gap-2">
-              <LayoutDashboard size={14} /> Overview
-            </h3>
-            <div className="bg-white rounded-3xl p-5 shadow-sm border border-slate-100">
-              <p className="text-sm font-medium leading-relaxed text-text-secondary italic">
-                "{teamData.tone || "Excellence in university sportsmanship."}"
-              </p>
-            </div>
-          </section>
-
-          {/* Schedule */}
-          <section className="space-y-3">
-            <h3 className="text-xs font-black uppercase tracking-widest text-slate-950 flex items-center gap-2">
-              <History size={14} /> Matches
-            </h3>
-            <div className="space-y-2">
-              {teamMatches.slice(0, 4).map((m) => (
-                <div key={m.id} className="bg-white rounded-2xl p-4 shadow-sm border border-slate-100 flex items-center justify-between">
-                  <span className="text-[10px] font-black text-slate-400 uppercase w-12">{formatDate(m.kickoff, { month: 'short', day: 'numeric' })}</span>
-                  <div className="flex-1 flex items-center justify-center gap-3">
-                    <span className={cn("text-xs font-black truncate max-w-[80px]", m.home === teamName ? "text-primary" : "text-slate-400")}>{m.home}</span>
-                    <span className="text-xs font-black text-slate-900">{m.status === 'FT' ? `${m.homeScore} : ${m.awayScore}` : "vs"}</span>
-                    <span className={cn("text-xs font-black truncate max-w-[80px]", m.away === teamName ? "text-primary" : "text-slate-400")}>{m.away}</span>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </section>
-
-          {/* Squad */}
-          <section className="space-y-3">
-            <h3 className="text-xs font-black uppercase tracking-widest text-slate-950 flex items-center gap-2">
-              <Users size={14} /> Top Athletes
-            </h3>
-            <div className="flex gap-4 overflow-x-auto pb-2 -mx-2 px-2 no-scrollbar">
-              {squad.map((ath) => (
-                <div key={ath.id} className="min-w-[140px] bg-white rounded-3xl p-4 shadow-sm border border-slate-100 flex flex-col items-center">
-                  <div className="h-12 w-12 rounded-full bg-slate-50 flex items-center justify-center mb-3 text-lg font-black text-slate-300">
-                    {ath.name[0]}
-                  </div>
-                  <span className="text-sm font-black text-slate-950 truncate w-full text-center">{ath.name}</span>
-                  <span className="text-[9px] font-bold text-primary uppercase mt-0.5">{ath.role}</span>
-                </div>
-              ))}
-            </div>
-          </section>
-
-        </div>
+export function TeamDetailsModal({ teamName, onClose }: { teamName: string; onClose: () => void }) {
+  const { results, fixtures, teams, athletes, loading, error, reload } = useFootballBundle();
+  const [tab, setTab] = useState("Matches");
+  const [selected, setSelected] = useState<Match | null>(null);
+  const team = teams.find(t => t.name === teamName);
+  const matches = [...new Map([...results,...fixtures].map(m => [m.id,m])).values()].filter(m => m.home === teamName || m.away === teamName).sort((a,b) => b.kickoff.localeCompare(a.kickoff));
+  const players = athletes.filter(a => a.team === teamName);
+  const form = matches.filter(m => m.status === "FT").slice(0,5).reverse().map(m => { const home = m.home === teamName; const score = home ? m.homeScore : m.awayScore; const against = home ? m.awayScore : m.homeScore; return score > against ? "W" : score < against ? "L" : "D"; });
+  return <DetailDialog label={teamName} onClose={onClose} className="reference-detail fixed inset-0 z-[110]">
+    <div className="reference-detail__frame">
+      <header className="detail-topline"><button type="button" aria-label="Close team details" onClick={onClose}><ArrowLeft size={20} /></button><h1>{teamName}</h1></header>
+      <div className="team-profile-heading">{team?.logo ? <img src={team.logo} alt="" /> : <span className="team-initial">{teamName[0]}</span>}<div><strong>{teamName}</strong><p className="list-item__meta">University football team</p></div></div>
+      <div className="sub-tabs" role="group" aria-label="Team sections">{["Matches", "Squad", "Overview"].map(t => <button type="button" key={t} className={`sub-tab${tab === t ? " sub-tab--active" : ""}`} aria-pressed={tab === t} onClick={() => setTab(t)}>{t}</button>)}</div>
+      <div className="reference-detail__body">
+        {loading || error ? <DataFeedback loading={loading} error={error} onRetry={reload} /> : tab === "Matches" ? matches.length ? matches.map(m => <MatchRow key={m.id} match={m} onClick={() => setSelected(m)} />) : <div className="empty-state">No matches recorded yet.</div> : tab === "Squad" ? players.length ? players.map(p => <article className="list-item" key={p.id}>{p.image ? <img className="player-thumbnail" src={p.image} alt="" /> : null}<div><div className="list-item__title">{p.name}</div><div className="list-item__meta">{p.role} · {p.statLine}</div></div></article>) : <div className="empty-state">No player profiles published yet.</div> : <><h2 className="panel-title">Recent form</h2><div className="reference-panel">{form.length ? <div className="team-form">{form.map((f,i) => <span key={i} data-result={f}>{f}</span>)}</div> : <p>No completed matches yet.</p>}</div><h2 className="panel-title">About</h2><div className="reference-panel">{team?.tone || "No team overview published yet."}</div></>}
       </div>
-    </DetailDialog>
-  );
-};
+    </div>
+    {selected ? <MatchDetailsModal match={selected} onClose={() => setSelected(null)} /> : null}
+  </DetailDialog>;
+}

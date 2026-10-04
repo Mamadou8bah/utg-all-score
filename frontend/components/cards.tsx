@@ -101,7 +101,7 @@ export const NewsCard = ({ item, onClick }: {
 );
 
 export const AnnouncementCard = ({ item }: { item: { title: string; body: string; level: string } }) => (
-  <div className="rounded-[28px] border border-slate-200 bg-white p-5 shadow-card">
+  <div className="reference-panel">
     <Badge variant={item.level === "warning" ? "warning" : "default"}>{item.level === "warning" ? "Urgent" : "Notice"}</Badge>
     <h3 className="mt-4 text-lg font-semibold text-slate-950">{item.title}</h3>
     <p className="mt-2 text-sm leading-6 text-text-secondary">{item.body}</p>
@@ -109,8 +109,8 @@ export const AnnouncementCard = ({ item }: { item: { title: string; body: string
 );
 
 export const AthleteHighlightCard = ({ athlete }: { athlete: AthleteProfile }) => (
-  <article className="grid gap-5 rounded-[30px] border border-slate-200 bg-white p-5 shadow-card md:grid-cols-[160px_1fr] md:items-center">
-    <div className="relative h-40 overflow-hidden rounded-[24px] bg-blue-50">
+  <article className="athlete-row">
+    <div className="athlete-row__photo">
       <img src={athlete.image} alt={athlete.name} className="h-full w-full object-cover" />
     </div>
     <div>
@@ -124,7 +124,7 @@ export const AthleteHighlightCard = ({ athlete }: { athlete: AthleteProfile }) =
 );
 
 export const EventCard = ({ event }: { event: { title: string; type: string; venue: string; date: string; description: string } }) => (
-  <article className="rounded-[28px] border border-slate-200 bg-white p-5 shadow-card">
+  <article className="reference-panel">
     <div className="flex items-center justify-between gap-3">
       <Badge variant="default">{event.type}</Badge>
       <p className="text-sm text-text-secondary">{formatDate(event.date)}</p>
@@ -136,7 +136,7 @@ export const EventCard = ({ event }: { event: { title: string; type: string; ven
 );
 
 export const StandingsTable = ({ rows, onTeamClick }: { rows: StandingRow[], onTeamClick?: (teamName: string) => void }) => (
-  <div className="overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-card sm:rounded-[30px]">
+  <div className="reference-table">
     <div className="overflow-x-auto">
       <table className="min-w-full whitespace-nowrap text-left text-xs sm:text-sm">
         <thead className="bg-slate-50 text-[10px] font-black uppercase tracking-widest text-text-secondary">

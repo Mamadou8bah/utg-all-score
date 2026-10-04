@@ -1,7 +1,8 @@
 import Link from "next/link";
-import { CalendarDays, Trophy, Users, Megaphone, Medal, ChevronRight, Calendar, Settings } from "lucide-react";
+import { CalendarDays, Trophy, Users, Megaphone, Medal, Calendar, Settings } from "lucide-react";
 
 const links = [
+  { href: "/search", label: "Search", description: "Find matches, competitions, teams and news", icon: Settings },
   { href: "/settings", label: "Settings", description: "Notifications and device preferences", icon: Settings },
   { href: "/fixtures", label: "Fixtures", description: "Upcoming games and past fixtures", icon: CalendarDays },
   { href: "/results", label: "Results", description: "Full-time scores and match reports", icon: Trophy },
@@ -16,14 +17,16 @@ export default function MorePage() {
     <div className="page-shell section-space">
       <h1 className="page-title">More</h1>
       <nav aria-label="Explore AllScore">
-        {links.map(({ href, label, description, icon: Icon }) => (
-          <Link key={href} href={href} className="explore-row">
-            <Icon size={21} className="text-primary" />
-            <div><span className="block text-sm font-semibold">{label}</span><span className="text-xs text-text-secondary">{description}</span></div>
-            <ChevronRight size={18} className="ml-auto text-text-secondary" />
+        {links.map(({ href, label, description }) => (
+          <Link key={href} href={href} className="list-item">
+
+            <div><span className="list-item__title block">{label}</span><span className="list-item__meta block">{description}</span></div>
+
           </Link>
         ))}
       </nav>
+      <h2 className="panel-title">About UTG AllScore</h2>
+      <div className="reference-panel">University football scores, fixtures, competition tables and official campus updates. Match times use Africa/Banjul.</div>
     </div>
   );
 }
