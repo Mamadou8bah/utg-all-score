@@ -1,6 +1,6 @@
 const PREFIX = "utg-allscore";
 const VERSION = `${PREFIX}-${new URLSearchParams(self.location.search || "").get("build") || "v6"}`;
-const APP_SHELL = ["/", "/live", "/fixtures", "/results", "/standings", "/news", "/more", "/announcements", "/events", "/teams", "/athletes", "/offline", "/icons/icon-192.png", "/icons/icon-512.png", "/images/utg-allscore-logo.png", "/images/football.png"];
+const APP_SHELL = ["/", "/live", "/fixtures", "/results", "/standings", "/news", "/more", "/settings", "/announcements", "/events", "/teams", "/athletes", "/offline", "/icons/icon-192.png", "/icons/icon-512.png", "/images/utg-allscore-logo.png", "/images/football.png"];
 const DATA_ENDPOINTS = ["/api/live", "/api/fixtures", "/api/results", "/api/news", "/api/announcements", "/api/events", "/api/teams", "/api/standings", "/api/competitions", "/api/athletes"];
 
 
@@ -80,15 +80,22 @@ self.addEventListener("push", (event) => {
     /* ignore malformed payload */
   }
 
-  event.waitUntil(
-    self.registration.showNotification(data.title || "UTG AllScore", {
+  event.waitUntil((async () => {
+    const tag = data.tag || "";
+    const category = tag.startsWith("match-ko-") || tag.startsWith("match-2h-") ? "matchStart" : tag.startsWith("goal-") ? "goals" : tag.startsWith("match-ht-") ? "halfTime" : tag.startsWith("match-ft-") ? "fullTime" : tag.startsWith("lineup-") ? "lineups" : tag.startsWith("news-") ? "breakingNews" : tag.startsWith("announcement-") ? "announcements" : null;
+    try {
+      const preferences = await (await caches.open("utg-device-preferences")).match("/device-alert-preferences");
+      const alerts = preferences ? await preferences.json() : {};
+      if (category && alerts[category] === false) return;
+    } catch { /* Keep alerts available if preference storage is unavailable. */ }
+    await self.registration.showNotification(data.title || "UTG AllScore", {
       body: data.body || "",
       icon: "/icons/icon-192.png",
       badge: "/icons/icon-192.png",
       tag: data.tag || "utg-allscore",
       data: { url: data.url || "/" }
-    })
-  );
+    });
+  })());
 });
 
 self.addEventListener("notificationclick", (event) => {

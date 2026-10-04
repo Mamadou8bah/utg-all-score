@@ -203,7 +203,11 @@ export async function POST(request: Request, context: RouteContext) {
     }
 
     const full = await prisma.match.findUnique({ where: { id }, include: matchIncludeWithSquads });
-    return jsonData(serializeMatch(full)!, request);
+    const serialized = serializeMatch(full);
+    if (rows.length && serialized) {
+      schedulePushToAll({ title: "Lineups updated", body: `${serialized.home} vs ${serialized.away} · Starting players and substitutes are available.`, url: "/fixtures", tag: `lineup-${id}` });
+    }
+    return jsonData(serialized!, request);
   }
 
   return jsonError("Unsupported action.", 400, request);

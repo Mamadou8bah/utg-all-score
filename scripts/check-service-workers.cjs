@@ -20,7 +20,9 @@ function worker(app, prefix) {
     async keys() { return [...stores.keys()]; },
     async delete(name) { return stores.delete(name); }
   };
+  const notifications = [];
   const self = {
+    registration: { async showNotification(title, options) { notifications.push({ title, options }); } },
     location: { origin }, clients: { async claim() {} }, skipWaiting() {},
     addEventListener(name, callback) { listeners[name] = callback; }
   };
@@ -30,7 +32,8 @@ function worker(app, prefix) {
   vm.runInContext(fs.readFileSync(`${app}/public/sw.js`, "utf8"), context);
   const version = vm.runInContext("VERSION", context);
   return {
-    caches, stores, prefix, version,
+    caches, stores, prefix, version, notifications,
+    async push(data) { let pending; listeners.push({ data: { json: () => data }, waitUntil(promise) { pending = promise; } }); await pending; },
     setNetwork(callback) { network = callback; },
     async request(path, mode = "cors", headers = {}) {
       let response;
@@ -50,6 +53,16 @@ function worker(app, prefix) {
 
 (async () => {
   const publicApp = worker("frontend", "utg-allscore");
+  await publicApp.push({ tag: "goal-test" });
+  assert.equal(publicApp.notifications.length, 1, "Alerts are enabled by default");
+  const preferences = await publicApp.caches.open("utg-device-preferences");
+  await preferences.put("/device-alert-preferences", Response.json({ goals: false, halfTime: false, breakingNews: false }));
+  await publicApp.push({ tag: "goal-test" }); await publicApp.push({ tag: "match-ht-test" }); await publicApp.push({ tag: "news-test" });
+  assert.equal(publicApp.notifications.length, 1, "Disabled alert categories must be suppressed");
+  await publicApp.push({ tag: "match-ft-test" });
+  assert.equal(publicApp.notifications.length, 2, "Other alert categories remain enabled");
+  await publicApp.activate();
+  assert.equal(publicApp.stores.has("utg-device-preferences"), true, "App updates preserve notification preferences");
   publicApp.setNetwork(async () => Response.json({ data: [{ id: "match", homeScore: 2 }] }));
   assert.equal((await publicApp.request("/api/live")).status, 200);
   publicApp.setNetwork(async () => new Response("Server failed", { status: 500 }));

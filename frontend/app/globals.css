@@ -448,3 +448,40 @@ button.list-item:hover, a.list-item:hover { background: #e8eaf4; }
 .search-result-icon img { width: 28px; height: 28px; }
 .search-result strong { font-size: .9rem; font-weight: 600; }
 .search-score { background: transparent; color: #1a1a1a; font-family: var(--font-heading), sans-serif; font-size: 1.2rem; padding: 0; }
+
+.settings-row { display: flex; align-items: center; justify-content: space-between; gap: 16px; padding: 12px; background: white; border-bottom: 1px solid var(--gm-border); font-size: .85rem; }
+.settings-row > div:first-child { min-width: 0; }
+.settings-row select { border: 0; border-radius: 3px; background: transparent; color: inherit; font-weight: 600; text-align: right; max-width: 52%; min-height: 44px; }
+.settings-toggle { position: relative; display: block; width: 52px; height: 44px; min-height: 44px; flex: 0 0 52px; padding: 0; border: 0; border-radius: 8px; background: transparent; -webkit-tap-highlight-color: transparent; }
+.settings-toggle::before { content: ""; position: absolute; top: 8px; left: 2px; width: 48px; height: 28px; border-radius: 14px; background: #929bab; transition: background .18s; }
+.settings-toggle::after { content: ""; position: absolute; top: 11px; left: 5px; width: 22px; height: 22px; background: white; border-radius: 50%; box-shadow: 0 1px 3px #0003; transition: transform .18s; }
+.settings-toggle--on::before { background: var(--primary); }
+.settings-toggle--on::after { transform: translateX(20px); }
+.settings-toggle:focus-visible { outline: 2px solid var(--primary); outline-offset: 2px; }
+.settings-toggle:active:not(:disabled)::after { width: 24px; }
+.settings-toggle:disabled { opacity: .5; cursor: not-allowed; }
+.settings-toggle[aria-busy="true"]::before { background: #6876b4; }
+.dark-theme .settings-toggle--on::before { background: #6879df; }
+.settings-intro { padding: 8px 12px; font-size: .8rem; line-height: 1.5; color: #6b6b6b; }
+.settings-back { display: grid; place-items: center; width: 44px; height: 44px; }
+.settings-push { background: white; }
+.settings-push > div { padding: 0; }
+.settings-push > div > div { margin-top: 0; border-radius: 0; border-bottom: 1px solid var(--gm-border); padding: 12px; }
+.settings-save-status { padding: 12px; font-size: .8rem; color: var(--primary); min-height: 44px; }
+html.dark-theme { color-scheme: dark; --background: #121212; --gm-border: #333943; }
+.dark-theme body { color: #f2f2f2; }
+.dark-theme .app-main .bg-white, .dark-theme .detail-dialog .bg-white,
+.dark-theme .page-title, .dark-theme .page-heading, .dark-theme .list-item, .dark-theme .reference-panel, .dark-theme .reference-table, .dark-theme .settings-row,
+.dark-theme .detail-topline, .dark-theme .detail-subtitle, .dark-theme .team-profile-heading, .dark-theme .settings-push, .dark-theme .date-strip,
+.dark-theme .league-group, .dark-theme .league-group__header, .dark-theme .match-row, .dark-theme .news-card, .dark-theme .sub-tabs,
+.dark-theme .bottom-nav, .dark-theme .explore-row, .dark-theme .search-header, .dark-theme .search-filters, .dark-theme .search-results section { background: #1e2229; color: #f2f2f2; border-color: #333943; }
+.dark-theme .app-main .bg-slate-50, .dark-theme .detail-dialog .bg-slate-50, .dark-theme .settings-push > div > div { background: #252b34; }
+.dark-theme .app-main .text-slate-950, .dark-theme .app-main .text-slate-900, .dark-theme .detail-dialog .text-slate-950, .dark-theme .detail-dialog .text-slate-900,
+.dark-theme .page-heading h1, .dark-theme .match-row__score, .dark-theme .search-score { color: #f2f2f2; }
+.dark-theme .list-item__meta, .dark-theme .settings-intro, .dark-theme .date-strip__wd, .dark-theme .match-row__status, .dark-theme .sub-tab, .dark-theme .text-text-secondary { color: #abb4c2; }
+.dark-theme .panel-title, .dark-theme .search-results h2 { background: #282d42; color: #e6eaff; }
+.dark-theme .sub-tab--active, .dark-theme .bottom-nav__item--active, .dark-theme .settings-save-status { color: #b6c2ff; }
+.dark-theme button.list-item:hover, .dark-theme a.list-item:hover, .dark-theme .match-row:hover, .dark-theme .league-group__header:hover, .dark-theme .search-result:hover { background: #2b3342; }
+.dark-theme .search-input-wrap, .dark-theme .search-input-wrap input { background: #252b34; color: #f2f2f2; }
+.dark-theme .match-row__status--live { color: #65d7a5; }
+.dark-theme .date-strip__day--active, .dark-theme .date-strip__day--active .date-strip__wd { color: #ff9ca9; }

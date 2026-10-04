@@ -327,14 +327,19 @@ export const NotificationSettings = () => {
     return output;
   };
 
+  const readyRegistration = () => Promise.race([
+    navigator.serviceWorker.ready,
+    new Promise<never>((_, reject) => window.setTimeout(() => reject(new Error("Service worker not ready")), 10000))
+  ]);
+
   const turnOffOnThisDevice = async () => {
     setBusy(true);
     try {
-      const registration = await navigator.serviceWorker.ready;
+      const registration = await readyRegistration();
       const subscription = await registration.pushManager.getSubscription();
       if (subscription) {
         const endpoint = subscription.endpoint;
-        await subscription.unsubscribe().catch(() => undefined);
+        if (!(await subscription.unsubscribe())) throw new Error("Could not unsubscribe");
         await fetch("/api/push/subscribe", {
           method: "DELETE",
           headers: { "Content-Type": "application/json" },
@@ -366,7 +371,9 @@ export const NotificationSettings = () => {
       return;
     }
 
-    const permission = await Notification.requestPermission();
+    let permission: NotificationPermission;
+    try { permission = await Notification.requestPermission(); }
+    catch { setStatus("error"); setMessage("Could not request notification permission."); return; }
     if (permission === "denied") {
       setStatus("denied");
       return;
@@ -375,7 +382,7 @@ export const NotificationSettings = () => {
 
     setBusy(true);
     try {
-      const registration = await navigator.serviceWorker.ready;
+      const registration = await readyRegistration();
       const subscription = await registration.pushManager.subscribe({
         userVisibleOnly: true,
         applicationServerKey: urlBase64ToUint8Array(vapidPublicKey)
@@ -435,17 +442,9 @@ export const NotificationSettings = () => {
               aria-label="Toggle push notifications"
               disabled={toggleDisabled}
               onClick={onToggle}
-              className={cn(
-                "relative h-8 w-14 shrink-0 rounded-full transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-200 disabled:cursor-not-allowed disabled:opacity-50",
-                enabled ? "bg-primary" : "bg-slate-300"
-              )}
+              aria-busy={busy}
+              className={cn("settings-toggle", enabled && "settings-toggle--on")}
             >
-              <span
-                className={cn(
-                  "absolute top-1 left-1 h-6 w-6 rounded-full bg-white shadow transition-transform",
-                  enabled && "translate-x-6"
-                )}
-              />
             </button>
           </div>
 
