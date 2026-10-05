@@ -1,3 +1,5 @@
+"use client";
+import { useLanguage } from "@/components/language-provider";
 import Link from "next/link";
 import { CalendarDays, Trophy, Users, Megaphone, Medal, Calendar, Settings } from "lucide-react";
 
@@ -13,20 +15,21 @@ const links = [
 ];
 
 export default function MorePage() {
+  const { t: translate } = useLanguage();
   return (
     <div className="page-shell section-space">
-      <h1 className="page-title">More</h1>
-      <nav aria-label="Explore AllScore">
+      <h1 className="page-title">{translate("More")}</h1>
+      <nav aria-label={translate("Explore AllScore")}>
         {links.map(({ href, label, description }) => (
           <Link key={href} href={href} className="list-item">
 
-            <div><span className="list-item__title block">{label}</span><span className="list-item__meta block">{description}</span></div>
+            <div><span className="list-item__title block">{translate(label)}</span><span className="list-item__meta block">{translate(description)}</span></div>
 
           </Link>
         ))}
       </nav>
-      <h2 className="panel-title">About UTG AllScore</h2>
-      <div className="reference-panel">University football scores, fixtures, competition tables and official campus updates. Match times use Africa/Banjul.</div>
+      <h2 className="panel-title">{translate("About UTG AllScore")}</h2>
+      <div className="reference-panel">{translate("University football scores, fixtures, competition tables and official campus updates. Match times use Africa/Banjul.")}</div>
     </div>
   );
 }

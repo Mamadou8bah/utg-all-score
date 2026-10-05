@@ -1,4 +1,5 @@
 "use client";
+import { useLanguage } from "@/components/language-provider";
 
 import { useState, useMemo, useEffect } from "react";
 import { type Competition } from "@/lib/types";
@@ -12,6 +13,7 @@ export const CompetitionSwitcher = ({
 }: {
   onSelect: (comp: Competition) => void;
 }) => {
+  const { t: translate } = useLanguage();
   const { competitions } = useCompetitionsBundle();
   const [isOpen, setIsOpen] = useState(false);
   const [selected, setSelected] = useState<Competition | null>(null);
@@ -70,7 +72,7 @@ export const CompetitionSwitcher = ({
           <CompetitionLogo competition={selected} />
           <div className="text-left min-w-0">
             <p className="text-[10px] font-bold uppercase tracking-wider text-text-secondary truncate">
-              {selected.type === "GENERAL" ? "University Wide" : selected.schoolName}
+              {translate(selected.type === "GENERAL" ? "University Wide" : selected.schoolName)}
             </p>
             <p className="text-sm font-bold text-slate-950 truncate">{selected.name}</p>
           </div>
@@ -94,14 +96,14 @@ export const CompetitionSwitcher = ({
                   <CompetitionLogo competition={comp} size="sm" />
                   <div className="min-w-0">
                     <p className="text-sm font-bold truncate">{comp.name}</p>
-                    <p className="text-[10px] truncate">{comp.type === "GENERAL" ? "General" : comp.schoolName}</p>
+                    <p className="text-[10px] truncate">{translate(comp.type === "GENERAL" ? "General" : comp.schoolName)}</p>
                   </div>
                 </div>
                 <button
                   type="button"
                   onClick={(e) => toggleFavorite(e, comp.id)}
                   className="shrink-0 p-1.5 hover:bg-slate-200 rounded-lg transition-colors"
-                  aria-label={favorites.includes(comp.id) ? "Remove favorite" : "Add favorite"}
+                  aria-label={translate(favorites.includes(comp.id) ? "Remove favorite" : "Add favorite")}
                 >
                   <Star
                     size={16}

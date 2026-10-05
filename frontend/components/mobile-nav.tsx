@@ -1,4 +1,5 @@
 "use client";
+import { useLanguage } from "@/components/language-provider";
 
 import { Radio, Ellipsis, Trophy, Newspaper } from "lucide-react";
 import { usePathname } from "next/navigation";
@@ -14,14 +15,15 @@ const links = [
 ];
 
 export const MobileNav = () => {
+  const { t: translate } = useLanguage();
   const pathname = usePathname();
-  return <nav className="bottom-nav" aria-label="Main navigation">
+  return <nav className="bottom-nav" aria-label={translate("Main navigation")}>
     {links.map(link => {
       const active = link.paths.some(path => pathname === path || (path !== "/" && pathname.startsWith(`${path}/`)));
       return <Link key={link.href} href={link.href} aria-current={active ? "page" : undefined}
         className={cn("bottom-nav__item", active && "bottom-nav__item--active")}>
         <span className="bottom-nav__icon" aria-hidden="true">{link.icon}</span>
-        <span className="bottom-nav__label">{link.label}</span>
+        <span className="bottom-nav__label">{translate(link.label)}</span>
       </Link>;
     })}
   </nav>;

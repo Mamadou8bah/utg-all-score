@@ -32,12 +32,14 @@
   "include": [
     "**/*.ts",
     "**/*.tsx",
+    ".next-hydration-debug/types/**/*.ts",
+    ".next-language/types/**/*.ts",
     ".next-mobile-debug/types/**/*.ts",
     ".next-production-check/types/**/*.ts",
     ".next-readiness/types/**/*.ts",
     ".next/types/**/*.ts",
     "next-env.d.ts",
-    ".next-hydration-debug/types/**/*.ts"
+    ".next-language-build/types/**/*.ts"
   ],
   "exclude": [
     "node_modules",

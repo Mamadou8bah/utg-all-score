@@ -1,0 +1,85 @@
+const assert = require('node:assert/strict');
+const { chromium } = require(process.env.PLAYWRIGHT_MODULE || 'playwright');
+const base = process.env.PUBLIC_TEST_URL || 'http://localhost:3403';
+(async () => {
+  const browser = await chromium.launch({ channel: 'msedge', headless: true });
+  try {
+    const context = await browser.newContext({ viewport: { width: 390, height: 844 }, serviceWorkers: 'block' });
+    const page = await context.newPage();
+    page.setDefaultNavigationTimeout(60000);
+    const errors = [];
+    page.on('pageerror', e => errors.push(e.message));
+    const competition = { id: 'league', name: 'Original League', type: 'GENERAL', format: 'LEAGUE' };
+    const match = { id: 'match', competitionId: 'league', competition: 'Original League', home: 'Original Team', away: 'Other Team', kickoff: '2026-10-05T12:00:00Z', venue: 'Original Venue', status: 'FT', homeScore: 2, awayScore: 1, events: [] };
+    const article = { id: 'news', title: 'Original article title', excerpt: 'Original article excerpt', body: 'Original published body.', category: 'Campus', publishedAt: '2026-10-05T12:00:00Z' };
+    let failLive = false;
+    await context.route('**/api/**', route => {
+      const path = new URL(route.request().url()).pathname;
+      if (path === '/api/live' && failLive) return route.fulfill({ status: 500, json: { error: 'Unavailable' } });
+      const data = path === '/api/search' ? { teams: [], players: [], competitions: [], matches: [], news: [] } : path === '/api/competitions' ? { competitions: [competition], groups: {}, brackets: {}, stats: {} }
+        : path === '/api/results' ? [match] : path === '/api/news' ? [article] : path === '/api/teams' ? [{ id: 'team', name: 'Original Team' }] : [];
+      return route.fulfill({ json: { data } });
+    });
+    await page.goto(base + '/settings');
+    await page.getByLabel('Language', { exact: true }).selectOption('fr');
+    await page.getByRole('heading', { name: 'Paramètres', exact: true }).waitFor();
+    await page.getByLabel('Langue', { exact: true }).waitFor();
+    assert.equal(await page.locator('html').getAttribute('lang'), 'fr');
+    assert.equal(await page.locator('.bottom-nav').getByRole('link', { name: 'Matchs', exact: true }).count(), 1);
+    assert.equal(await page.getByRole('switch', { name: 'Buts', exact: true }).count(), 1);
+    await page.goto(base + '/');
+    await page.getByRole('button', { name: 'Toutes les ligues', exact: true }).waitFor();
+    const weekdays = await page.locator('.date-strip__wd').allTextContents();
+    assert(weekdays.some(day => /lun|mar|mer|jeu|ven|sam|dim/.test(day)), weekdays.join(','));
+    await page.goto(base + '/standings');
+    await page.getByRole('heading', { name: 'Compétitions', exact: true }).waitFor();
+    await page.getByRole('button', { name: /Original League/ }).click();
+    const dialog = page.locator('dialog[open]').last();
+    await dialog.getByRole('button', { name: 'Buteurs', exact: true }).click();
+    await dialog.getByText('Aucun buteur enregistré pour le moment.', { exact: true }).waitFor();
+    await dialog.getByRole('button', { name: 'Calendrier', exact: true }).click();
+    await dialog.getByRole('button', { name: /Original Team/ }).click();
+    const matchDialog = page.locator('dialog[open]').last();
+    await matchDialog.getByRole('button', { name: 'Statistiques', exact: true }).click();
+    await matchDialog.getByText('Cartons jaunes enregistrés', { exact: true }).waitFor();
+    await matchDialog.getByRole('button', { name: 'Détails', exact: true }).click();
+    await matchDialog.getByText('5 octobre 2026', { exact: true }).waitFor();
+    await page.goto(base + '/teams');
+    await page.getByRole('button', { name: /Original Team/ }).click();
+    await page.locator('dialog[open]').last().getByRole('button', { name: 'Effectif', exact: true }).click();
+    await page.getByText('Aucun profil de joueur publié pour le moment.', { exact: true }).waitFor();
+    await page.goto(base + '/news');
+    await page.getByRole('button', { name: /Original article title/ }).click();
+    await page.getByText('Original published body.', { exact: true }).waitFor();
+    await page.getByRole('button', { name: 'Retour aux actualités', exact: true }).waitFor();
+    await page.goto(base + '/search');
+    await page.getByPlaceholder('Équipes, joueurs, ligues…', { exact: true }).fill('unknown');
+    await page.getByText('Aucun résultat pour « unknown ». Essayez un autre nom ou une autre catégorie.', { exact: true }).waitFor();
+    for (const [path, text] of [['/fixtures', 'Matchs passés et à venir'], ['/results', 'Historique récent des matchs'], ['/events', 'Événements de football'], ['/announcements', 'Annonces de football'], ['/athletes', 'Les joueurs clés du football de l’UTG'], ['/more', 'Plus'], ['/offline', 'Vous êtes hors ligne']]) {
+      await page.goto(base + path);
+      await page.getByRole('heading', { name: text, exact: true }).waitFor();
+      assert.equal(await page.evaluate(() => document.documentElement.scrollWidth > innerWidth), false, path);
+    }
+    failLive = true;
+    await page.goto(base + '/live');
+    await page.getByRole('button', { name: 'Réessayer', exact: true }).waitFor();
+    await page.getByText('Impossible de charger les mises à jour. Vérifiez votre connexion et réessayez.', { exact: true }).waitFor();
+    await page.reload();
+    await page.getByRole('button', { name: 'Réessayer', exact: true }).waitFor();
+    assert.equal(await page.locator('html').getAttribute('lang'), 'fr');
+    const otherTab = await context.newPage();
+    await otherTab.goto(base + '/standings');
+    await otherTab.getByRole('heading', { name: 'Compétitions', exact: true }).waitFor();
+    await otherTab.getByRole('button', { name: /Original League/ }).click();
+    await otherTab.locator('dialog[open]').getByRole('button', { name: 'Calendrier', exact: true }).waitFor();
+    await page.goto(base + '/settings');
+    await page.getByLabel('Langue', { exact: true }).selectOption('en');
+    await otherTab.locator('dialog[open]').getByRole('button', { name: 'Fixtures', exact: true }).waitFor();
+    await otherTab.close();
+    await page.getByRole('heading', { name: 'Settings', exact: true }).waitFor();
+    await page.locator('.bottom-nav').getByRole('link', { name: 'Matches', exact: true }).waitFor();
+    assert.equal(await page.locator('html').getAttribute('lang'), 'en');
+    assert.deepEqual(errors, []);
+    console.log('French navigation, screens, dialogs, dates, search, errors, persistence, English restore and original published content passed');
+  } finally { await browser.close(); }
+})().catch(e => { console.error(e); process.exitCode = 1; });

@@ -20,6 +20,11 @@ export function ImageUpload({
   async function handleFile(event: React.ChangeEvent<HTMLInputElement>) {
     const file = event.target.files?.[0];
     if (!file) return;
+    if (file.size > 5 * 1024 * 1024 || !["image/jpeg", "image/png", "image/webp", "image/gif", "image/svg+xml"].includes(file.type)) {
+      setError(file.size > 5 * 1024 * 1024 ? "Choose an image smaller than 5 MB." : "Choose a JPG, PNG, WebP, GIF or SVG image.");
+      event.target.value = "";
+      return;
+    }
 
     setUploading(true);
     setError("");
@@ -50,7 +55,7 @@ export function ImageUpload({
           <Button type="button" variant="ghost" disabled={uploading} onClick={() => inputRef.current?.click()}>
             {uploading ? "Uploading…" : value ? "Replace image" : "Upload image"}
           </Button>
-          {error ? <p className="text-sm text-error">{error}</p> : null}
+          {error ? <p role="alert" className="text-sm text-error">{error}</p> : null}
         </div>
       </div>
     </div>

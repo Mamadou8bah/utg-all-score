@@ -1,4 +1,5 @@
 "use client";
+import { useLanguage } from "@/components/language-provider";
 
 import { DetailDialog } from "@/components/detail-dialog";
 
@@ -25,6 +26,7 @@ export const NewsDetailsModal = ({
   item: NewsItem; 
   onClose: () => void 
 }) => {
+  const { t: translate, locale } = useLanguage();
   const [shareMessage, setShareMessage] = useState<string | null>(null);
   if (!item) return null;
   const readingMinutes = Math.max(1, Math.ceil((item.body || item.excerpt).split(/\s+/).length / 200));
@@ -38,7 +40,7 @@ export const NewsDetailsModal = ({
         {/* Header/Close */}
         <div className="absolute top-4 right-4 z-10">
           <button 
-            aria-label="Close article"
+            aria-label={translate("Close article")}
             onClick={onClose}
             className="flex h-10 w-10 items-center justify-center rounded-full bg-slate-700 text-white  transition hover:bg-slate-600 active:scale-90 sm:bg-slate-100 sm:text-slate-600 sm:hover:bg-slate-200"
           >
@@ -74,11 +76,11 @@ export const NewsDetailsModal = ({
             <div className="mb-8 flex flex-wrap items-center gap-6 border-b border-slate-100 pb-8 text-sm text-text-secondary">
               <div className="flex items-center gap-2">
                 <Calendar size={16} />
-                <span className="font-bold">{formatDate(item.publishedAt, { month: 'long', day: 'numeric', year: 'numeric' })}</span>
+                <span className="font-bold">{formatDate(item.publishedAt, { month: 'long', day: 'numeric', year: 'numeric' }, locale)}</span>
               </div>
               <div className="flex items-center gap-2">
                 <Clock size={16} />
-                <span className="font-bold">{readingMinutes} min read</span>
+                <span className="font-bold">{readingMinutes} {translate("min read")}</span>
               </div>
               <div className="flex items-center gap-2">
                 <BookOpen size={16} />
@@ -100,14 +102,12 @@ export const NewsDetailsModal = ({
             {/* Interaction Footer */}
             <div className="mt-12 flex items-center justify-between border-t border-slate-100 pt-8">
               <div className="flex items-center gap-4">
-                <Button variant="ghost" aria-label="Share article" onClick={async () => setShareMessage(await sharePage(item.title, `${window.location.origin}/news`, item.excerpt))} className="h-12 w-12 rounded-full p-0 flex items-center justify-center ring-slate-100">
+                <Button variant="ghost" aria-label={translate("Share article")} onClick={async () => setShareMessage(await sharePage(item.title, `${window.location.origin}/news`, item.excerpt))} className="h-12 w-12 rounded-full p-0 flex items-center justify-center ring-slate-100">
                   <Share2 size={20} className="text-slate-600" />
                 </Button>
-                {shareMessage ? <span role="status" className="text-xs text-text-secondary">{shareMessage}</span> : null}
+                {shareMessage ? <span role="status" className="text-xs text-text-secondary">{translate(shareMessage)}</span> : null}
               </div>
-              <Button onClick={onClose} className="rounded-2xl px-8 py-3.5 font-black uppercase tracking-widest text-xs">
-                Back to Feed
-              </Button>
+              <Button onClick={onClose} className="rounded-2xl px-8 py-3.5 font-black uppercase tracking-widest text-xs">{translate("Back to Feed")}</Button>
             </div>
           </div>
         </div>

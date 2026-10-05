@@ -1,9 +1,11 @@
 "use client";
+import { useLanguage } from "@/components/language-provider";
 
 import { useEffect, useState } from "react";
 import Image from "next/image";
 
 export function SplashScreen() {
+  const { t: translate } = useLanguage();
   const [shouldRender, setShouldRender] = useState(false);
 
   useEffect(() => {
@@ -23,7 +25,7 @@ export function SplashScreen() {
       <div className="relative animate-pulse">
         <Image
           src="https://res.cloudinary.com/dflsnes44/image/upload/q_auto/f_auto/v1775301714/ChatGPT_Image_Apr_4_2026_11_16_34_AM_dxzi5q.png"
-          alt="UTG AllScore Logo"
+          alt={translate("UTG AllScore Logo")}
           width={180}
           height={180}
           priority

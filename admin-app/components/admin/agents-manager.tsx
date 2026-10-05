@@ -1,0 +1,192 @@
+"use client";
+import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { FormModal } from "@/components/form-modal";
+import { useDialogs } from "@/components/dialog-provider";
+
+import { useEffect, useMemo, useState } from "react";
+import { AdminShell, Button, Card, Field, Input, Select } from "@/components/ui";
+import { adminNav } from "@/lib/nav";
+import { apiFetch, apiJson } from "@/lib/api";
+
+type School = { id: string; name: string };
+type Agent = {
+  id: string;
+  email: string;
+  name: string;
+  schoolName: string | null;
+  active: boolean;
+  schoolId?: string | null;
+  assignedCompetitions?: Array<{ id: string; name: string; type?: string }>;
+};
+
+export default function AgentsPage({ agentId }: { agentId?: string }) {
+  const router=useRouter();
+  const [loaded,setLoaded]=useState(false);
+  const { confirm } = useDialogs();
+  const [schools, setSchools] = useState<School[]>([]);
+  const [agents, setAgents] = useState<Agent[]>([]);
+  const [form, setForm] = useState({ name: "", email: "", password: "", schoolId: "" });
+  const [editingId, setEditingId] = useState<string | null>(null);
+  const [editForm, setEditForm] = useState({ name: "", schoolId: "", active: true, password: "" });
+  const [message, setMessage] = useState("");
+  const [activeForm, setActiveForm] = useState<string | null>(null);
+
+  async function load() {
+    setSchools(await apiJson<School[]>("/api/portal/admin/schools"));
+    setAgents(await apiJson<Agent[]>("/api/portal/admin/agents"));
+  }
+
+  useEffect(() => {
+    load().then(()=>setLoaded(true)).catch(() => {setLoaded(true);setMessage("Unable to load updates. Check your connection and try again.");});
+  }, []);
+
+  async function handleCreate(event: React.FormEvent) {
+    event.preventDefault();
+    const res = await apiFetch("/api/portal/admin/agents", { method: "POST", body: JSON.stringify(form) });
+    const json = await res.json();
+    setMessage(res.ok ? "Agent created." : json.error || "Failed.");
+    if (res.ok) {
+      setActiveForm(null);
+      if(json.data?.id) router.push(`/agents/${encodeURIComponent(json.data.id)}`);
+      setForm({ name: "", email: "", password: "", schoolId: "" });
+      void load().catch(() => setMessage("Could not refresh the latest data. Check your connection and try again."));
+    }
+  }
+
+  async function saveEdit(id: string) {
+    const payload: Record<string, unknown> = { name: editForm.name, schoolId: editForm.schoolId, active: editForm.active };
+    if (editForm.password) payload.password = editForm.password;
+    const res = await apiFetch(`/api/portal/admin/agents/${id}`, { method: "PATCH", body: JSON.stringify(payload) });
+    const json = await res.json();
+    setMessage(res.ok ? "Agent updated." : json.error || "Failed.");
+    if (res.ok) {
+      setEditingId(null);
+      void load().catch(() => setMessage("Could not refresh the latest data. Check your connection and try again."));
+    }
+  }
+
+  async function remove(id: string, name: string) {
+    if (!(await confirm(`Delete agent ${name}?`))) return;
+    const res = await apiFetch(`/api/portal/admin/agents/${id}`, { method: "DELETE" });
+    const json = await res.json();
+    setMessage(res.ok ? "Agent deleted." : json.error || "Failed.");
+    if(res.ok) {router.push("/agents");return;}
+    if (res.ok) void load().catch(() => setMessage("Could not refresh the latest data. Check your connection and try again."));
+  }
+
+  const schoolOptions = useMemo(() => schools, [schools]);
+
+  return (
+    <AdminShell
+      title="School Agents"
+      subtitle="Agents belong to a school and can be assigned to school competitions, general competitions, and/or specific fixtures."
+      nav={adminNav}
+    >
+      {agentId ? <Link href="/agents" className="admin-back-link">← Back to agents</Link> : null}
+      {agentId && !loaded ? <Card><p role="status">Loading details…</p></Card> : null}
+      {agentId && loaded && !agents.some(row=>row.id === agentId) && !message ? <Card><p>This record was not found. It may have been removed.</p></Card> : null}
+      {!agentId ? <div className="admin-action-toolbar" aria-label="Page actions"><Button type="button" onClick={() => { setMessage(""); setActiveForm("agent"); } }>Create agent</Button></div> : null}
+      {!agentId && !loaded ? <Card><p role="status">Loading agents…</p></Card> : null}
+      {!agentId && loaded && !agents.length && !message ? <Card><p>No agents yet. Use the action above to add one.</p></Card> : null}
+      {message.startsWith("Unable to load") ? <Button variant="ghost" onClick={()=>{setMessage("");setLoaded(false);load().then(()=>setLoaded(true)).catch(()=>{setLoaded(true);setMessage("Unable to load updates. Check your connection and try again.");});}}>Try again</Button> : null}
+      {message ? <p className="rounded-2xl bg-blue-50 px-4 py-3 text-sm text-primary">{message}</p> : null}
+      <FormModal title="Create agent" open={activeForm === "agent"} onClose={() => setActiveForm(null)} message={message}>
+        <form className="grid gap-4 md:grid-cols-2" onSubmit={handleCreate}>
+          <Field label="Full name">
+            <Input value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} required />
+          </Field>
+          <Field label="Email">
+            <Input type="email" value={form.email} onChange={(e) => setForm({ ...form, email: e.target.value })} required />
+          </Field>
+          <Field label="Temporary password">
+            <Input type="password" value={form.password} onChange={(e) => setForm({ ...form, password: e.target.value })} required />
+          </Field>
+          <Field label="School">
+            <Select value={form.schoolId} onChange={(e) => setForm({ ...form, schoolId: e.target.value })} required>
+              <option value="">Select school</option>
+              {schoolOptions.map((s) => (
+                <option key={s.id} value={s.id}>
+                  {s.name}
+                </option>
+              ))}
+            </Select>
+          </Field>
+          <div className="md:col-span-2">
+            <Button type="submit">Add agent</Button>
+          </div>
+        </form>
+      </FormModal>
+      <Card title={agentId ? "Overview" : "Registered agents"}>
+        <div className="space-y-3">
+          {agents.filter(row=>!agentId || row.id === agentId).map((agent) => (
+            <div key={agent.id} className="rounded-[20px] bg-slate-50 p-4 text-sm">
+              {!agentId ? (<Link href={`/agents/${encodeURIComponent(agent.id)}`} className="admin-record-link"><div><strong>{agent.name}</strong><p>{agent.schoolName || "No school"} · {agent.active ? "Active" : "Inactive"}</p></div><span aria-hidden="true">›</span></Link>) : editingId === agent.id ? (
+                <div className="grid gap-3 md:grid-cols-2">
+                  <Input value={editForm.name} onChange={(e) => setEditForm({ ...editForm, name: e.target.value })} />
+                  <Select value={editForm.schoolId} onChange={(e) => setEditForm({ ...editForm, schoolId: e.target.value })}>
+                    {schoolOptions.map((s) => (
+                      <option key={s.id} value={s.id}>
+                        {s.name}
+                      </option>
+                    ))}
+                  </Select>
+                  <Input
+                    type="password"
+                    placeholder="New password (optional)"
+                    value={editForm.password}
+                    onChange={(e) => setEditForm({ ...editForm, password: e.target.value })}
+                  />
+                  <label className="flex items-center gap-2 text-sm">
+                    <input
+                      type="checkbox"
+                      checked={editForm.active}
+                      onChange={(e) => setEditForm({ ...editForm, active: e.target.checked })}
+                    />
+                    Active account
+                  </label>
+                  <div className="flex gap-2 md:col-span-2">
+                    <Button onClick={() => saveEdit(agent.id)}>Save</Button>
+                    <Button variant="ghost" onClick={() => setEditingId(null)}>
+                      Cancel
+                    </Button>
+                  </div>
+                </div>
+              ) : (
+                <div className="flex items-center justify-between gap-4">
+                  <div>
+                    <p className="font-semibold text-slate-950">
+                      {agent.name} {!agent.active ? <span className="text-error">(inactive)</span> : null}
+                    </p>
+                    <p className="text-text-secondary">{agent.email}</p>
+                    <p className="mt-1 text-primary">{agent.schoolName ?? "No school"}</p>
+                    {agent.assignedCompetitions?.length ? (
+                      <p className="mt-1 text-xs text-text-secondary">
+                        Competitions: {agent.assignedCompetitions.map((c,i) => <span key={c.id}>{i ? ", " : ""}<Link href={`/competitions/${encodeURIComponent(c.id)}`} className="text-primary underline">{c.name}</Link></span>)}
+                      </p>
+                    ) : null}
+                  </div>
+                  <div className="flex gap-2">
+                    <Button
+                      variant="ghost"
+                      onClick={() => {
+                        setEditingId(agent.id);
+                        setEditForm({ name: agent.name, schoolId: agent.schoolId ?? "", active: agent.active, password: "" });
+                      }}
+                    >
+                      Edit
+                    </Button>
+                    <Button variant="ghost" onClick={() => remove(agent.id, agent.name)}>
+                      Delete
+                    </Button>
+                  </div>
+                </div>
+              )}
+            </div>
+          ))}
+          {!agents.length ? <p className="text-sm text-text-secondary">No agents registered yet.</p> : null}
+        </div>
+      </Card>
+    </AdminShell>
+  );
+}

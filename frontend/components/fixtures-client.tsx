@@ -1,4 +1,5 @@
 "use client";
+import { useLanguage } from "@/components/language-provider";
 
 import { useState } from "react";
 import { FixtureCard, ResultCard } from "@/components/cards";
@@ -9,6 +10,7 @@ import { useApiData } from "@/lib/use-api-data";
 import { MatchDetailsModal } from "@/components/match-details-modal";
 
 export default function FixturesClient() {
+  const { t: translate } = useLanguage();
   const [selectedMatch, setSelectedMatch] = useState<Match | null>(null);
   const { data: fixtures, loading: fixturesLoading, error: fixturesError, reload: reloadFixtures } = useApiData<Match[]>("/api/fixtures", []);
   const { data: results, loading: resultsLoading, error: resultsError, reload: reloadResults } = useApiData<Match[]>("/api/results", []);
@@ -17,17 +19,17 @@ export default function FixturesClient() {
 
   return (
     <div className="page-shell section-space space-y-2">
-      <PageHeader 
-        eyebrow="Fixtures" 
-        title="Past & Upcoming Fixtures" 
-        description="Track completed fixtures and upcoming games in one place." 
+      <PageHeader
+        eyebrow="Fixtures"
+        title={translate("Past & Upcoming Fixtures")}
+        description="Track completed fixtures and upcoming games in one place."
       />
-      
+
       {results.length > 0 || fixtures.length > 0 ? (
         <div className="space-y-2">
           {results.length > 0 && (
             <section className="space-y-2">
-              <h2 className="px-1 text-[10px] font-black uppercase tracking-[0.2em] text-primary">Past Fixtures</h2>
+              <h2 className="px-1 text-[10px] font-black uppercase tracking-[0.2em] text-primary">{translate("Past Fixtures")}</h2>
               <div className="grid gap-0">
                 {results.map((match) => (
                   <ResultCard
@@ -42,13 +44,13 @@ export default function FixturesClient() {
 
           {fixtures.length > 0 && (
             <section className="space-y-2">
-              <h2 className="px-1 text-[10px] font-black uppercase tracking-[0.2em] text-text-secondary">Upcoming Fixtures</h2>
+              <h2 className="px-1 text-[10px] font-black uppercase tracking-[0.2em] text-text-secondary">{translate("Upcoming Fixtures")}</h2>
               <div className="grid gap-0">
                 {fixtures.map((match) => (
-                  <FixtureCard 
-                    key={match.id} 
-                    match={match} 
-                    onClick={() => setSelectedMatch(match)} 
+                  <FixtureCard
+                    key={match.id}
+                    match={match}
+                    onClick={() => setSelectedMatch(match)}
                   />
                 ))}
               </div>
@@ -57,14 +59,14 @@ export default function FixturesClient() {
         </div>
       ) : (
         <div className="rounded-3xl border border-dashed border-slate-200 p-12 text-center bg-slate-100">
-          <p className="text-sm font-bold text-text-secondary">No fixtures found.</p>
+          <p className="text-sm font-bold text-text-secondary">{translate("No fixtures found.")}</p>
         </div>
       )}
 
       {selectedMatch && (
-        <MatchDetailsModal 
-          match={selectedMatch} 
-          onClose={() => setSelectedMatch(null)} 
+        <MatchDetailsModal
+          match={selectedMatch}
+          onClose={() => setSelectedMatch(null)}
         />
       )}
     </div>

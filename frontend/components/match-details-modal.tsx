@@ -1,4 +1,5 @@
 "use client";
+import { useLanguage } from "@/components/language-provider";
 
 import { DetailDialog } from "@/components/detail-dialog";
 
@@ -16,6 +17,7 @@ export const MatchDetailsModal = ({
   match: Match,
   onClose: () => void
 }) => {
+  const { t: translate, locale } = useLanguage();
   const { standings, results, fixtures } = useFootballBundle();
   const [activeTab, setActiveTab] = useState("Details");
   const [selectedTeam, setSelectedTeam] = useState<string | null>(null);
@@ -23,19 +25,24 @@ export const MatchDetailsModal = ({
 
   const competitionStandings = useMemo(() =>
     standings.filter(s => s.competitionId === match.competitionId)
+    .filter(s => (match.groupId ? s.groupKey === match.groupId : !s.groupKey))
     .sort((a, b) => b.pts - a.pts),
-    [match.competitionId, standings]
+    [match.competitionId, match.groupId, standings]
   );
 
   const teamHistory = useMemo(() => {
     const allMatches = [...results, ...fixtures, ...[match]]
-      .filter(m => m.home === match.home || m.away === match.home || m.home === match.away || m.away === match.away)
+      .filter(m =>
+        m.status === "FT" &&
+        ((m.home === match.home && m.away === match.away) ||
+          (m.home === match.away && m.away === match.home))
+      )
       .sort((a, b) => new Date(b.kickoff).getTime() - new Date(a.kickoff).getTime());
     return allMatches.slice(0, 5);
   }, [match, results, fixtures]);
 
   return (
-    <DetailDialog label={`${match.home} versus ${match.away}`} onClose={onClose} className="reference-match match-detail fixed inset-0 z-[100] flex flex-col bg-slate-100 md:items-center md:justify-center md:bg-slate-900 md:p-4">
+    <DetailDialog label={`${match.home} ${locale === "fr-FR" ? "contre" : "versus"} ${match.away}`} onClose={onClose} className="reference-match match-detail fixed inset-0 z-[100] flex flex-col bg-slate-100 md:items-center md:justify-center md:bg-slate-900 md:p-4">
       <div className="flex h-[100dvh] min-h-[100dvh] w-full max-w-2xl flex-col bg-white animate-slideUp md:h-[85vh] md:min-h-0 md:overflow-hidden md:rounded-[32px]">
         {/* Header Section */}
         <div className="bg-primary px-4 pt-4 pb-0 text-white relative">
@@ -44,13 +51,13 @@ export const MatchDetailsModal = ({
               <div className="h-6 w-6 rounded-md bg-white p-0.5 overflow-hidden">
                 <img
                   src="/images/utg-allscore-logo.png"
-                  alt="Logo"
+                  alt={translate("Logo")}
                   className="h-full w-full object-contain"
                 />
               </div>
               <span className="text-[10px] font-black uppercase tracking-[0.15em] text-white">{match.competition}</span>
             </div>
-            <button aria-label="Close match details" onClick={onClose} className="p-2 rounded-full bg-slate-800 hover:bg-slate-700 transition-colors">
+            <button aria-label={translate("Close match details")} onClick={onClose} className="p-2 rounded-full bg-slate-800 hover:bg-slate-700 transition-colors">
               <X size={20} />
             </button>
           </div>
@@ -75,7 +82,7 @@ export const MatchDetailsModal = ({
                     <span>{match.awayScore}</span>
                   </>
                 ) : (
-                  <span className="text-2xl">{formatTime(match.kickoff)}</span>
+                  <span className="text-2xl">{formatTime(match.kickoff, locale)}</span>
                 )}
               </div>
               {match.status === "LIVE" && (
@@ -85,10 +92,10 @@ export const MatchDetailsModal = ({
                 </div>
               )}
               {match.status === "HT" && (
-                <span className="text-[10px] font-black uppercase text-slate-300">Half Time</span>
+                <span className="text-[10px] font-black uppercase text-slate-300">{translate("Half Time")}</span>
               )}
               {match.status === "FT" && (
-                <span className="text-[10px] font-black uppercase text-slate-300">Full Time</span>
+                <span className="text-[10px] font-black uppercase text-slate-300">{translate("Full Time")}</span>
               )}
             </div>
 
@@ -116,7 +123,7 @@ export const MatchDetailsModal = ({
                     : "border-transparent text-white/60 hover:text-white"
                 )}
               >
-                {tab}
+                {translate(tab)}
               </button>
             ))}
           </div>
@@ -138,7 +145,7 @@ export const MatchDetailsModal = ({
               <div className="bg-white rounded-2xl p-4 shadow-sm space-y-4">
                 <div className="flex items-center gap-3 text-text-secondary text-sm">
                   <Calendar size={18} className="text-primary" />
-                  <span className="font-bold">{new Date(match.kickoff).toLocaleDateString(undefined, { dateStyle: 'long' })}</span>
+                  <span className="font-bold">{new Date(match.kickoff).toLocaleDateString(locale, { dateStyle: 'long', timeZone: 'Africa/Banjul' })}</span>
                 </div>
                 <div className="flex items-center gap-3 text-text-secondary text-sm">
                   <MapPin size={18} className="text-primary" />
@@ -149,8 +156,7 @@ export const MatchDetailsModal = ({
               {match.events.length > 0 && (
                 <div className="bg-white rounded-2xl p-4 shadow-sm">
                   <h3 className="text-xs font-black uppercase tracking-widest text-text-secondary mb-4 flex items-center gap-2">
-                    <TrendingUp size={14} /> Match Events
-                  </h3>
+                    <TrendingUp size={14} />{translate("Match Events")}</h3>
                   <div className="space-y-6">
                     {match.events.map((event, idx) => (
                       <div key={idx} className={cn(
@@ -163,7 +169,7 @@ export const MatchDetailsModal = ({
                           event.team === match.home ? "items-start" : "items-end"
                         )}>
                           <span className="font-black text-slate-900">{event.player}</span>
-                          <span className="text-xs text-text-secondary font-bold">{event.type} · {event.detail}</span>
+                          <span className="text-xs text-text-secondary font-bold">{translate(event.type)} · {event.detail}</span>
                         </div>
                       </div>
                     ))}
@@ -174,7 +180,7 @@ export const MatchDetailsModal = ({
               <div className="bg-white rounded-2xl p-4 shadow-sm flex items-center justify-between">
                 <div className="flex items-center gap-2">
                   <Info size={16} className="text-secondary" />
-                  <span className="text-sm font-black text-slate-900">Venue Info</span>
+                  <span className="text-sm font-black text-slate-900">{translate("Venue Info")}</span>
                 </div>
                 <span className="text-xs font-bold text-text-secondary">{match.venue}</span>
               </div>
@@ -196,7 +202,7 @@ export const MatchDetailsModal = ({
                     <div key={i} className="space-y-2">
                       <div className="flex justify-between text-[10px] font-black uppercase tracking-wider text-text-secondary">
                         <span className="text-primary">{stat.home}</span>
-                        <span>{stat.label}</span>
+                        <span>{translate(stat.label)}</span>
                         <span className="text-secondary">{stat.away}</span>
                       </div>
                       <div className="flex h-1.5 w-full bg-slate-100 rounded-full overflow-hidden">
@@ -214,7 +220,7 @@ export const MatchDetailsModal = ({
                 </div>
               </div>
               <div className="bg-white rounded-2xl p-6 shadow-sm text-center">
-                <p className="text-[10px] font-black text-text-secondary uppercase">Statistics from recorded match events</p>
+                <p className="text-[10px] font-black text-text-secondary uppercase">{translate("Statistics from recorded match events")}</p>
               </div>
             </div>
           )}
@@ -223,24 +229,23 @@ export const MatchDetailsModal = ({
             <div className="space-y-4 pb-20">
               <div className="bg-white rounded-2xl p-4 shadow-sm">
                 <h3 className="text-xs font-black uppercase tracking-widest text-text-secondary mb-4 flex items-center gap-2">
-                  <History size={14} /> Team Performance
-                </h3>
-                <div className="space-y-4">
-                  {teamHistory.map((m, i) => (
-                    <div key={i} className="flex items-center justify-between border-b border-slate-50 pb-3 last:border-0 last:pb-0">
+                  <History size={14} />{translate("Head-to-head")}</h3>
+                {teamHistory.length ? <div className="space-y-4">
+                  {teamHistory.map((m) => (
+                    <div key={m.id} className="flex items-center justify-between border-b border-slate-50 pb-3 last:border-0 last:pb-0">
                       <div className="flex flex-col">
                         <span className="text-[10px] font-black text-text-secondary uppercase">
-                          {formatDate(m.kickoff, { month: 'short', day: 'numeric', year: 'numeric' })}
+                          {formatDate(m.kickoff, { month: 'short', day: 'numeric', year: 'numeric' }, locale)}
                         </span>
                         <div className="flex items-center gap-2">
                            <span className={cn("text-sm font-black", (m.homeScore || 0) > (m.awayScore || 0) ? "text-slate-950" : "text-slate-400")}>{m.home}</span>
-                           <span className="text-xs font-black text-primary">{m.homeScore ?? "-"} : {m.awayScore ?? "-"}</span>
+                           <span className="text-xs font-black text-primary">{translate(m.homeScore ?? "-")} : {translate(m.awayScore ?? "-")}</span>
                            <span className={cn("text-sm font-black", (m.awayScore || 0) > (m.homeScore || 0) ? "text-slate-950" : "text-slate-400")}>{m.away}</span>
                         </div>
                       </div>
                     </div>
                   ))}
-                </div>
+                </div> : <p className="text-sm text-text-secondary">{translate("No completed meetings between these teams yet.")}</p>}
               </div>
             </div>
           )}
@@ -251,12 +256,12 @@ export const MatchDetailsModal = ({
                 <div className="bg-slate-50 px-4 py-2 flex items-center justify-between text-[10px] font-black uppercase tracking-widest text-text-secondary">
                   <div className="flex items-center gap-4">
                     <span className="w-4">#</span>
-                    <span>Team</span>
+                    <span>{translate("Team")}</span>
                   </div>
                   <div className="flex items-center gap-4">
-                    <span className="w-4 text-center">PL</span>
-                    <span className="w-4 text-center">GD</span>
-                    <span className="w-4 text-center text-primary">PTS</span>
+                    <span className="w-4 text-center">{translate("PL")}</span>
+                    <span className="w-4 text-center">{translate("GD")}</span>
+                    <span className="w-4 text-center text-primary">{translate("PTS")}</span>
                   </div>
                 </div>
                 <div className="divide-y divide-slate-50">
@@ -300,18 +305,18 @@ export const MatchDetailsModal = ({
 
                     <div className="bg-white rounded-2xl p-4 shadow-sm space-y-4">
                       <div className="space-y-2">
-                        <p className="text-[10px] font-black text-text-secondary uppercase tracking-widest border-b border-slate-50 pb-1">Starting XI</p>
+                        <p className="text-[10px] font-black text-text-secondary uppercase tracking-widest border-b border-slate-50 pb-1">{translate("Starting XI")}</p>
                         {match.lineups.home.starting.map(p => (
                           <div key={p.number} className="flex items-center gap-3 text-xs">
                             <span className="w-4 font-black text-primary">{p.number}</span>
                             <span className="font-bold text-slate-900 truncate">{p.name}</span>
-                            <span className="ml-auto text-[8px] font-black text-slate-300 uppercase">{p.role}</span>
+                            <span className="ml-auto text-[8px] font-black text-slate-300 uppercase">{translate(p.role)}</span>
                           </div>
                         ))}
                       </div>
 
                       <div className="space-y-2 pt-2">
-                        <p className="text-[10px] font-black text-text-secondary uppercase tracking-widest border-b border-slate-50 pb-1">Substitutes</p>
+                        <p className="text-[10px] font-black text-text-secondary uppercase tracking-widest border-b border-slate-50 pb-1">{translate("Substitutes")}</p>
                         {match.lineups.home.subs.map(p => (
                           <div key={p.number} className="flex items-center gap-3 text-xs text-slate-500">
                             <span className="w-4 font-black text-slate-400">{p.number}</span>
@@ -333,18 +338,18 @@ export const MatchDetailsModal = ({
 
                     <div className="bg-white rounded-2xl p-4 shadow-sm space-y-4">
                       <div className="space-y-2">
-                        <p className="text-[10px] font-black text-text-secondary uppercase tracking-widest border-b border-slate-50 pb-1 text-right">Starting XI</p>
+                        <p className="text-[10px] font-black text-text-secondary uppercase tracking-widest border-b border-slate-50 pb-1 text-right">{translate("Starting XI")}</p>
                         {match.lineups.away.starting.map(p => (
                           <div key={p.number} className="flex items-center gap-3 text-xs flex-row-reverse">
                             <span className="w-4 font-black text-secondary text-right">{p.number}</span>
                             <span className="font-bold text-slate-900 truncate text-right">{p.name}</span>
-                            <span className="mr-auto text-[8px] font-black text-slate-300 uppercase">{p.role}</span>
+                            <span className="mr-auto text-[8px] font-black text-slate-300 uppercase">{translate(p.role)}</span>
                           </div>
                         ))}
                       </div>
 
                       <div className="space-y-2 pt-2">
-                        <p className="text-[10px] font-black text-text-secondary uppercase tracking-widest border-b border-slate-50 pb-1 text-right">Substitutes</p>
+                        <p className="text-[10px] font-black text-text-secondary uppercase tracking-widest border-b border-slate-50 pb-1 text-right">{translate("Substitutes")}</p>
                         {match.lineups.away.subs.map(p => (
                           <div key={p.number} className="flex items-center gap-3 text-xs text-slate-500 flex-row-reverse">
                             <span className="w-4 font-black text-slate-400 text-right">{p.number}</span>
@@ -361,8 +366,8 @@ export const MatchDetailsModal = ({
                     <TrendingUp size={32} />
                   </div>
                   <div className="space-y-1">
-                    <h4 className="font-black text-slate-900">Lineups Pending</h4>
-                    <p className="text-xs text-text-secondary font-bold">Starting XIs will be released 60 minutes before kickoff.</p>
+                    <h4 className="font-black text-slate-900">{translate("Lineups Pending")}</h4>
+                    <p className="text-xs text-text-secondary font-bold">{translate("Starting XIs will be released 60 minutes before kickoff.")}</p>
                   </div>
                 </div>
               )}

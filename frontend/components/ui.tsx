@@ -1,4 +1,5 @@
 "use client";
+import { useLanguage } from "@/components/language-provider";
 
 import type React from "react";
 import { useEffect, useMemo, useState, useRef } from "react";
@@ -20,7 +21,8 @@ type ButtonProps = React.ButtonHTMLAttributes<HTMLButtonElement> & {
   variant?: "primary" | "secondary" | "ghost" | "destructive";
 };
 
-export const Button = ({ className, variant = "primary", ...props }: ButtonProps) => (
+export const Button = ({ className, variant = "primary", ...props }: ButtonProps) => {
+  return (
   <button
     className={cn(
       "inline-flex items-center justify-center rounded-full px-5 py-3 text-sm font-semibold transition duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-200 disabled:cursor-not-allowed disabled:bg-slate-300 disabled:text-slate-500 disabled:shadow-none disabled:hover:translate-y-0",
@@ -33,8 +35,10 @@ export const Button = ({ className, variant = "primary", ...props }: ButtonProps
     {...props}
   />
 );
+};
 
-export const Input = ({ className, ...props }: React.InputHTMLAttributes<HTMLInputElement>) => (
+export const Input = ({ className, ...props }: React.InputHTMLAttributes<HTMLInputElement>) => {
+  return (
   <input
     className={cn(
       "h-12 w-full rounded-2xl border border-slate-200 bg-white px-4 text-sm text-text-primary shadow-sm outline-none transition focus:border-primary focus:ring-4 focus:ring-blue-100",
@@ -43,6 +47,7 @@ export const Input = ({ className, ...props }: React.InputHTMLAttributes<HTMLInp
     {...props}
   />
 );
+};
 
 export const Badge = ({
   children,
@@ -52,7 +57,8 @@ export const Badge = ({
   children: React.ReactNode;
   variant?: "default" | "live" | "success" | "warning";
   className?: string;
-}) => (
+}) => {
+  return (
   <span
     className={cn(
       "inline-flex items-center rounded-full px-3 py-1 text-[11px] font-bold uppercase tracking-[0.18em]",
@@ -66,6 +72,7 @@ export const Badge = ({
     {children}
   </span>
 );
+};
 
 export const PageHeader = ({
   eyebrow,
@@ -77,16 +84,19 @@ export const PageHeader = ({
   title: string;
   description: string;
   actions?: React.ReactNode;
-}) => (
+}) => {
+  const { t: translate } = useLanguage();
+  return (
   <div className="page-heading flex flex-col gap-3 md:flex-row md:items-end md:justify-between">
     <div className="max-w-2xl">
-      <p className="text-[10px] font-bold uppercase tracking-[0.32em] text-primary">{eyebrow}</p>
-      <h1 className="mt-2 text-3xl font-bold tracking-tight text-slate-950 md:text-5xl">{title}</h1>
-      <p className="mt-2 text-sm leading-6 text-text-secondary md:text-base md:leading-7">{description}</p>
+      <p className="text-[10px] font-bold uppercase tracking-[0.32em] text-primary">{translate(eyebrow)}</p>
+      <h1 className="mt-2 text-3xl font-bold tracking-tight text-slate-950 md:text-5xl">{translate(title)}</h1>
+      <p className="mt-2 text-sm leading-6 text-text-secondary md:text-base md:leading-7">{translate(description)}</p>
     </div>
     {actions ? <div className="mt-2 flex flex-wrap gap-2">{actions}</div> : null}
   </div>
 );
+};
 
 export const Tabs = ({
   tabs,
@@ -97,6 +107,7 @@ export const Tabs = ({
   defaultTab?: string;
   variant?: "default" | "pwa";
 }) => {
+  const { t: translate } = useLanguage();
   const [activeTab, setActiveTab] = useState(defaultTab ?? tabs[0]?.id);
   const selected = useMemo(() => tabs.find((tab) => tab.id === activeTab) ?? tabs[0], [activeTab, tabs]);
 
@@ -118,7 +129,7 @@ export const Tabs = ({
                     : "text-slate-500 hover:text-primary"
                 )}
               >
-                {tab.label}
+                {translate(tab.label)}
               </button>
             );
           })}
@@ -143,7 +154,7 @@ export const Tabs = ({
               tab.id === selected.id ? "app-tab--active text-primary" : "text-text-secondary hover:text-primary"
             )}
           >
-            {tab.label}
+            {translate(tab.label)}
           </button>
         ))}
       </div>
@@ -165,6 +176,7 @@ export const Modal = ({
   onClose: () => void;
   children: React.ReactNode;
 }) => {
+  const { t: translate } = useLanguage();
   const dialogRef = useRef<HTMLDialogElement>(null);
   useEffect(() => {
     const dialog = dialogRef.current;
@@ -182,12 +194,10 @@ export const Modal = ({
       <div className="flex w-full max-w-lg max-h-[min(85dvh,calc(100dvh-2rem))] flex-col overflow-hidden rounded-[32px] bg-white p-6 shadow-float animate-slideUp">
         <div className="flex shrink-0 items-start justify-between gap-4">
           <div>
-            <h3 className="text-xl font-semibold text-slate-950">{title}</h3>
-            <p className="mt-2 text-sm leading-6 text-text-secondary">{description}</p>
+            <h3 className="text-xl font-semibold text-slate-950">{translate(title)}</h3>
+            <p className="mt-2 text-sm leading-6 text-text-secondary">{translate(description)}</p>
           </div>
-          <button onClick={onClose} className="rounded-full bg-slate-100 px-3 py-2 text-sm text-text-secondary">
-            Close
-          </button>
+          <button onClick={onClose} className="rounded-full bg-slate-100 px-3 py-2 text-sm text-text-secondary">{translate("Close")}</button>
         </div>
         <div className="mt-5 min-h-0 overflow-y-auto">{children}</div>
       </div>
@@ -196,6 +206,7 @@ export const Modal = ({
 };
 
 export const Navbar = () => {
+  const { t: translate } = useLanguage();
   const pathname = usePathname();
   const links = [
     { label: "Matches", path: "/" },
@@ -206,24 +217,25 @@ export const Navbar = () => {
   ];
   return (
     <header className="top-bar">
-      <Link href="/" className="top-bar__brand" aria-label="UTG AllScore home">
-        <img src="/images/utg-allscore-logo.png" alt="UTG AllScore logo" width={36} height={36} className="top-bar__logo" />
-        <span>UTG AllScore</span>
+      <Link href="/" className="top-bar__brand" aria-label={translate("UTG AllScore home")}>
+        <img src="/images/utg-allscore-logo.png" alt={translate("UTG AllScore logo")} width={36} height={36} className="top-bar__logo" />
+        <span>{translate("UTG AllScore")}</span>
       </Link>
-      <nav className="top-bar__nav" aria-label="Main navigation">
+      <nav className="top-bar__nav" aria-label={translate("Main navigation")}>
         {links.map((link) => (
           <Link key={link.path} href={link.path} aria-current={(pathname === link.path || (link.path === "/more" && pathname === "/settings")) ? "page" : undefined}
             className={cn("top-bar__link", (pathname === link.path || (link.path === "/more" && pathname === "/settings")) && "top-bar__link--active")}>
-            {link.label}
+            {translate(link.label)}
           </Link>
         ))}
       </nav>
-      <div className="top-bar__actions"><Link href="/search" aria-label="Search AllScore" className="global-search-link"><Search size={21} /></Link></div>
+      <div className="top-bar__actions"><Link href="/search" aria-label={translate("Search AllScore")} className="global-search-link"><Search size={21} /></Link></div>
     </header>
   );
 };
 
 export const InstallPrompt = () => {
+  const { t: translate } = useLanguage();
   const [eventState, setEventState] = useState<any>(null);
   const [installed, setInstalled] = useState(false);
 
@@ -241,8 +253,8 @@ export const InstallPrompt = () => {
     };
   }, []);
 
-  if (installed) return <Badge variant="success">Installed</Badge>;
-  if (!eventState) return <Badge variant="default">Installable PWA</Badge>;
+  if (installed) return <Badge variant="success">{translate("Installed")}</Badge>;
+  if (!eventState) return <Badge variant="default">{translate("Installable PWA")}</Badge>;
 
   return (
     <Button
@@ -251,13 +263,12 @@ export const InstallPrompt = () => {
         await eventState.prompt();
         setEventState(null);
       }}
-    >
-      Install App
-    </Button>
+    >{translate("Install App")}</Button>
   );
 };
 
 export const OfflineStatus = () => {
+  const { t: translate } = useLanguage();
   const [online, setOnline] = useState(true);
 
   useEffect(() => {
@@ -272,10 +283,11 @@ export const OfflineStatus = () => {
     };
   }, []);
 
-  return <div className={cn("rounded-full px-4 py-2 text-sm font-medium", online ? "bg-green-50 text-success" : "bg-amber-50 text-warning")}>{online ? "Online and syncing" : "Offline mode active"}</div>;
+  return <div className={cn("rounded-full px-4 py-2 text-sm font-medium", online ? "bg-green-50 text-success" : "bg-amber-50 text-warning")}>{translate(online ? "Online and syncing" : "Offline mode active")}</div>;
 };
 
 export const NotificationSettings = () => {
+  const { t: translate } = useLanguage();
   const [status, setStatus] = useState<"idle" | "enabled" | "denied" | "unsupported" | "error">("idle");
   const [message, setMessage] = useState<string | null>(null);
   const [needsHomeScreen, setNeedsHomeScreen] = useState(false);
@@ -423,23 +435,21 @@ export const NotificationSettings = () => {
   return (
         <div className="space-y-4">
           {needsHomeScreen ? (
-            <div className="rounded-3xl bg-amber-50 p-4 text-sm text-amber-950">
-              On iPhone, add AllScore to your Home Screen first (Share → Add to Home Screen), then open it from the icon. The Allow prompt only appears in that installed app — not in a Safari tab.
-            </div>
+            <div className="rounded-3xl bg-amber-50 p-4 text-sm text-amber-950">{translate("On iPhone, add AllScore to your Home Screen first (Share → Add to Home Screen), then open it from the icon. The Allow prompt only appears in that installed app — not in a Safari tab.")}</div>
           ) : null}
 
           <div className="flex items-center justify-between gap-4 rounded-3xl bg-slate-50 px-4 py-4">
             <div className="min-w-0">
-              <p className="text-sm font-semibold text-slate-950">Alerts on this device</p>
+              <p className="text-sm font-semibold text-slate-950">{translate("Alerts on this device")}</p>
               <p className="mt-1 text-sm text-text-secondary">
-                {enabled ? "On — you’ll get match and news alerts." : "Off — turn on to receive alerts."}
+                {translate(enabled ? "On — you’ll get match and news alerts." : "Off — turn on to receive alerts.")}
               </p>
             </div>
             <button
               type="button"
               role="switch"
               aria-checked={enabled}
-              aria-label="Toggle push notifications"
+              aria-label={translate("Toggle push notifications")}
               disabled={toggleDisabled}
               onClick={onToggle}
               aria-busy={busy}
@@ -449,18 +459,14 @@ export const NotificationSettings = () => {
           </div>
 
           {status === "denied" ? (
-            <div className="rounded-3xl bg-slate-50 p-4 text-sm text-text-secondary">
-              Notifications are blocked in this browser. Update browser settings to turn them back on.
-            </div>
+            <div className="rounded-3xl bg-slate-50 p-4 text-sm text-text-secondary">{translate("Notifications are blocked in this browser. Update browser settings to turn them back on.")}</div>
           ) : null}
           {status === "unsupported" ? (
-            <div className="rounded-3xl bg-slate-50 p-4 text-sm text-text-secondary">
-              This browser does not support push notifications.
-            </div>
+            <div className="rounded-3xl bg-slate-50 p-4 text-sm text-text-secondary">{translate("This browser does not support push notifications.")}</div>
           ) : null}
           {status === "error" ? (
             <div className="rounded-3xl bg-slate-50 p-4 text-sm text-text-secondary">
-              {message || "Could not update push notifications."}
+              {translate(message || "Could not update push notifications.")}
             </div>
           ) : null}
 
@@ -468,10 +474,13 @@ export const NotificationSettings = () => {
   );
 };
 
-export const MetaLine = ({ date, venue }: { date: string; venue?: string }) => (
+export const MetaLine = ({ date, venue }: { date: string; venue?: string }) => {
+  const { locale } = useLanguage();
+  return (
   <div className="flex flex-wrap gap-3 text-sm text-text-secondary">
-    <span>{formatDate(date, { day: "numeric", month: "short" })}</span>
-    <span>{formatTime(date)}</span>
+    <span>{formatDate(date, { day: "numeric", month: "short" }, locale)}</span>
+    <span>{formatTime(date, locale)}</span>
     {venue ? <span>{venue}</span> : null}
   </div>
 );
+};

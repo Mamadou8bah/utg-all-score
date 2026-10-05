@@ -3,8 +3,8 @@ import { twMerge } from "tailwind-merge";
 
 export const cn = (...inputs: ClassValue[]) => twMerge(clsx(inputs));
 
-export const formatDate = (value: string, options?: Intl.DateTimeFormatOptions) =>
-  new Intl.DateTimeFormat("en-GB", {
+export const formatDate = (value: string, options?: Intl.DateTimeFormatOptions, locale = "en-GB") =>
+  new Intl.DateTimeFormat(locale, {
     timeZone: "Africa/Banjul",
     day: "numeric",
     month: "short",
@@ -12,8 +12,8 @@ export const formatDate = (value: string, options?: Intl.DateTimeFormatOptions) 
     ...options
   }).format(new Date(value));
 
-export const formatTime = (value: string) =>
-  new Intl.DateTimeFormat("en-GB", {
+export const formatTime = (value: string, locale = "en-GB") =>
+  new Intl.DateTimeFormat(locale, {
     timeZone: "Africa/Banjul",
     hour: "2-digit",
     minute: "2-digit"

@@ -1,4 +1,5 @@
 "use client";
+import { useDialogs } from "@/components/dialog-provider";
 
 import { useEffect, useState } from "react";
 import { AgentShell, Button, Card, Field, Input, Select, Textarea } from "@/components/ui";
@@ -10,6 +11,7 @@ type NewsItem = { id: string; title: string; excerpt: string; category: string; 
 type AnnouncementItem = { id: string; title: string; body: string; level: string; createdAt: string };
 
 export default function AgentContentPage() {
+  const { confirm } = useDialogs();
   const [message, setMessage] = useState("");
   const [news, setNews] = useState<NewsItem[]>([]);
   const [announcements, setAnnouncements] = useState<AnnouncementItem[]>([]);
@@ -57,7 +59,7 @@ export default function AgentContentPage() {
   }
 
   async function remove(type: "news" | "announcement", id: string) {
-    if (!confirm("Delete this item?")) return;
+    if (!(await confirm("Delete this item?"))) return;
     const res = await apiFetch("/api/portal/content", { method: "DELETE", body: JSON.stringify({ type, id }) });
     setMessage(res.ok ? "Deleted." : "Failed to delete.");
     if (res.ok) void load().catch(() => setMessage("Could not refresh your content. Check your connection and try again."));

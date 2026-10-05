@@ -25,3 +25,7 @@ frontend/prisma/prod.db
 .next-production-check/
 .readiness-browser/
 /admin-app/tsconfig.tsbuildinfo
+
+# Isolated language verification builds
+.next-language/
+.next-language-build/

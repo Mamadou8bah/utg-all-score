@@ -88,10 +88,10 @@ export function Card({ title, children }: { title?: string; children: ReactNode 
 
 export function Field({ label, children }: { label: string; children: ReactNode }) {
   return (
-    <div className="block space-y-2">
+    <label className="block space-y-2">
       <span className="text-sm font-semibold text-slate-950">{label}</span>
       {children}
-    </div>
+    </label>
   );
 }
 

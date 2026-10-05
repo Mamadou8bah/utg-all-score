@@ -1,28 +1,32 @@
+"use client";
+import { useLanguage } from "@/components/language-provider";
 import Link from "next/link";
 import { type Match, type StandingRow, type Competition, type AthleteProfile } from "@/lib/types";
 import { formatDate, formatTime, cn } from "@/lib/utils";
 import { Badge, Button, MetaLine } from "@/components/ui";
 import { ChevronRight, Trophy, Info, CalendarDays, Zap, Newspaper, LayoutGrid } from "lucide-react";
 
-export const Hero = () => (
+export const Hero = () => {
+  const { t: translate } = useLanguage();
+  return (
   <section className="relative overflow-hidden rounded-[32px] bg-slate-950 px-5 py-7 text-white shadow-float sm:rounded-[36px] sm:px-8 sm:py-8 lg:px-10">
     <div className="relative grid gap-6 lg:grid-cols-[1.15fr_0.85fr] lg:items-center">
       <div>
-        <Badge variant="live">Official Campus Sports</Badge>
-        <h1 className="mt-4 max-w-2xl text-3xl font-bold tracking-tight sm:text-5xl lg:text-6xl">Your Official University Sports Hub.</h1>
-        <p className="mt-4 max-w-xl text-sm leading-6 text-slate-200 sm:text-base sm:leading-7">UTG AllScore brings live match control, results, official updates, and athlete storytelling into one fast sports app.</p>
+        <Badge variant="live">{translate("Official Campus Sports")}</Badge>
+        <h1 className="mt-4 max-w-2xl text-3xl font-bold tracking-tight sm:text-5xl lg:text-6xl">{translate("Your Official University Sports Hub.")}</h1>
+        <p className="mt-4 max-w-xl text-sm leading-6 text-slate-200 sm:text-base sm:leading-7">{translate("UTG AllScore brings live match control, results, official updates, and athlete storytelling into one fast sports app.")}</p>
         <div className="mt-6 flex flex-wrap gap-3">
-          <Link href="/live" className="flex-1 sm:flex-none"><Button className="w-full sm:w-auto">Live Scores</Button></Link>
-          <Link href="/fixtures" className="flex-1 sm:flex-none"><Button variant="ghost" className="w-full bg-slate-800 text-white ring-1 ring-slate-600 hover:bg-slate-700 sm:w-auto">Fixtures</Button></Link>
+          <Link href="/live" className="flex-1 sm:flex-none"><Button className="w-full sm:w-auto">{translate("Live Scores")}</Button></Link>
+          <Link href="/fixtures" className="flex-1 sm:flex-none"><Button variant="ghost" className="w-full bg-slate-800 text-white ring-1 ring-slate-600 hover:bg-slate-700 sm:w-auto">{translate("Fixtures")}</Button></Link>
         </div>
       </div>
       <div className="grid gap-3">
         <div className="rounded-[28px] border border-slate-700 bg-slate-800 p-4 sm:p-5">
-          <p className="text-[10px] uppercase tracking-[0.3em] text-slate-400">Live right now</p>
+          <p className="text-[10px] uppercase tracking-[0.3em] text-slate-400">{translate("Live right now")}</p>
           <div className="mt-3 flex items-center justify-between">
             <div>
-              <p className="text-xl font-bold">ICT vs Business</p>
-              <p className="mt-1 text-xs text-slate-300">VC Tournament</p>
+              <p className="text-xl font-bold">{translate("ICT vs Business")}</p>
+              <p className="mt-1 text-xs text-slate-300">{translate("VC Tournament")}</p>
             </div>
             <Badge variant="live" className="h-6 px-2">72'</Badge>
           </div>
@@ -34,42 +38,46 @@ export const Hero = () => (
             ["Offline", "Cached scores"]
           ].map(([title, value]) => (
             <div key={title} className="rounded-[24px] border border-slate-700 bg-slate-900 p-3">
-              <p className="text-[10px] text-slate-400">{title}</p>
-              <p className="mt-1 text-sm font-semibold">{value}</p>
+              <p className="text-[10px] text-slate-400">{translate(title)}</p>
+              <p className="mt-1 text-sm font-semibold">{translate(value)}</p>
             </div>
           ))}
           <div className="hidden rounded-[24px] border border-slate-700 bg-slate-900 p-3 sm:block">
-            <p className="text-[10px] text-slate-400">Alerts</p>
-            <p className="mt-1 text-sm font-semibold">Live Push</p>
+            <p className="text-[10px] text-slate-400">{translate("Alerts")}</p>
+            <p className="mt-1 text-sm font-semibold">{translate("Live Push")}</p>
           </div>
         </div>
       </div>
     </div>
   </section>
 );
+};
 
-const TeamMark = ({ teamName, className }: { teamName: string; className: string }) => (
+const TeamMark = ({ teamName, className }: { teamName: string; className: string }) => {
+  return (
   <div className={cn("bg-slate-50 flex items-center justify-center text-slate-400", className)}>
     <span className="font-black">{teamName[0]}</span>
   </div>
 );
+};
 
 export const MatchRow = ({ match, onClick }: { match: Match; onClick?: () => void }) => {
+  const { t: translate, locale } = useLanguage();
   const live = match.status === "LIVE" || match.status === "HT";
   const scored = match.status !== "UPCOMING";
   return (
     <button type="button" onClick={onClick} className="match-row"
-      aria-label={`${match.home} versus ${match.away}, ${scored ? `${match.homeScore} to ${match.awayScore}, ${match.status}` : formatTime(match.kickoff)}`}>
+      aria-label={`${match.home} ${locale === "fr-FR" ? "contre" : "versus"} ${match.away}, ${scored ? `${match.homeScore} ${locale === "fr-FR" ? "à" : "to"} ${match.awayScore}, ${translate(match.status)}` : formatTime(match.kickoff, locale)}`}>
       <span className="match-row__side match-row__side--home">
         <span className="match-row__name">{match.home}</span>
         <TeamMark teamName={match.home} className="crest crest--home" />
       </span>
       <span className="match-row__centre">
         <span className={scored ? "match-row__score" : "match-row__kickoff"}>
-          {scored ? `${match.homeScore} – ${match.awayScore}` : formatTime(match.kickoff)}
+          {translate(scored ? `${match.homeScore} – ${match.awayScore}` : formatTime(match.kickoff, locale))}
         </span>
         <span className={cn("match-row__status", live && "match-row__status--live")}>
-          {live ? (match.status === "HT" ? "HT" : `LIVE ${match.timer || ""}`) : scored ? "FT" : "Scheduled"}
+          {translate(live ? (match.status === "HT" ? "HT" : `LIVE ${match.timer || ""}`) : scored ? "FT" : "Scheduled")}
         </span>
       </span>
       <span className="match-row__side match-row__side--away">
@@ -87,7 +95,9 @@ export const ResultCard = MatchRow;
 export const NewsCard = ({ item, onClick }: {
   item: { title: string; excerpt: string; category: string; image?: string; publishedAt: string };
   onClick?: () => void;
-}) => (
+}) => {
+  const { locale } = useLanguage();
+  return (
   <button type="button" onClick={onClick} className="news-card text-left">
     <div className="news-card__image">
       {item.image ? <img src={item.image} alt="" className="absolute inset-0 h-full w-full object-cover" /> : null}
@@ -95,59 +105,71 @@ export const NewsCard = ({ item, onClick }: {
     </div>
     <div className="p-3">
       <h2 className="text-[15px] font-bold leading-snug">{item.title}</h2>
-      <p className="mt-2 text-xs text-text-secondary">{formatDate(item.publishedAt, { month: "short", day: "numeric" })}</p>
+      <p className="mt-2 text-xs text-text-secondary">{formatDate(item.publishedAt, { month: "short", day: "numeric" }, locale)}</p>
     </div>
   </button>
 );
+};
 
-export const AnnouncementCard = ({ item }: { item: { title: string; body: string; level: string } }) => (
+export const AnnouncementCard = ({ item }: { item: { title: string; body: string; level: string } }) => {
+  const { t: translate } = useLanguage();
+  return (
   <div className="reference-panel">
-    <Badge variant={item.level === "warning" ? "warning" : "default"}>{item.level === "warning" ? "Urgent" : "Notice"}</Badge>
+    <Badge variant={item.level === "warning" ? "warning" : "default"}>{translate(item.level === "warning" ? "Urgent" : "Notice")}</Badge>
     <h3 className="mt-4 text-lg font-semibold text-slate-950">{item.title}</h3>
     <p className="mt-2 text-sm leading-6 text-text-secondary">{item.body}</p>
   </div>
 );
+};
 
-export const AthleteHighlightCard = ({ athlete }: { athlete: AthleteProfile }) => (
+export const AthleteHighlightCard = ({ athlete }: { athlete: AthleteProfile }) => {
+  const { t: translate } = useLanguage();
+  return (
   <article className="athlete-row">
     <div className="athlete-row__photo">
       <img src={athlete.image} alt={athlete.name} className="h-full w-full object-cover" />
     </div>
     <div>
-      <Badge variant="success">{athlete.sport}</Badge>
+      <Badge variant="success">{translate(athlete.sport)}</Badge>
       <h3 className="mt-4 text-2xl font-semibold text-slate-950">{athlete.name}</h3>
-      <p className="mt-2 text-sm text-text-secondary">{athlete.team} · {athlete.role}</p>
+      <p className="mt-2 text-sm text-text-secondary">{athlete.team} · {translate(athlete.role)}</p>
       <p className="mt-4 text-sm leading-6 text-text-secondary">{athlete.story}</p>
-      <p className="mt-4 text-sm font-semibold text-primary">{athlete.statLine}</p>
+      <p className="mt-4 text-sm font-semibold text-primary">{translate(athlete.statLine)}</p>
     </div>
   </article>
 );
+};
 
-export const EventCard = ({ event }: { event: { title: string; type: string; venue: string; date: string; description: string } }) => (
+export const EventCard = ({ event }: { event: { title: string; type: string; venue: string; date: string; description: string } }) => {
+  const { locale } = useLanguage();
+  return (
   <article className="reference-panel">
     <div className="flex items-center justify-between gap-3">
       <Badge variant="default">{event.type}</Badge>
-      <p className="text-sm text-text-secondary">{formatDate(event.date)}</p>
+      <p className="text-sm text-text-secondary">{formatDate(event.date, undefined, locale)}</p>
     </div>
     <h3 className="mt-4 text-xl font-semibold text-slate-950">{event.title}</h3>
     <p className="mt-2 text-sm text-text-secondary">{event.venue}</p>
     <p className="mt-4 text-sm leading-6 text-text-secondary">{event.description}</p>
   </article>
 );
+};
 
-export const StandingsTable = ({ rows, onTeamClick }: { rows: StandingRow[], onTeamClick?: (teamName: string) => void }) => (
+export const StandingsTable = ({ rows, onTeamClick }: { rows: StandingRow[], onTeamClick?: (teamName: string) => void }) => {
+  const { t: translate } = useLanguage();
+  return (
   <div className="reference-table">
     <div className="overflow-x-auto">
       <table className="min-w-full whitespace-nowrap text-left text-xs sm:text-sm">
         <thead className="bg-slate-50 text-[10px] font-black uppercase tracking-widest text-text-secondary">
           <tr>
-            <th className="px-3 py-4 font-black sm:px-6 sm:py-5"># Team</th>
-            <th className="px-2 py-4 text-center sm:px-3 sm:py-5">PL</th>
-            <th className="hidden px-3 py-5 text-center sm:table-cell">W</th>
-            <th className="hidden px-3 py-5 text-center sm:table-cell">D</th>
-            <th className="hidden px-3 py-5 text-center sm:table-cell">L</th>
-            <th className="px-2 py-4 text-center sm:px-3 sm:py-5">GD</th>
-            <th className="px-3 py-4 text-center sm:px-6 sm:py-5">PTS</th>
+            <th className="px-3 py-4 font-black sm:px-6 sm:py-5">{translate("# Team")}</th>
+            <th className="px-2 py-4 text-center sm:px-3 sm:py-5">{translate("PL")}</th>
+            <th className="hidden px-3 py-5 text-center sm:table-cell">{translate("W")}</th>
+            <th className="hidden px-3 py-5 text-center sm:table-cell">{translate("D")}</th>
+            <th className="hidden px-3 py-5 text-center sm:table-cell">{translate("L")}</th>
+            <th className="px-2 py-4 text-center sm:px-3 sm:py-5">{translate("GD")}</th>
+            <th className="px-3 py-4 text-center sm:px-6 sm:py-5">{translate("PTS")}</th>
           </tr>
         </thead>
         <tbody>
@@ -181,7 +203,7 @@ export const StandingsTable = ({ rows, onTeamClick }: { rows: StandingRow[], onT
                 "px-2 py-3 text-center font-bold sm:px-3 sm:py-4",
                 row.gd > 0 ? "text-success" : row.gd < 0 ? "text-error" : "text-slate-400"
               )}>
-                {row.gd > 0 ? `+${row.gd}` : row.gd}
+                {translate(row.gd > 0 ? `+${row.gd}` : row.gd)}
               </td>
               <td className="px-3 py-3 text-center text-sm font-black text-primary sm:px-6 sm:py-4 sm:text-base">
                 {row.pts}
@@ -193,6 +215,7 @@ export const StandingsTable = ({ rows, onTeamClick }: { rows: StandingRow[], onT
     </div>
   </div>
 );
+};
 
 export const CompetitionCard = ({ 
   competition, 
@@ -200,7 +223,9 @@ export const CompetitionCard = ({
 }: { 
   competition: Competition, 
   onClick?: () => void 
-}) => (
+}) => {
+  const { t: translate } = useLanguage();
+  return (
   <article 
     onClick={onClick}
     className="group relative cursor-pointer overflow-hidden rounded-[2.5rem] border border-slate-200 bg-white p-6 shadow-sm transition-all hover:border-primary hover:shadow-card active:scale-[0.98]"
@@ -217,7 +242,7 @@ export const CompetitionCard = ({
           </div>
           <div>
             <Badge variant="default" className="mb-1 text-[9px] font-black tracking-[0.2em]">
-              {competition.type === "GENERAL" ? "University wide" : competition.schoolName}
+              {translate(competition.type === "GENERAL" ? "University wide" : competition.schoolName)}
             </Badge>
             <h3 className="text-xl font-black text-slate-950 group-hover:text-primary transition-colors">
               {competition.name}
@@ -235,14 +260,15 @@ export const CompetitionCard = ({
     
     <div className="mt-6 flex items-center gap-3">
        <span className="flex items-center gap-1 text-[10px] font-black uppercase text-text-secondary tracking-widest">
-         <Trophy size={12} /> {competition.format}
+         <Trophy size={12} /> {translate(competition.format)}
        </span>
        <div className="h-1 w-1 rounded-full bg-slate-200" />
-       <span className="text-[10px] font-black uppercase text-primary tracking-widest leading-none pt-0.5">
-         Live Season
-       </span>
+       <span className="text-[10px] font-black uppercase text-primary tracking-widest leading-none pt-0.5">{translate("Live Season")}</span>
     </div>
   </article>
 );
+};
 
-export const SkeletonBlock = ({ className }: { className?: string }) => <div className={`animate-pulse rounded-[28px] bg-slate-200 ${className ?? "h-24 w-full"}`} />;
+export const SkeletonBlock = ({ className }: { className?: string }) => {
+  return <div className={`animate-pulse rounded-[28px] bg-slate-200 ${className ?? "h-24 w-full"}`} />;
+};

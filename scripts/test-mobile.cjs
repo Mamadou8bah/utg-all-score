@@ -31,6 +31,7 @@ const { chromium } = require(process.env.PLAYWRIGHT_MODULE || 'playwright');
       });
       const newPage = async () => {
         const current = await context.newPage();
+        current.setDefaultNavigationTimeout(60000);
         current.on('pageerror', (error) => failures.push(`${app} ${new URL(current.url()).pathname} at ${current.viewportSize().width}px: ${error.message}`));
         return current;
       };

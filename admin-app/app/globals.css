@@ -184,3 +184,41 @@ h1, h2, h3 { letter-spacing: -.035em; }
 .global-search-link { display: grid; place-items: center; width: 44px; height: 44px; border-radius: 10px; color: inherit; flex-shrink: 0; }
 .global-search-link:hover { background: #ffffff16; }
 .top-bar__actions, .portal-actions { display: flex; align-items: center; gap: 2px; }
+
+.app-action-dialog { position: fixed; inset: 0; margin: auto; width: calc(100% - 32px); max-width: 420px; max-height: calc(100dvh - 48px); overflow-y: auto; padding: 0; border: 1px solid #e0e3eb; border-radius: 18px; background: white; color: #1a1a1a; box-shadow: 0 20px 80px #08145f33; }
+.app-action-dialog::backdrop { background: #08102b99; backdrop-filter: blur(3px); }
+.app-action-dialog form { padding: 20px; }
+.app-action-dialog header { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+.app-action-dialog h2 { font-size: 20px; font-weight: 700; color: #0c1c8c; }
+.app-action-dialog p { margin: 12px 0 20px; font-size: 14px; line-height: 1.6; overflow-wrap: anywhere; }
+.action-dialog-close { display: grid; place-items: center; width: 44px; height: 44px; flex-shrink: 0; border-radius: 10px; background: #f0f2f8; }
+.action-dialog-field { display: block; font-size: 13px; font-weight: 600; }
+.action-dialog-field input { display: block; width: 100%; min-width: 0; height: 48px; padding: 10px 12px; margin-top: 8px; border: 1px solid #bcc4d3; border-radius: 8px; font-size: 16px; background: white; color: #1a1a1a; }
+.app-action-dialog footer { display: flex; gap: 10px; justify-content: flex-end; margin-top: 24px; }
+.app-action-dialog footer button { min-height: 44px; padding: 10px 20px; border-radius: 9px; font-size: 14px; font-weight: 600; }
+.action-dialog-cancel { background: #eef0f6; color: #34405c; }
+.action-dialog-submit { background: #0c1c8c; color: white; }
+.action-dialog-submit--danger { background: #ce1126; }
+@media (max-width: 480px) { .app-action-dialog footer button { flex: 1; } }
+
+.admin-action-toolbar { display: flex; gap: 10px; flex-wrap: wrap; }
+.admin-form-modal { position: fixed; inset: 0; margin: auto; padding: 0; width: calc(100% - 32px); max-width: 720px; max-height: calc(100dvh - 32px); border: 1px solid #e0e3eb; border-radius: 18px; background: white; color: #1a1a1a; box-shadow: 0 20px 80px #08145f33; }
+.admin-form-modal[open] { display: flex; flex-direction: column; }
+.admin-form-modal::backdrop { background: #08102b99; backdrop-filter: blur(3px); }
+.admin-form-modal > header { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 16px 20px; border-bottom: 1px solid #e0e3eb; flex-shrink: 0; }
+.admin-form-modal header p { color: #6b6b6b; font-size: 10px; text-transform: uppercase; letter-spacing: .08em; }
+.admin-form-modal h2 { font-size: 22px; font-weight: 700; color: #0c1c8c; }
+.admin-form-modal header button { width: 44px; height: 44px; display: grid; place-items: center; border-radius: 10px; background: #f0f2f8; flex-shrink: 0; }
+.admin-form-modal__body { overflow-y: auto; min-height: 0; padding: 20px; }
+.admin-form-modal > footer { display: flex; justify-content: flex-end; padding: 12px 20px; border-top: 1px solid #e0e3eb; flex-shrink: 0; }
+.admin-form-modal footer button { min-height: 44px; padding: 10px 20px; border-radius: 9px; background: #eef0f6; font-size: 14px; font-weight: 600; }
+.admin-form-message { padding: 12px; margin-bottom: 16px; background: #eef0ff; color: #0c1c8c; border-radius: 8px; font-size: 14px; }
+@media (max-width: 480px) { .admin-action-toolbar > button { flex: 1 1 auto; } .admin-form-modal { width: calc(100% - 16px); max-height: calc(100dvh - 16px); } .admin-form-modal__body { padding: 16px; } }
+
+.admin-record-link { display: flex; align-items: center; gap: 14px; width: 100%; padding: 16px; border: 1px solid #e0e3eb; border-radius: 12px; background: white; text-align: left; transition: border-color .15s, background .15s; }
+.admin-record-link:hover { background: #f7f8ff; border-color: #9aa5da; }
+.admin-record-link > div { min-width: 0; flex: 1; }
+.admin-record-link strong { font-size: 15px; font-weight: 700; color: #0c1c8c; overflow-wrap: anywhere; }
+.admin-record-link p { font-size: 12px; color: #6b6b6b; line-height: 1.6; margin-top: 4px; }
+.admin-record-link > span:last-child { margin-left: auto; font-size: 24px; color: #8791b0; }
+.admin-back-link { display: inline-flex; align-items: center; min-height: 44px; width: fit-content; color: #0c1c8c; font-size: 14px; font-weight: 600; }

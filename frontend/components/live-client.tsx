@@ -1,4 +1,5 @@
 "use client";
+import { useLanguage } from "@/components/language-provider";
 
 import { useState } from "react";
 import { LiveMatchCard } from "@/components/cards";
@@ -9,6 +10,7 @@ import { useApiData } from "@/lib/use-api-data";
 import { MatchDetailsModal } from "@/components/match-details-modal";
 
 export default function LiveClient() {
+  const { t: translate } = useLanguage();
   const [selectedMatch, setSelectedMatch] = useState<Match | null>(null);
   const { data: liveMatches, loading, error, reload } = useApiData<Match[]>("/api/live", []);
 
@@ -18,7 +20,7 @@ export default function LiveClient() {
     <div className="page-shell section-space space-y-2 pb-32">
       <PageHeader
         eyebrow="Live Scores"
-        title="Live matches"
+        title={translate("Live matches")}
         description="Follow live scores and match events."
       />
 
@@ -34,7 +36,7 @@ export default function LiveClient() {
         </div>
       ) : (
         <div className="rounded-3xl border border-dashed border-slate-200 p-12 text-center bg-slate-100">
-          <p className="text-sm font-bold text-text-secondary">No matches live right now.</p>
+          <p className="text-sm font-bold text-text-secondary">{translate("No matches live right now.")}</p>
         </div>
       )}
 

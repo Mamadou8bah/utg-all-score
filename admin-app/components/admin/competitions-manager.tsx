@@ -1,0 +1,520 @@
+"use client";
+import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { FormModal } from "@/components/form-modal";
+import { useDialogs } from "@/components/dialog-provider";
+
+import { useEffect, useMemo, useState } from "react";
+import { AdminShell, Button, Card, Field, Input, LogoMark, Select, Textarea } from "@/components/ui";
+import { LogoUpload } from "@/components/logo-upload";
+import { adminNav } from "@/lib/nav";
+import { apiFetch, apiJson } from "@/lib/api";
+
+type School = { id: string; name: string };
+type Team = { id: string; name: string; schoolId?: string | null; schoolName?: string | null };
+type Agent = { id: string; name: string; schoolName: string | null; schoolId?: string | null; active: boolean };
+type Competition = {
+  id: string;
+  name: string;
+  slug: string;
+  type: string;
+  format: string;
+  teamCount: number;
+  matchCount: number;
+  groupCount: number;
+  agentCount?: number;
+  logo?: string | null;
+  description?: string;
+  schoolId?: string | null;
+};
+type Entry = { competitionId: string; teamId: string; teamName: string; competitionName: string };
+type AgentAssignment = {
+  competitionId: string;
+  userId: string;
+  competitionName: string;
+  competitionType?: string;
+  agentName: string;
+  schoolName: string | null;
+};
+
+export default function CompetitionsPage({ competitionId }: { competitionId?: string }) {
+  const router=useRouter();
+  const [loaded,setLoaded]=useState(false);
+  const { confirm, prompt } = useDialogs();
+  const [schools, setSchools] = useState<School[]>([]);
+  const [teams, setTeams] = useState<Team[]>([]);
+  const [agents, setAgents] = useState<Agent[]>([]);
+  const [competitions, setCompetitions] = useState<Competition[]>([]);
+  const [entries, setEntries] = useState<Entry[]>([]);
+  const [agentAssignments, setAgentAssignments] = useState<AgentAssignment[]>([]);
+  const [form, setForm] = useState({ name: "", slug: "", type: "GENERAL", format: "LEAGUE", description: "", schoolId: "", logo: "" });
+  const [linkForm, setLinkForm] = useState({ competitionId: "", teamId: "" });
+  const [agentForm, setAgentForm] = useState({ competitionId: "", userId: "" });
+  const [editingId, setEditingId] = useState<string | null>(null);
+  const [editForm, setEditForm] = useState({
+    name: "",
+    slug: "",
+    type: "GENERAL",
+    format: "LEAGUE",
+    description: "",
+    schoolId: "",
+    logo: ""
+  });
+  const [message, setMessage] = useState("");
+  const [activeForm, setActiveForm] = useState<string | null>(null);
+
+  async function load() {
+    setSchools(await apiJson<School[]>("/api/portal/admin/schools"));
+    setTeams(await apiJson<Team[]>("/api/portal/admin/teams"));
+    setAgents(await apiJson<Agent[]>("/api/portal/admin/agents"));
+    setCompetitions(await apiJson<Competition[]>("/api/portal/admin/competitions"));
+    setEntries(await apiJson<Entry[]>("/api/portal/admin/competition-teams"));
+    setAgentAssignments(await apiJson<AgentAssignment[]>("/api/portal/admin/competition-agents"));
+  }
+
+  useEffect(() => {
+    load().then(()=>setLoaded(true)).catch(() => {setLoaded(true);setMessage("Unable to load updates. Check your connection and try again.");});
+  }, []);
+
+  const linkCompetition = competitions.find((c) => c.id === linkForm.competitionId);
+  const linkableTeams = useMemo(() => {
+    if (!linkCompetition) return teams;
+    if (linkCompetition.type === "SCHOOL" && linkCompetition.schoolId) {
+      return teams.filter((team) => !team.schoolId || team.schoolId === linkCompetition.schoolId);
+    }
+    return teams;
+  }, [teams, linkCompetition]);
+
+  const agentCompetition = competitions.find((c) => c.id === agentForm.competitionId);
+  const assignableAgents = useMemo(() => {
+    const active = agents.filter((a) => a.active);
+    if (!agentCompetition) return active;
+    if (agentCompetition.type === "SCHOOL" && agentCompetition.schoolId) {
+      const schoolAgents = active.filter((a) => a.schoolId === agentCompetition.schoolId);
+      // Prefer same-school agents, but still allow others for dual-role coverage
+      return schoolAgents.length ? [...schoolAgents, ...active.filter((a) => a.schoolId !== agentCompetition.schoolId)] : active;
+    }
+    return active;
+  }, [agents, agentCompetition]);
+
+  async function handleCreate(event: React.FormEvent) {
+    event.preventDefault();
+    const res = await apiFetch("/api/portal/admin/competitions", {
+      method: "POST",
+      body: JSON.stringify({
+        ...form,
+        schoolId: form.type === "SCHOOL" ? form.schoolId : null,
+        logo: form.logo || null
+      })
+    });
+    const json = await res.json();
+    setMessage(res.ok ? "Competition created." : json.error || "Failed.");
+    if (res.ok) {
+      setActiveForm(null);
+      if(json.data?.id) router.push(`/competitions/${encodeURIComponent(json.data.id)}`);
+      setForm({ name: "", slug: "", type: "GENERAL", format: "LEAGUE", description: "", schoolId: "", logo: "" });
+      void load().catch(() => setMessage("Could not refresh the latest data. Check your connection and try again."));
+    }
+  }
+
+  async function saveEdit(id: string) {
+    const res = await apiFetch(`/api/portal/admin/competitions/${id}`, {
+      method: "PATCH",
+      body: JSON.stringify({
+        ...editForm,
+        schoolId: editForm.type === "SCHOOL" ? editForm.schoolId : null,
+        logo: editForm.logo || null
+      })
+    });
+    const json = await res.json();
+    setMessage(res.ok ? "Competition updated." : json.error || "Failed.");
+    if (res.ok) {
+      setEditingId(null);
+      void load().catch(() => setMessage("Could not refresh the latest data. Check your connection and try again."));
+    }
+  }
+
+  async function remove(id: string, name: string) {
+    if (!(await confirm(`Delete ${name} and all its matches?`))) return;
+    const res = await apiFetch(`/api/portal/admin/competitions/${id}`, { method: "DELETE" });
+    const json = await res.json();
+    setMessage(res.ok ? "Competition deleted." : json.error || "Failed.");
+    if(res.ok) {router.push("/competitions");return;}
+    if (res.ok) void load().catch(() => setMessage("Could not refresh the latest data. Check your connection and try again."));
+  }
+
+  async function handleLink(event: React.FormEvent) {
+    event.preventDefault();
+    const res = await apiFetch("/api/portal/admin/competition-teams", { method: "POST", body: JSON.stringify(linkForm) });
+    const json = await res.json();
+    setMessage(res.ok ? "Team linked." : json.error || "Failed.");
+    if (res.ok) {
+      setActiveForm(null);
+      setLinkForm({ ...linkForm, teamId: "" });
+      void load().catch(() => setMessage("Could not refresh the latest data. Check your connection and try again."));
+    }
+  }
+
+  async function unlink(competitionId: string, teamId: string) {
+    const res = await apiFetch("/api/portal/admin/competition-teams", {
+      method: "DELETE",
+      body: JSON.stringify({ competitionId, teamId })
+    });
+    const json = await res.json();
+    setMessage(res.ok ? "Team unlinked." : json.error || "Failed.");
+    if (res.ok) void load().catch(() => setMessage("Could not refresh the latest data. Check your connection and try again."));
+  }
+
+  async function handleAssignAgent(event: React.FormEvent) {
+    event.preventDefault();
+    const res = await apiFetch("/api/portal/admin/competition-agents", {
+      method: "POST",
+      body: JSON.stringify(agentForm)
+    });
+    const json = await res.json();
+    setMessage(res.ok ? "Agent assigned to competition." : json.error || "Failed.");
+    if (res.ok) {
+      setActiveForm(null);
+      setAgentForm({ competitionId: "", userId: "" });
+      void load().catch(() => setMessage("Could not refresh the latest data. Check your connection and try again."));
+    }
+  }
+
+  async function unassignAgent(competitionId: string, userId: string) {
+    const res = await apiFetch("/api/portal/admin/competition-agents", {
+      method: "DELETE",
+      body: JSON.stringify({ competitionId, userId })
+    });
+    const json = await res.json();
+    setMessage(res.ok ? "Agent unassigned." : json.error || "Failed.");
+    if (res.ok) void load().catch(() => setMessage("Could not refresh the latest data. Check your connection and try again."));
+  }
+
+  async function generateFixtures(competitionId: string, name: string) {
+    const startDate = await prompt(`Start date for ${name} fixtures (YYYY-MM-DD)`, new Date().toISOString().slice(0, 10), "date");
+    if (!startDate) return;
+    const res = await apiFetch(`/api/portal/admin/competitions/${competitionId}/generate-fixtures`, {
+      method: "POST",
+      body: JSON.stringify({ startDate })
+    });
+    const json = await res.json();
+    setMessage(res.ok ? `Generated ${json.data?.count ?? 0} fixtures.` : json.error || "Failed.");
+    if (res.ok) void load().catch(() => setMessage("Could not refresh the latest data. Check your connection and try again."));
+  }
+
+  async function qualifyGroups(competitionId: string, name: string) {
+    const advanceRaw = await prompt(`Teams to advance per group for ${name} (1 = group winners, 2 = top two):`, "1", "number");
+    if (advanceRaw === null) return;
+    const advancePerGroup = advanceRaw === "2" ? 2 : 1;
+    const startDate = await prompt(`Knockout start date (YYYY-MM-DD)`, new Date().toISOString().slice(0, 10), "date");
+    if (!startDate) return;
+    const res = await apiFetch(`/api/portal/admin/competitions/${competitionId}/qualify-groups`, {
+      method: "POST",
+      body: JSON.stringify({ advancePerGroup, startDate })
+    });
+    const json = await res.json();
+    if (res.ok) {
+      const data = json.data;
+      setMessage(
+        `Qualified ${data?.qualified?.length ?? 0} teams. Updated ${data?.updatedCount ?? 0}, created ${data?.createdCount ?? 0} knockout fixtures.`
+      );
+      void load().catch(() => setMessage("Could not refresh the latest data. Check your connection and try again."));
+    } else {
+      setMessage(json.error || "Failed.");
+    }
+  }
+
+  return (
+    <AdminShell
+      title={competitionId ? competitions.find(c=>c.id === competitionId)?.name || "Competition details" : "Competitions"}
+      subtitle="Create general or school competitions, link teams, and assign agents who can update all fixtures in that competition."
+      nav={adminNav}
+    >
+      {competitionId ? <Link href="/competitions" className="admin-back-link">← Back to competitions</Link> : null}
+      {competitionId && !loaded ? <Card><p role="status">Loading details…</p></Card> : null}
+      {competitionId && loaded && !competitions.some(row=>row.id === competitionId) && !message ? <Card><p>This record was not found. It may have been removed.</p></Card> : null}
+      <div className="admin-action-toolbar" aria-label="Page actions">{competitionId ? <><Button onClick={()=>{setMessage("");setLinkForm({...linkForm,competitionId});setActiveForm("link");}}>Add team</Button><Button onClick={()=>{setMessage("");setAgentForm({...agentForm,competitionId});setActiveForm("assign");}}>Assign agent</Button></> : <Button onClick={()=>{setMessage("");setActiveForm("competition");}}>Create competition</Button>}</div>
+      {!competitionId && !loaded ? <Card><p role="status">Loading competitions…</p></Card> : null}
+      {!competitionId && loaded && !competitions.length && !message ? <Card><p>No competitions yet. Use the action above to add one.</p></Card> : null}
+      {message.startsWith("Unable to load") ? <Button variant="ghost" onClick={()=>{setMessage("");setLoaded(false);load().then(()=>setLoaded(true)).catch(()=>{setLoaded(true);setMessage("Unable to load updates. Check your connection and try again.");});}}>Try again</Button> : null}
+      {message ? <p className="rounded-2xl bg-blue-50 px-4 py-3 text-sm text-primary">{message}</p> : null}
+
+      <FormModal title="Create competition" open={activeForm === "competition"} onClose={() => setActiveForm(null)} message={message}>
+        <form className="grid gap-4 sm:grid-cols-2" onSubmit={handleCreate}>
+          <Field label="Name">
+            <Input value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} required />
+          </Field>
+          <Field label="Slug">
+            <Input value={form.slug} onChange={(e) => setForm({ ...form, slug: e.target.value })} required />
+          </Field>
+          <Field label="Type">
+            <Select value={form.type} onChange={(e) => setForm({ ...form, type: e.target.value, schoolId: "" })}>
+              <option value="GENERAL">General (University-wide)</option>
+              <option value="SCHOOL">School internal</option>
+            </Select>
+          </Field>
+          <Field label="Format">
+            <Select value={form.format} onChange={(e) => setForm({ ...form, format: e.target.value })}>
+              <option value="LEAGUE">League</option>
+              <option value="TOURNAMENT">Tournament</option>
+            </Select>
+          </Field>
+          {form.type === "SCHOOL" ? (
+            <Field label="School">
+              <Select value={form.schoolId} onChange={(e) => setForm({ ...form, schoolId: e.target.value })} required>
+                <option value="">Select school</option>
+                {schools.map((s) => (
+                  <option key={s.id} value={s.id}>
+                    {s.name}
+                  </option>
+                ))}
+              </Select>
+            </Field>
+          ) : null}
+          <Field label="Description">
+            <Textarea
+              value={form.description}
+              onChange={(e) => setForm({ ...form, description: e.target.value })}
+              className="sm:col-span-2"
+              required
+            />
+          </Field>
+          <div className="sm:col-span-2">
+            <LogoUpload value={form.logo} onChange={(logo) => setForm({ ...form, logo })} label="Competition logo" />
+          </div>
+          <div className="sm:col-span-2">
+            <Button type="submit" className="w-full sm:w-auto">
+              Create competition
+            </Button>
+          </div>
+        </form>
+      </FormModal>
+
+      <FormModal title="Add team to competition" open={activeForm === "link"} onClose={() => setActiveForm(null)} message={message}>
+        <form className="grid gap-4 sm:grid-cols-2" onSubmit={handleLink}>
+          <Field label="Competition">
+            <Select
+              disabled={!!competitionId} value={linkForm.competitionId}
+              onChange={(e) => setLinkForm({ competitionId: e.target.value, teamId: "" })}
+              required
+            >
+              <option value="">Select competition</option>
+              {competitions.filter(row=>!competitionId || row.id === competitionId).map((c) => (
+                <option key={c.id} value={c.id}>
+                  {c.name}
+                </option>
+              ))}
+            </Select>
+          </Field>
+          <Field label="Team">
+            <Select
+              value={linkForm.teamId}
+              onChange={(e) => setLinkForm({ ...linkForm, teamId: e.target.value })}
+              required
+              disabled={!linkForm.competitionId}
+            >
+              <option value="">{linkForm.competitionId ? "Select team" : "Select competition first"}</option>
+              {linkableTeams.map((t) => (
+                <option key={t.id} value={t.id}>
+                  {t.name}
+                  {t.schoolName ? ` · ${t.schoolName}` : ""}
+                </option>
+              ))}
+            </Select>
+          </Field>
+          <div className="sm:col-span-2">
+            <Button type="submit" variant="secondary" className="w-full sm:w-auto">
+              Link team
+            </Button>
+          </div>
+        </form>
+      </FormModal>
+
+      <FormModal title="Assign agents to competition" open={activeForm === "assign"} onClose={() => setActiveForm(null)} message={message}>
+        <p className="mb-4 text-sm text-text-secondary">
+          Assigned agents can update every fixture in that competition (school or general). You can still assign
+          additional agents to individual matches on the Matches page.
+        </p>
+        <form className="grid gap-4 sm:grid-cols-2" onSubmit={handleAssignAgent}>
+          <Field label="Competition">
+            <Select
+              disabled={!!competitionId} value={agentForm.competitionId}
+              onChange={(e) => setAgentForm({ competitionId: e.target.value, userId: "" })}
+              required
+            >
+              <option value="">Select competition</option>
+              {competitions.filter(row=>!competitionId || row.id === competitionId).map((c) => (
+                <option key={c.id} value={c.id}>
+                  {c.name} ({c.type === "SCHOOL" ? "School" : "General"})
+                </option>
+              ))}
+            </Select>
+          </Field>
+          <Field label="Agent">
+            <Select
+              value={agentForm.userId}
+              onChange={(e) => setAgentForm({ ...agentForm, userId: e.target.value })}
+              required
+              disabled={!agentForm.competitionId}
+            >
+              <option value="">{agentForm.competitionId ? "Select agent" : "Select competition first"}</option>
+              {assignableAgents.map((a) => (
+                <option key={a.id} value={a.id}>
+                  {a.name} · {a.schoolName ?? "No school"}
+                </option>
+              ))}
+            </Select>
+          </Field>
+          <div className="sm:col-span-2">
+            <Button type="submit" variant="secondary" className="w-full sm:w-auto">
+              Assign agent
+            </Button>
+          </div>
+        </form>
+      </FormModal>
+
+      <Card title={competitionId ? "Overview" : "Active competitions"}>
+        <div className="space-y-3">
+          {competitions.filter(row=>!competitionId || row.id === competitionId).map((c) => (
+            <div key={c.id} className="rounded-[20px] bg-slate-50 p-4">
+              {!competitionId ? (<Link href={`/competitions/${encodeURIComponent(c.id)}`} className="admin-record-link"><LogoMark name={c.name} logo={c.logo}/><div><strong>{c.name}</strong><p>{c.format} · {c.teamCount} teams · {c.matchCount} matches</p></div><span aria-hidden="true">›</span></Link>) : editingId === c.id ? (
+                <div className="grid gap-3 sm:grid-cols-2">
+                  <Input value={editForm.name} onChange={(e) => setEditForm({ ...editForm, name: e.target.value })} />
+                  <Input value={editForm.slug} onChange={(e) => setEditForm({ ...editForm, slug: e.target.value })} />
+                  <Select value={editForm.type} onChange={(e) => setEditForm({ ...editForm, type: e.target.value })}>
+                    <option value="GENERAL">General</option>
+                    <option value="SCHOOL">School</option>
+                  </Select>
+                  <Select value={editForm.format} onChange={(e) => setEditForm({ ...editForm, format: e.target.value })}>
+                    <option value="LEAGUE">League</option>
+                    <option value="TOURNAMENT">Tournament</option>
+                  </Select>
+                  {editForm.type === "SCHOOL" ? (
+                    <Select
+                      value={editForm.schoolId}
+                      onChange={(e) => setEditForm({ ...editForm, schoolId: e.target.value })}
+                      required
+                    >
+                      <option value="">Select school</option>
+                      {schools.map((s) => (
+                        <option key={s.id} value={s.id}>
+                          {s.name}
+                        </option>
+                      ))}
+                    </Select>
+                  ) : null}
+                  <Textarea
+                    value={editForm.description}
+                    onChange={(e) => setEditForm({ ...editForm, description: e.target.value })}
+                    className="sm:col-span-2"
+                  />
+                  <div className="sm:col-span-2">
+                    <LogoUpload value={editForm.logo} onChange={(logo) => setEditForm({ ...editForm, logo })} />
+                  </div>
+                  <div className="flex flex-col gap-2 sm:col-span-2 sm:flex-row">
+                    <Button onClick={() => saveEdit(c.id)}>Save</Button>
+                    <Button variant="ghost" onClick={() => setEditingId(null)}>
+                      Cancel
+                    </Button>
+                  </div>
+                </div>
+              ) : (
+                <div className="flex flex-col gap-4 sm:flex-row sm:items-start">
+                  <LogoMark name={c.name} logo={c.logo} />
+                  <div className="min-w-0 flex-1">
+                    <p className="font-semibold text-slate-950">{c.name}</p>
+                    <p className="text-sm text-text-secondary">
+                      {c.type} · {c.format} · {c.slug}
+                    </p>
+                    <p className="mt-1 text-xs font-semibold text-primary">
+                      {c.teamCount} teams · {c.matchCount} matches
+                      {c.groupCount ? ` · ${c.groupCount} groups` : ""}
+                      {c.agentCount ? ` · ${c.agentCount} agents` : ""}
+                    </p>
+                  </div>
+                  <div className="flex w-full flex-col gap-2 sm:w-auto sm:min-w-[220px]">
+                    {c.format === "LEAGUE" ? (
+                      <Button variant="secondary" className="w-full sm:w-auto" onClick={() => generateFixtures(c.id, c.name)}>
+                        Generate fixtures
+                      </Button>
+                    ) : null}
+                    {c.format === "TOURNAMENT" && c.groupCount > 0 ? (
+                      <Button variant="secondary" className="w-full sm:w-auto" onClick={() => qualifyGroups(c.id, c.name)}>
+                        Qualify to knockout
+                      </Button>
+                    ) : null}
+                    <div className="grid grid-cols-2 gap-2">
+                      <Button
+                        variant="ghost"
+                        onClick={() => {
+                          setEditingId(c.id);
+                          setEditForm({
+                            name: c.name,
+                            slug: c.slug,
+                            type: c.type,
+                            format: c.format,
+                            description: c.description ?? "",
+                            schoolId: c.schoolId ?? "",
+                            logo: c.logo ?? ""
+                          });
+                        }}
+                      >
+                        Edit
+                      </Button>
+                      <Button variant="ghost" onClick={() => remove(c.id, c.name)}>
+                        Delete
+                      </Button>
+                    </div>
+                  </div>
+                </div>
+              )}
+            </div>
+          ))}
+        </div>
+      </Card>
+
+      {competitionId ? (<Card title="Competition agents">
+        <div className="space-y-2">
+          {agentAssignments.filter(entry=>entry.competitionId === competitionId).map((entry) => (
+            <div
+              key={`${entry.competitionId}-${entry.userId}`}
+              className="flex flex-col gap-3 rounded-xl bg-slate-50 px-4 py-3 text-sm sm:flex-row sm:items-center sm:justify-between"
+            >
+              <span className="min-w-0">
+                <Link href={`/agents/${encodeURIComponent(entry.userId)}`} className="font-semibold text-primary">{entry.agentName}</Link>
+                {entry.schoolName ? ` (${entry.schoolName})` : ""} → {entry.competitionName}
+              </span>
+              <Button variant="ghost" className="w-full sm:w-auto" onClick={() => unassignAgent(entry.competitionId, entry.userId)}>
+                Unassign
+              </Button>
+            </div>
+          ))}
+          {!agentAssignments.some(e=>e.competitionId === competitionId) ? (
+            <p className="text-sm text-text-secondary">No agents assigned to competitions yet.</p>
+          ) : null}
+        </div>
+      </Card>) : null}
+
+      {competitionId ? (<Card title="Linked teams">
+        <div className="space-y-2">
+          {entries.filter(e=>e.competitionId === competitionId).map((e) => (
+            <div
+              key={`${e.competitionId}-${e.teamId}`}
+              className="flex flex-col gap-3 rounded-xl bg-slate-50 px-4 py-3 text-sm sm:flex-row sm:items-center sm:justify-between"
+            >
+              <span className="min-w-0">
+                <strong><Link href={`/teams/${encodeURIComponent(e.teamId)}`} className="font-semibold text-primary">{e.teamName}</Link></strong> in {e.competitionName}
+              </span>
+              <Button variant="ghost" className="w-full sm:w-auto" onClick={() => unlink(e.competitionId, e.teamId)}>
+                Unlink
+              </Button>
+            </div>
+          ))}
+          {!entries.some(e=>e.competitionId === competitionId) ? <p className="text-sm text-text-secondary">No teams linked yet.</p> : null}
+        </div>
+      </Card>) : null}
+
+
+    </AdminShell>
+  );
+}

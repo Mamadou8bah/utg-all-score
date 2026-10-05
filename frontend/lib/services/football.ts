@@ -1,4 +1,5 @@
 import { prisma } from "@/lib/db";
+import { cachePublic, PUBLIC_CACHE_SECONDS } from "@/lib/public-cache";
 import {
   fetchKnockoutBracket,
   recomputeCompetitionStandings,
@@ -157,7 +158,7 @@ export async function fetchMatchById(id: string) {
   });
 }
 
-export async function fetchMatchesByStatus(
+async function fetchMatchesByStatusUncached(
   status: "LIVE" | "HT" | "FT" | "UPCOMING" | ("LIVE" | "HT")[],
   options?: { take?: number; competitionSlug?: string }
 ) {
@@ -175,40 +176,66 @@ export async function fetchMatchesByStatus(
   return matches.map((m) => serializeMatch(m)!);
 }
 
+export async function fetchMatchesByStatus(
+  status: "LIVE" | "HT" | "FT" | "UPCOMING" | ("LIVE" | "HT")[],
+  options?: { take?: number; competitionSlug?: string }
+) {
+  const statuses = Array.isArray(status) ? status : [status];
+  const cacheClass = statuses.some((value) => value === "LIVE" || value === "HT")
+    ? PUBLIC_CACHE_SECONDS.live
+    : PUBLIC_CACHE_SECONDS.matches;
+  const key = `matches:${statuses.join(",")}:${options?.take ?? ""}:${options?.competitionSlug ?? ""}`;
+  return cachePublic(key, cacheClass, () => fetchMatchesByStatusUncached(status, options));
+}
+
 export async function fetchAllMatches(take = 100) {
-  const matches = await prisma.match.findMany({
-    include: matchIncludeList,
-    orderBy: { kickoff: "desc" },
-    take
+  return cachePublic(`matches:all:${take}`, PUBLIC_CACHE_SECONDS.matches, async () => {
+    const matches = await prisma.match.findMany({
+      include: matchIncludeList,
+      orderBy: { kickoff: "desc" },
+      take
+    });
+    return matches.map((m) => serializeMatch(m)!);
   });
-  return matches.map((m) => serializeMatch(m)!);
 }
 
 export async function fetchCompetitions(): Promise<Competition[]> {
-  const items = await prisma.competition.findMany({
-    include: { school: true },
-    orderBy: { name: "asc" }
-  });
+  return cachePublic("competitions", PUBLIC_CACHE_SECONDS.metadata, async () => {
+    const items = await prisma.competition.findMany({
+      include: { school: true },
+      orderBy: { name: "asc" }
+    });
 
-  return items.map((item) => ({
-    id: item.slug,
-    name: item.name,
-    type: item.type as Competition["type"],
-    schoolName: item.school?.name,
-    description: item.description,
-    format: item.format as Competition["format"],
-    logo: item.logo ?? undefined
-  }));
+    return items.map((item) => ({
+      id: item.slug,
+      name: item.name,
+      type: item.type as Competition["type"],
+      schoolName: item.school?.name,
+      description: item.description,
+      format: item.format as Competition["format"],
+      logo: item.logo ?? undefined
+    }));
+  });
 }
 
 export async function fetchStandings(competitionSlug?: string): Promise<StandingRow[]> {
-  const standings = await prisma.standing.findMany({
-    where: competitionSlug ? { competition: { slug: competitionSlug } } : undefined,
-    include: { competition: true, team: true },
-    orderBy: [{ pts: "desc" }, { gd: "desc" }, { gf: "desc" }]
-  });
+  return cachePublic(`standings:${competitionSlug ?? "all"}`, PUBLIC_CACHE_SECONDS.standings, async () => {
+    const [standings, competitions] = await Promise.all([
+    prisma.standing.findMany({
+      where: competitionSlug ? { competition: { slug: competitionSlug } } : undefined,
+      include: { competition: true, team: true },
+      orderBy: [{ pts: "desc" }, { gd: "desc" }, { gf: "desc" }]
+    }),
+    prisma.competition.findMany({
+      where: competitionSlug ? { slug: competitionSlug } : undefined,
+      include: {
+        teamEntries: { include: { team: true } },
+        groups: { include: { teamEntries: { include: { team: true } } } }
+      }
+    })
+    ]);
 
-  return standings.map((row) => ({
+  const rows = standings.map((row) => ({
     competitionId: row.competition.slug,
     groupKey: row.groupKey || undefined,
     team: row.team.name,
@@ -221,45 +248,85 @@ export async function fetchStandings(competitionSlug?: string): Promise<Standing
     gd: row.gd,
     pts: row.pts
   }));
+  const existing = new Set(rows.map((row) => `${row.competitionId}:${row.groupKey ?? ""}:${row.team}`));
+
+  for (const competition of competitions) {
+    const entries = competition.groups.length
+      ? competition.groups.flatMap((group) => group.teamEntries.map((entry) => ({ team: entry.team, groupKey: group.id })))
+      : competition.teamEntries.map((entry) => ({ team: entry.team, groupKey: "" }));
+    for (const entry of entries) {
+      const key = `${competition.slug}:${entry.groupKey}:${entry.team.name}`;
+      if (existing.has(key)) continue;
+      rows.push({
+        competitionId: competition.slug,
+        groupKey: entry.groupKey || undefined,
+        team: entry.team.name,
+        played: 0,
+        win: 0,
+        draw: 0,
+        loss: 0,
+        gf: 0,
+        ga: 0,
+        gd: 0,
+        pts: 0
+      });
+      existing.add(key);
+    }
+  }
+
+    return rows.sort((a, b) =>
+    a.competitionId.localeCompare(b.competitionId) ||
+    (a.groupKey ?? "").localeCompare(b.groupKey ?? "") ||
+    b.pts - a.pts ||
+    b.gd - a.gd ||
+    b.gf - a.gf ||
+    a.team.localeCompare(b.team)
+    );
+  });
 }
 
 export async function fetchAllKnockoutBrackets() {
-  const tournaments = await prisma.competition.findMany({
-    where: { format: "TOURNAMENT" },
-    select: { slug: true }
+  return cachePublic("knockout-brackets", PUBLIC_CACHE_SECONDS.metadata, async () => {
+    const tournaments = await prisma.competition.findMany({
+      where: { format: "TOURNAMENT" },
+      select: { slug: true }
+    });
+
+    const brackets = await Promise.all(
+      tournaments.map(async (comp) => [comp.slug, await fetchKnockoutBracket(comp.slug)] as const)
+    );
+
+    const result: Record<string, Awaited<ReturnType<typeof fetchKnockoutBracket>>> = {};
+    for (const [slug, bracket] of brackets) {
+      if (bracket.length) result[slug] = bracket;
+    }
+    return result;
   });
-
-  const brackets = await Promise.all(
-    tournaments.map(async (comp) => [comp.slug, await fetchKnockoutBracket(comp.slug)] as const)
-  );
-
-  const result: Record<string, Awaited<ReturnType<typeof fetchKnockoutBracket>>> = {};
-  for (const [slug, bracket] of brackets) {
-    if (bracket.length) result[slug] = bracket;
-  }
-  return result;
 }
 
 export async function fetchCompetitionGroups() {
-  const groups = await prisma.competitionGroup.findMany({
-    include: { teamEntries: { include: { team: true } }, competition: true },
-    orderBy: { name: "asc" }
-  });
-
-  const result: Record<string, { id: string; name: string; teams: string[] }[]> = {};
-  for (const group of groups) {
-    const key = group.competition.slug;
-    if (!result[key]) result[key] = [];
-    result[key].push({
-      id: group.id,
-      name: group.name,
-      teams: group.teamEntries.map((entry) => entry.team.name)
+  return cachePublic("competition-groups", PUBLIC_CACHE_SECONDS.metadata, async () => {
+    const groups = await prisma.competitionGroup.findMany({
+      include: { teamEntries: { include: { team: true } }, competition: true },
+      orderBy: { name: "asc" }
     });
-  }
-  return result;
+
+    const result: Record<string, { id: string; name: string; teams: string[] }[]> = {};
+    for (const group of groups) {
+      const key = group.competition.slug;
+      if (!result[key]) result[key] = [];
+      result[key].push({
+        id: group.id,
+        name: group.name,
+        teams: group.teamEntries.map((entry) => entry.team.name)
+      });
+    }
+    return result;
+  });
 }
 
 export async function fetchCompetitionStats(): Promise<Record<string, CompetitionStats>> {
+  return cachePublic("competition-stats", PUBLIC_CACHE_SECONDS.metadata, async () => {
   const competitions = await prisma.competition.findMany({
     include: {
       _count: { select: { teamEntries: true } },
@@ -374,9 +441,11 @@ export async function fetchCompetitionStats(): Promise<Record<string, Competitio
   }
 
   return result;
+  });
 }
 
 export async function fetchNews(): Promise<NewsItem[]> {
+  return cachePublic("news", PUBLIC_CACHE_SECONDS.metadata, async () => {
   const items = await prisma.newsArticle.findMany({
     where: { published: true },
     orderBy: { publishedAt: "desc" },
@@ -392,9 +461,11 @@ export async function fetchNews(): Promise<NewsItem[]> {
     publishedAt: item.publishedAt.toISOString(),
     body: item.body ?? undefined
   }));
+  });
 }
 
 export async function fetchAnnouncements(): Promise<AnnouncementItem[]> {
+  return cachePublic("announcements", PUBLIC_CACHE_SECONDS.metadata, async () => {
   const items = await prisma.announcement.findMany({
     where: { active: true },
     orderBy: { createdAt: "desc" },
@@ -407,9 +478,11 @@ export async function fetchAnnouncements(): Promise<AnnouncementItem[]> {
     body: item.body,
     level: item.level as AnnouncementItem["level"]
   }));
+  });
 }
 
 export async function fetchTeams(): Promise<TeamProfile[]> {
+  return cachePublic("teams", PUBLIC_CACHE_SECONDS.metadata, async () => {
   const teams = await prisma.team.findMany({ orderBy: { name: "asc" } });
   return teams.map((team) => ({
     name: team.name,
@@ -418,9 +491,11 @@ export async function fetchTeams(): Promise<TeamProfile[]> {
     form: parseJsonArray(team.form),
     logo: team.logo ?? undefined
   }));
+  });
 }
 
 export async function fetchAthletes(): Promise<AthleteProfile[]> {
+  return cachePublic("athletes", PUBLIC_CACHE_SECONDS.metadata, async () => {
   const players = await prisma.player.findMany({
     include: { team: true },
     orderBy: [{ goals: "desc" }, { assists: "desc" }],
@@ -437,9 +512,11 @@ export async function fetchAthletes(): Promise<AthleteProfile[]> {
     story: `Key contributor for ${player.team.name} in university football competitions.`,
     image: index % 2 === 0 ? "/images/athlete-lamin.svg" : "/images/athlete-maimuna.svg"
   }));
+  });
 }
 
 export async function fetchFootballEvents(): Promise<FootballEventItem[]> {
+  return cachePublic("events", PUBLIC_CACHE_SECONDS.metadata, async () => {
   const events = await prisma.footballEvent.findMany({ orderBy: { date: "asc" } });
   return events.map((event) => ({
     id: event.id,
@@ -449,6 +526,7 @@ export async function fetchFootballEvents(): Promise<FootballEventItem[]> {
     date: event.date.toISOString(),
     description: event.description
   }));
+  });
 }
 
 export async function getAgentAssignedCompetitionIds(userId: string) {

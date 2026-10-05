@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from "next";
 import { DM_Sans, Barlow_Condensed } from "next/font/google";
 import "./globals.css";
+import { DialogProvider } from "@/components/dialog-provider";
 import { AuthGuard } from "@/components/auth-guard";
 import { PwaBoot } from "@/components/pwa-boot";
 import { APP_ICON, PWA_THEME_COLOR } from "@/lib/branding";
@@ -34,7 +35,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html lang="en" suppressHydrationWarning>
       <body className={`${bodyFont.variable} ${headingFont.variable}`} suppressHydrationWarning>
-        <AuthGuard>{children}</AuthGuard>
+        <DialogProvider><AuthGuard>{children}</AuthGuard></DialogProvider>
         <PwaBoot />
       </body>
     </html>

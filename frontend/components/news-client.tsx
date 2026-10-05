@@ -1,4 +1,5 @@
 "use client";
+import { useLanguage } from "@/components/language-provider";
 
 import { useState } from "react";
 import { NewsCard } from "@/components/cards";
@@ -10,6 +11,7 @@ import { useApiData } from "@/lib/use-api-data";
 import { NewsDetailsModal } from "@/components/news-details-modal";
 
 export default function NewsClient() {
+  const { t: translate, locale } = useLanguage();
   const [selectedNews, setSelectedNews] = useState<NewsItem | null>(null);
   const { data: newsItems, loading, error, reload } = useApiData<NewsItem[]>("/api/news", []);
 
@@ -22,7 +24,7 @@ export default function NewsClient() {
     <div className="page-shell section-space space-y-3">
       <PageHeader
         eyebrow="News"
-        title="News"
+        title={translate("News")}
         description="Match reports, campus stories, and official updates."
       />
 
@@ -30,14 +32,14 @@ export default function NewsClient() {
         <button type="button" className="news-featured" onClick={() => setSelectedNews(featured)}>
           {featured.image ? <img src={featured.image} alt="" /> : null}
           <span className="news-featured__content">
-            <span className="news-featured__label">Latest story · {featured.category}</span>
+            <span className="news-featured__label">{translate("Latest story ·")} {featured.category}</span>
             <h2>{featured.title}</h2>
-            <span className="news-featured__meta">{formatDate(featured.publishedAt, { day: "numeric", month: "short" })}</span>
+            <span className="news-featured__meta">{formatDate(featured.publishedAt, { day: "numeric", month: "short" }, locale)}</span>
           </span>
         </button>
       ) : null}
       <div className="news-list">
-        {newsItems.length === 0 ? <p className="empty-state">No news published yet.</p> : null}
+        {newsItems.length === 0 ? <p className="empty-state">{translate("No news published yet.")}</p> : null}
         {rest.map((item) => (
           <NewsCard
             key={item.id}

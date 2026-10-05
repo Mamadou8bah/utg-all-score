@@ -1,6 +1,6 @@
 "use client";
 
-import type { ReactNode } from "react";
+import { cloneElement, isValidElement, useId, type ReactNode } from "react";
 import { Search } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
@@ -56,7 +56,7 @@ export function AdminShell({
           <div className="portal-actions"><a href={`${PUBLIC_SITE_URL}/search`} aria-label="Search AllScore" className="global-search-link"><Search size={21} /></a><ProfileMenu /></div>
         </div>
         <nav className="portal-desktop-nav" aria-label="Desktop navigation">
-          {nav.map((item) => <Link key={item.href} href={item.href} aria-current={pathname === item.href ? "page" : undefined}>{item.label}</Link>)}
+          {nav.map((item) => <Link key={item.href} href={item.href} aria-current={(pathname === item.href || (item.href !== "/" && pathname.startsWith(`${item.href}/`))) ? "page" : undefined}>{item.label}</Link>)}
           <a href={PUBLIC_SITE_URL}>Public site ↗</a>
         </nav>
       </header>
@@ -86,12 +86,10 @@ export function Card({ title, children }: { title?: string; children: ReactNode 
 }
 
 export function Field({ label, children }: { label: string; children: ReactNode }) {
-  return (
-    <div className="block space-y-2">
-      <span className="text-sm font-semibold text-slate-950">{label}</span>
-      {children}
-    </div>
-  );
+  const generated = useId();
+  const control = isValidElement<{ id?: string }>(children) ? children : null;
+  const id = control?.props.id || generated;
+  return <div className="block space-y-2"><label htmlFor={id} className="text-sm font-semibold text-slate-950">{label}</label>{control ? cloneElement(control, { id }) : children}</div>;
 }
 
 export function Input(props: React.InputHTMLAttributes<HTMLInputElement>) {

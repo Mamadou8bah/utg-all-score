@@ -1,4 +1,5 @@
 "use client";
+import { useLanguage } from "@/components/language-provider";
 
 import { useMemo, useState } from "react";
 import { CompetitionDetailsModal } from "@/components/competition-details-modal";
@@ -12,6 +13,7 @@ import type { Competition, Match } from "@/lib/types";
 import { cn } from "@/lib/utils";
 
 export default function HomeClient() {
+  const { t: translate } = useLanguage();
   const { data: fixtures, loading: fixturesLoading, error: fixturesError, reload: reloadFixtures } = useApiData<Match[]>("/api/fixtures", []);
   const { data: results, loading: resultsLoading, error: resultsError, reload: reloadResults } = useApiData<Match[]>("/api/results", []);
   const { data: live, loading: liveLoading, error: liveError, reload: reloadLive } = useApiData<Match[]>("/api/live", []);
@@ -46,24 +48,24 @@ export default function HomeClient() {
 
   return (
     <div className="page-shell match-centre">
-      <div className="secondary-strip no-scrollbar" role="group" aria-label="Filter matches">
+      <div className="secondary-strip no-scrollbar" role="group" aria-label={translate("Filter matches")}>
         {[["all", "All"], ["live", "Live"], ["upcoming", "Upcoming"], ["results", "Results"]].map(([value, label]) => (
           <button key={value} type="button" className={cn("filter-chip", filter === value && "filter-chip--active")}
-            aria-pressed={filter === value} onClick={() => setFilter(value)}>{label}</button>
+            aria-pressed={filter === value} onClick={() => setFilter(value)}>{translate(label)}</button>
         ))}
         <span className="filter-divider" aria-hidden="true" />
         {[["all", "All leagues"], ["GENERAL", "University"], ["SCHOOL", "Schools"]].map(([value, label]) => (
           <button key={value} type="button" className={cn("filter-chip", scope === value && "filter-chip--active")}
-            aria-pressed={scope === value} onClick={() => setScope(value)}>{label}</button>
+            aria-pressed={scope === value} onClick={() => setScope(value)}>{translate(label)}</button>
         ))}
       </div>
       <DatePickerTimeline selectedDate={date} onDateChange={setDate} />
       {loading || error ? <DataFeedback loading={loading} error={error} onRetry={reload} /> : groups.length === 0 ? (
-        <div className="empty-state">No fixtures for this day with the current filters.</div>
+        <div className="empty-state">{translate("No fixtures for this day with the current filters.")}</div>
       ) : groups.map((group) => (
         <section key={group.id} className="league-group" aria-label={group.name}>
           <button type="button" className="league-group__header" onClick={() => setSelectedCompetition(competitions.find((competition) => competition.id === group.id) ?? null)}>
-            <span>{group.name}</span><span className="league-group__meta">{group.matches.length} {group.matches.length === 1 ? "match" : "matches"}</span>
+            <span>{group.name}</span><span className="league-group__meta">{group.matches.length} {translate(group.matches.length === 1 ? "match" : "matches")}</span>
           </button>
           {group.matches.map((match) => <MatchRow key={match.id} match={match} onClick={() => setSelectedMatch(match)} />)}
         </section>

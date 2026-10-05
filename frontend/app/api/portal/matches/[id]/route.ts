@@ -61,6 +61,13 @@ export async function PATCH(request: Request, context: RouteContext) {
   const nextAwayScore = body?.awayScore ?? match.awayScore;
   const nextTimer = body?.timer ?? match.timer;
 
+  if (!Number.isSafeInteger(nextHomeScore) || !Number.isSafeInteger(nextAwayScore) || nextHomeScore < 0 || nextAwayScore < 0 || nextHomeScore > 2147483647 || nextAwayScore > 2147483647) {
+    return jsonError("Scores must be non-negative whole numbers within the supported range.", 400, request);
+  }
+  if (!["UPCOMING", "LIVE", "HT", "FT"].includes(nextStatus)) {
+    return jsonError("Invalid match status.", 400, request);
+  }
+
   if (session!.role === "AGENT" && match.status === "UPCOMING") {
     const scoreChanging = nextHomeScore !== match.homeScore || nextAwayScore !== match.awayScore;
     if (scoreChanging) {
